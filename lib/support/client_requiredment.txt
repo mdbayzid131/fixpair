@@ -1,0 +1,51 @@
+📄 Software Development Feature & Change Tracking Document
+
+🧾 Project Basic Information
+Project Name: Fixpair
+Client Name: Michael
+
+🧩 Core Feature List (Initial Scope)
+Note: List all confirmed features as discussed with the client at the project initiation.
+Customer (Client) Features
+User registration and login via Email, Phone, or Social Login (Google, Apple)
+Secure profile management with optional identity verification (KYC)
+Browse and search consultants by categories (Doctor, Lawyer, Financial Advisor, etc.)
+Advanced filters: Specialization, Real-time Availability, Ratings, Experience, Price Range, Language
+Detailed consultant profiles with bio, qualifications, ratings, reviews, and availability calendar
+Instant Video Consultation – Start live video call immediately when consultant is online
+Schedule Booking – View consultant’s calendar and book future time slots with confirmation and reminders
+Callback Request – Request a callback with preferred time window when consultant is unavailable
+Secure in-app Per-Minute Billing with real-time cost tracker (in €)
+Germany-friendly payment options: PayPal, Visa/Mastercard, Apple Pay, Google Pay, Klarna, Live video consultation with chat, file sharing, and screen sharing.
+Service fee before the call started
+Post-session detailed consultation report with summaries, notes, recommendations, screenshots, and attachments/Link
+Full consultation history, invoices, and rating/review system
+2. Consultant (Service Provider) Features
+Consultant profile login & management.
+Dedicated web dashboard for easy management
+Availability management (Online/Offline) with calendar scheduling
+Real-time notifications for Instant requests, Schedule Bookings, and Callback requests
+Accept/Reject consultation requests with alternative time suggestions
+Professional live video consultation workspace with note-taking panel
+Access to customer basic profile and previous consultation history (read-only)
+Powerful post-consultation report builder (summary, notes, recommendations, attachments, links)
+Notification
+3. Admin (Super Admin) Features
+User & consultant management
+Approval & verification system
+Payment & transaction management
+Service fee configuration
+Analytics & reports
+Notifications & announcements
+
+4. General Platform Features
+High-quality live video calls with low latency and reconnection support
+End-to-end encryption for video, chat, and file sharing
+Real-time notifications (Push, Email, SMS)
+Multi-role secure authentication and authorization
+Responsive design: Native Android + iOS Mobile App + Web Admin Panel
+Invoice generation with VAT compliance for Germany
+Grace period handling for connection drops in per-minute billing (Pre-Authorization system)
+Calendar integration (Google Calendar / Apple Calendar) for bookings
+Secure and scalable architecture for future growth
+
