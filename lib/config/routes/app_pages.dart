@@ -9,12 +9,28 @@ import '../../modules/auth/views/forgot_password_view.dart';
 import '../../modules/auth/views/otp_verify_screen.dart';
 import '../../modules/auth/views/set_net_passwqord.dart';
 import '../../modules/auth/views/success_view.dart';
-import '../../modules/search/bindings/search_binding.dart';
-import '../../modules/search/views/search_view.dart';
 import '../../modules/history/bindings/history_binding.dart';
 import '../../modules/history/views/history_view.dart';
 import '../../modules/profile/bindings/profile_binding.dart';
 import '../../modules/profile/views/profile_view.dart';
+import '../../modules/personal_info/bindings/personal_info_binding.dart';
+import '../../modules/personal_info/views/personal_info_view.dart';
+import '../../modules/legal_faq/bindings/legal_faq_binding.dart';
+import '../../modules/legal_faq/views/legal_faq_view.dart';
+import '../../modules/terms_conditions/bindings/terms_conditions_binding.dart';
+import '../../modules/terms_conditions/views/terms_conditions_view.dart';
+import '../../modules/privacy_policy/bindings/privacy_policy_binding.dart';
+import '../../modules/privacy_policy/views/privacy_policy_view.dart';
+
+import '../../modules/consultant_profile/bindings/consultant_profile_binding.dart';
+import '../../modules/consultant_profile/views/consultant_profile_view.dart';
+import '../../modules/consultant_booking/bindings/consultant_booking_binding.dart';
+import '../../modules/consultant_booking/views/consultant_booking_view.dart';
+import '../../modules/consultant_booking/views/consultant_booking_view.dart';
+import '../../modules/schedule_booking/bindings/schedule_booking_binding.dart';
+import '../../modules/schedule_booking/views/schedule_booking_view.dart';
+import '../../modules/notifications/bindings/notifications_binding.dart';
+import '../../modules/notifications/views/notifications_view.dart';
 
 import '../../modules/splash/bindings/splash_binding.dart';
 import '../../modules/splash/views/splash_view.dart';
@@ -26,6 +42,7 @@ class AppRoutes {
   static const String FORGOT_PASSWORD = '/forgot-password';
   static const String HOME = '/home';
   static const String PROFILE = '/profile';
+  static const String PERSONAL_INFO = '/personal-info';
   static const String BOTTOM_NAV_BAR = '/bottom-nav-bar';
   static const String MAP = '/map';
   static const String CART = '/cart';
@@ -60,6 +77,10 @@ class AppRoutes {
   static const String TRACK_ORDER = '/track-order';
   static const String SUCCESS = '/success';
   static const String HISTORY = '/history';
+  static const String LEGAL_FAQ = '/legal-faq';
+  static const String CONSULTANT_PROFILE = '/consultant-profile';
+  static const String CONSULTANT_BOOKING = '/consultant-booking';
+  static const String SCHEDULE_BOOKING = '/schedule-booking';
 }
 
 final pages = [
@@ -117,5 +138,45 @@ final pages = [
     name: AppRoutes.PROFILE,
     page: () => const ProfileView(),
     binding: ProfileBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.PERSONAL_INFO,
+    page: () => const PersonalInfoView(),
+    binding: PersonalInfoBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.LEGAL_FAQ,
+    page: () => const LegalFAQView(),
+    binding: LegalFAQBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.TERMS_CONDITIONS,
+    page: () => const TermsConditionsView(),
+    binding: TermsConditionsBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.PRIVACY_POLICY,
+    page: () => const PrivacyPolicyView(),
+    binding: PrivacyPolicyBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.NOTIFICATIONS,
+    page: () => const NotificationsView(),
+    binding: NotificationsBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.CONSULTANT_PROFILE,
+    page: () => const ConsultantProfileView(),
+    binding: ConsultantProfileBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.CONSULTANT_BOOKING,
+    page: () => const ConsultantBookingView(),
+    binding: ConsultantBookingBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.SCHEDULE_BOOKING,
+    page: () => const ScheduleBookingView(),
+    binding: ScheduleBookingBinding(),
   ),
 ];

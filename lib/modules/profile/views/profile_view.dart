@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../config/routes/app_pages.dart';
 import '../controllers/profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
@@ -26,7 +27,11 @@ class ProfileView extends GetView<ProfileController> {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: Icon(Icons.settings_outlined, color: const Color(0xFF64748B), size: 24.sp),
+            icon: Icon(
+              Icons.settings_outlined,
+              color: const Color(0xFF64748B),
+              size: 24.sp,
+            ),
           ),
           SizedBox(width: 8.w),
         ],
@@ -76,7 +81,11 @@ class ProfileView extends GetView<ProfileController> {
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 4),
             ),
-            child: Icon(Icons.person, size: 40.sp, color: const Color(0xFF94A3B8)),
+            child: Icon(
+              Icons.person,
+              size: 40.sp,
+              color: const Color(0xFF94A3B8),
+            ),
           ),
           SizedBox(width: 20.w),
           Column(
@@ -126,9 +135,14 @@ class ProfileView extends GetView<ProfileController> {
             iconBg: const Color(0xFFE0EFFF),
             iconColor: const Color(0xFF0066FF),
             label: 'Personal Information',
-            onTap: () {},
+            onTap: () => Get.toNamed(AppRoutes.PERSONAL_INFO),
           ),
-          const Divider(height: 1, color: Color(0xFFF1F5F9), indent: 70, endIndent: 20),
+          const Divider(
+            height: 1,
+            color: Color(0xFFF1F5F9),
+            indent: 70,
+            endIndent: 20,
+          ),
           _buildMenuItem(
             icon: Icons.credit_card_outlined,
             iconBg: const Color(0xFFDCFCE7),
@@ -136,13 +150,18 @@ class ProfileView extends GetView<ProfileController> {
             label: 'Payment Methods',
             onTap: () {},
           ),
-          const Divider(height: 1, color: Color(0xFFF1F5F9), indent: 70, endIndent: 20),
+          const Divider(
+            height: 1,
+            color: Color(0xFFF1F5F9),
+            indent: 70,
+            endIndent: 20,
+          ),
           _buildMenuItem(
             icon: Icons.help_outline_rounded,
             iconBg: const Color(0xFFFFF7ED),
             iconColor: const Color(0xFFF59E0B),
             label: 'Legal & FAQ',
-            onTap: () {},
+            onTap: () => Get.toNamed(AppRoutes.LEGAL_FAQ),
             isLast: true,
           ),
         ],
@@ -160,9 +179,12 @@ class ProfileView extends GetView<ProfileController> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: isLast 
-        ? BorderRadius.only(bottomLeft: Radius.circular(24.r), bottomRight: Radius.circular(24.r))
-        : null,
+      borderRadius: isLast
+          ? BorderRadius.only(
+              bottomLeft: Radius.circular(24.r),
+              bottomRight: Radius.circular(24.r),
+            )
+          : null,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
         child: Row(
@@ -183,7 +205,11 @@ class ProfileView extends GetView<ProfileController> {
                 ),
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: const Color(0xFF94A3B8), size: 24.sp),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: const Color(0xFF94A3B8),
+              size: 24.sp,
+            ),
           ],
         ),
       ),
@@ -212,8 +238,15 @@ class ProfileView extends GetView<ProfileController> {
             children: [
               Container(
                 padding: EdgeInsets.all(10.w),
-                decoration: const BoxDecoration(color: Color(0xFFFEF2F2), shape: BoxShape.circle),
-                child: Icon(Icons.logout_rounded, color: const Color(0xFFEF4444), size: 22.sp),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFEF2F2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.logout_rounded,
+                  color: const Color(0xFFEF4444),
+                  size: 22.sp,
+                ),
               ),
               SizedBox(width: 16.w),
               Text(

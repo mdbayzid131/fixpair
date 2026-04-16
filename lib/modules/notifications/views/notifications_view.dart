@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/notifications_controller.dart';
 
@@ -10,92 +10,97 @@ class NotificationsView extends GetView<NotificationsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF9F9F9),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
-        centerTitle: false,
+        leading: IconButton(
+          icon: Icon(Icons.chevron_left_rounded, color: const Color(0xFF1D293D), size: 28.sp),
+          onPressed: () => Get.back(),
+        ),
+        centerTitle: true,
         title: Text(
           'Notifications',
           style: GoogleFonts.manrope(
-            fontSize: 20.sp,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xff1A2530),
+            color: const Color(0xFF1D293D),
           ),
         ),
-        leading: Padding(
-          padding: EdgeInsets.only(left: 16.w),
-          child: Center(
-            child: Container(
-              height: 40.w,
-              width: 40.w,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                icon: Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 18.sp,
-                  color: Colors.black87,
-                ),
-                onPressed: () => Get.back(),
+        actions: [
+          TextButton(
+            onPressed: () => controller.markAllAsRead(),
+            child: Text(
+              'Read All',
+              style: GoogleFonts.manrope(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF0066FF),
               ),
             ),
           ),
-        ),
-      ),
-      body: ListView(
-        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-        children: [
-          _buildGroupHeader('Today'),
-          ...controller.todayNotifications.map(
-            (n) => _buildNotificationCard(n),
-          ),
-          SizedBox(height: 16.h),
-          _buildGroupHeader('Yesterday'),
-          ...controller.yesterdayNotifications.map(
-            (n) => _buildNotificationCard(n),
-          ),
-          SizedBox(height: 40.h),
+          SizedBox(width: 8.w),
         ],
       ),
+      body: Obx(() {
+        return ListView.separated(
+          padding: EdgeInsets.all(20.w),
+          itemCount: controller.notifications.length,
+          separatorBuilder: (context, index) => SizedBox(height: 16.h),
+          itemBuilder: (context, index) {
+            final notification = controller.notifications[index];
+            return _buildNotificationCard(notification);
+          },
+        );
+      }),
     );
   }
 
-  Widget _buildGroupHeader(String title) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 16.h),
-      child: Text(
-        title,
-        style: GoogleFonts.manrope(
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w600,
-          color: Colors.black38,
-        ),
-      ),
-    );
-  }
+  Widget _buildNotificationCard(Map<String, dynamic> notification) {
+    final bool isRead = notification['isRead'];
+    final String type = notification['type'];
 
-  Widget _buildNotificationCard(NotificationModel notification) {
+    Color iconBgColor;
+    Color iconColor;
+    IconData iconData;
+
+    switch (type) {
+      case 'consultation':
+        iconBgColor = const Color(0xFFFFF7ED);
+        iconColor = const Color(0xFFF59E0B);
+        iconData = Icons.calendar_today_outlined;
+        break;
+      case 'payment':
+        iconBgColor = const Color(0xFFDCFCE7);
+        iconColor = const Color(0xFF10B981);
+        iconData = Icons.credit_card_outlined;
+        break;
+      case 'booking':
+        iconBgColor = const Color(0xFFE0EFFF);
+        iconColor = const Color(0xFF0066FF);
+        iconData = Icons.check_circle_outline_rounded;
+        break;
+      case 'feature':
+      default:
+        iconBgColor = const Color(0xFFF1F5F9);
+        iconColor = const Color(0xFF64748B);
+        iconData = Icons.security_outlined;
+        break;
+    }
+
     return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(24.r),
+        border: Border.all(
+          color: isRead ? Colors.transparent : const Color(0xFFCFE4FF),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -106,15 +111,10 @@ class NotificationsView extends GetView<NotificationsController> {
           Container(
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
-              color: const Color(0xffF9F9F9),
+              color: iconBgColor,
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.black.withOpacity(0.03)),
             ),
-            child: Icon(
-              notification.icon,
-              size: 24.sp,
-              color: const Color(0xff1A2530),
-            ),
+            child: Icon(iconData, color: iconColor, size: 24.sp),
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -125,38 +125,41 @@ class NotificationsView extends GetView<NotificationsController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      notification.title,
+                      notification['title'],
                       style: GoogleFonts.manrope(
-                        fontSize: 15.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xff1A2530),
+                        color: const Color(0xFF1D293D),
                       ),
                     ),
-                    Text(
-                      notification.time,
-                      style: GoogleFonts.manrope(
-                        fontSize: 12.sp,
-                        color: Colors.black38,
+                    if (!isRead)
+                      Container(
+                        width: 8.w,
+                        height: 8.w,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF0066FF),
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
                   ],
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  notification.content,
+                  notification['description'],
                   style: GoogleFonts.manrope(
-                    fontSize: 13.sp,
-                    color: Colors.black54,
-                    height: 1.4,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF64748B),
+                    height: 1.5,
                   ),
                 ),
-                SizedBox(height: 12.h),
+                SizedBox(height: 16.h),
                 Text(
-                  notification.category,
+                  notification['time'],
                   style: GoogleFonts.manrope(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w700,
-                    color: notification.categoryColor,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF94A3B8),
                   ),
                 ),
               ],

@@ -7,9 +7,11 @@ class CustomElevatedButton extends StatelessWidget {
   final String label;
   final void Function()? onPressed;
   final ButtonStyle? style;
+  final Color? backgroundColor;
   final bool isLoading; // <-- নতুন property
 
   const CustomElevatedButton({
+    this.backgroundColor,
     super.key,
     required this.label,
     required this.onPressed,
@@ -26,12 +28,15 @@ class CustomElevatedButton extends StatelessWidget {
         style:
             style ??
             ElevatedButton.styleFrom(
-              minimumSize: Size(double.infinity, 48.h),
-              backgroundColor: AppTheme.primaryColor,
+              backgroundColor: backgroundColor ?? AppTheme.primaryColor,
+              minimumSize: Size(double.infinity, 56.h),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.r),
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              padding: EdgeInsets.symmetric(vertical: 10.h),
+              elevation: 8,
+              shadowColor:
+                  backgroundColor?.withValues(alpha: 0.4) ??
+                  AppTheme.primaryColor.withValues(alpha: 0.4),
             ),
         child: isLoading
             ? SizedBox(

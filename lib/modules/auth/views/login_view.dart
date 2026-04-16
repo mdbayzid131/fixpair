@@ -1,4 +1,5 @@
 import 'package:fixpair/config/constants/image_paths.dart';
+import 'package:fixpair/config/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -286,15 +287,6 @@ class LoginView extends GetView<LoginController> {
                         label: 'Log In',
                         onPressed: controller.login,
                         isLoading: controller.isLoading.value,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF6B00),
-                          minimumSize: Size(double.infinity, 56.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          elevation: 8,
-                          shadowColor: const Color(0xFFFF6B00).withOpacity(0.4),
-                        ),
                       ),
                     ),
                     SizedBox(height: 32.h),

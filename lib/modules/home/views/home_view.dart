@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fixpair/modules/home/controllers/home_controller.dart';
+import '../../../config/routes/app_pages.dart';
 
 class LaundryHomeScreen extends GetView<HomeController> {
   const LaundryHomeScreen({super.key});
@@ -63,7 +64,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                     statusColor: const Color(0xFF0066FF),
                     image: 'https://i.pravatar.cc/150?u=sarah',
                   ),
-                   SizedBox(height: 16.h),
+                  SizedBox(height: 16.h),
                   _buildExpertCard(
                     name: 'Dr. Elena Schmidt',
                     role: 'Doctor',
@@ -112,7 +113,11 @@ class LaundryHomeScreen extends GetView<HomeController> {
                     CircleAvatar(
                       radius: 24.r,
                       backgroundColor: Colors.white.withOpacity(0.3),
-                      child: Icon(Icons.person, color: Colors.white, size: 28.sp),
+                      child: Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 28.sp,
+                      ),
                     ),
                     SizedBox(width: 12.w),
                     Column(
@@ -138,13 +143,21 @@ class LaundryHomeScreen extends GetView<HomeController> {
                     ),
                   ],
                 ),
-                Container(
-                  padding: EdgeInsets.all(10.w),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
+                InkWell(
+                  onTap: () => Get.toNamed(AppRoutes.NOTIFICATIONS),
+                  borderRadius: BorderRadius.circular(24.r),
+                  child: Container(
+                    padding: EdgeInsets.all(10.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.notifications_none_rounded,
+                      color: Colors.white,
+                      size: 22.sp,
+                    ),
                   ),
-                  child: Icon(Icons.notifications_none_rounded, color: Colors.white, size: 22.sp),
                 ),
               ],
             ),
@@ -185,7 +198,11 @@ class LaundryHomeScreen extends GetView<HomeController> {
                     fontSize: 14.sp,
                     color: const Color(0xFF94A3B8),
                   ),
-                  prefixIcon: Icon(Icons.search_rounded, color: const Color(0xFF94A3B8), size: 20.sp),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: const Color(0xFF94A3B8),
+                    size: 20.sp,
+                  ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(vertical: 18.h),
                 ),
@@ -259,7 +276,9 @@ class LaundryHomeScreen extends GetView<HomeController> {
                 children: [
                   CircleAvatar(
                     radius: 24.r,
-                    backgroundImage: const NetworkImage('https://i.pravatar.cc/150?u=sarah'),
+                    backgroundImage: const NetworkImage(
+                      'https://i.pravatar.cc/150?u=sarah',
+                    ),
                   ),
                   SizedBox(width: 12.w),
                   Column(
@@ -291,7 +310,11 @@ class LaundryHomeScreen extends GetView<HomeController> {
                   color: Colors.white.withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.videocam_rounded, color: Colors.white, size: 20.sp),
+                child: Icon(
+                  Icons.videocam_rounded,
+                  color: Colors.white,
+                  size: 20.sp,
+                ),
               ),
             ],
           ),
@@ -307,7 +330,11 @@ class LaundryHomeScreen extends GetView<HomeController> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.access_time_filled_rounded, color: const Color(0xFFFF6B00), size: 18.sp),
+                    Icon(
+                      Icons.access_time_filled_rounded,
+                      color: const Color(0xFFFF6B00),
+                      size: 18.sp,
+                    ),
                     SizedBox(width: 8.w),
                     Text(
                       'Today, 14:30 - 15:00',
@@ -320,7 +347,10 @@ class LaundryHomeScreen extends GetView<HomeController> {
                   ],
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFF6B00),
                     borderRadius: BorderRadius.circular(8.r),
@@ -352,135 +382,153 @@ class LaundryHomeScreen extends GetView<HomeController> {
     required Color statusColor,
     required String image,
   }) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Stack(
-            children: [
-              Container(
-                width: 70.w,
-                height: 70.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16.r),
-                  image: DecorationImage(image: NetworkImage(image), fit: BoxFit.cover),
-                ),
-              ),
-              Positioned(
-                top: 4.h,
-                right: 4.w,
-                child: Container(
-                  width: 12.w,
-                  height: 12.w,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF10B981),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: () {
+        Get.toNamed(AppRoutes.CONSULTANT_PROFILE);
+      },
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Stack(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0EFFF),
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      child: Text(
-                        category,
-                        style: GoogleFonts.manrope(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF0066FF),
-                        ),
-                      ),
+                Container(
+                  width: 70.w,
+                  height: 70.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16.r),
+                    image: DecorationImage(
+                      image: NetworkImage(image),
+                      fit: BoxFit.cover,
                     ),
-                    Row(
-                      children: [
-                        Icon(Icons.star_rounded, color: const Color(0xFFFF6B00), size: 16.sp),
-                        SizedBox(width: 4.w),
-                        Text(
-                          rating,
-                          style: GoogleFonts.manrope(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1D293D),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  name,
-                  style: GoogleFonts.manrope(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1D293D),
                   ),
                 ),
-                Text(
-                  role,
-                  style: GoogleFonts.manrope(
-                    fontSize: 12.sp,
-                    color: const Color(0xFF94A3B8),
-                    fontWeight: FontWeight.w500,
+                Positioned(
+                  top: 4.h,
+                  right: 4.w,
+                  child: Container(
+                    width: 12.w,
+                    height: 12.w,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
                   ),
-                ),
-                SizedBox(height: 8.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      price,
-                      style: GoogleFonts.manrope(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1D293D),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0EFFF),
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      child: Text(
-                        status,
-                        style: GoogleFonts.manrope(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF0066FF),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
-          ),
-        ],
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0EFFF),
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        child: Text(
+                          category,
+                          style: GoogleFonts.manrope(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF0066FF),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.star_rounded,
+                            color: const Color(0xFFFF6B00),
+                            size: 16.sp,
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            rating,
+                            style: GoogleFonts.manrope(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1D293D),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    name,
+                    style: GoogleFonts.manrope(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1D293D),
+                    ),
+                  ),
+                  Text(
+                    role,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12.sp,
+                      color: const Color(0xFF94A3B8),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        price,
+                        style: GoogleFonts.manrope(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1D293D),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 6.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0EFFF),
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        child: Text(
+                          status,
+                          style: GoogleFonts.manrope(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF0066FF),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
