@@ -232,7 +232,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
           _buildOptionButton('Start Now', [
             const Color(0xFFFF6B00),
             const Color(0xFFFF8A00),
-          ], () {}),
+          ], () => Get.toNamed(AppRoutes.CONSULTANT_CONFIRMATION)),
         ],
       ),
     );
@@ -302,55 +302,58 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
   }
 
   Widget _buildCallbackOption() {
-    return Container(
-      padding: EdgeInsets.all(24.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.all(12.w),
-            decoration: const BoxDecoration(
-              color: Color(0xFFF1F5F9),
-              shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.REQUEST_CALLBACK),
+      child: Container(
+        padding: EdgeInsets.all(24.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+          border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF1F5F9),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.phone_callback_rounded,
+                color: const Color(0xFF64748B),
+                size: 24.sp,
+              ),
             ),
-            child: Icon(
-              Icons.phone_callback_rounded,
-              color: const Color(0xFF64748B),
-              size: 24.sp,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Request Callback',
-                  style: GoogleFonts.manrope(
-                    fontSize: 17.sp,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFF1D293D),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Request Callback',
+                    style: GoogleFonts.manrope(
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1D293D),
+                    ),
                   ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  'Leave your details and the consultant will contact you.',
-                  style: GoogleFonts.manrope(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF64748B),
-                    height: 1.4,
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Leave your details and the consultant will contact you.',
+                    style: GoogleFonts.manrope(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF64748B),
+                      height: 1.4,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,6 +1,15 @@
 import 'package:fixpair/modules/bottom_nab_bar/bindings/bottom_nab_bar_binding.dart';
 import 'package:fixpair/modules/bottom_nab_bar/views/bottom_nab_bar_view.dart';
+import 'package:fixpair/modules/request_callback/bindings/request_callback_binding.dart';
+import 'package:fixpair/modules/request_callback/views/request_callback_view.dart';
+import 'package:fixpair/modules/consultant_confirmation/bindings/consultant_confirmation_binding.dart';
+import 'package:fixpair/modules/consultant_confirmation/views/consultant_confirmation_view.dart';
+import 'package:fixpair/modules/video_call/bindings/video_call_binding.dart';
+import 'package:fixpair/modules/video_call/views/video_call_view.dart';
+import '../../modules/consultation_summary/bindings/consultation_summary_binding.dart';
+import '../../modules/consultation_summary/views/consultation_summary_view.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
+import 'package:get/get_navigation/src/routes/transitions_type.dart';
 
 import '../../modules/auth/bindings/auth_binding.dart';
 import '../../modules/auth/views/login_view.dart';
@@ -25,7 +34,6 @@ import '../../modules/privacy_policy/views/privacy_policy_view.dart';
 import '../../modules/consultant_profile/bindings/consultant_profile_binding.dart';
 import '../../modules/consultant_profile/views/consultant_profile_view.dart';
 import '../../modules/consultant_booking/bindings/consultant_booking_binding.dart';
-import '../../modules/consultant_booking/views/consultant_booking_view.dart';
 import '../../modules/consultant_booking/views/consultant_booking_view.dart';
 import '../../modules/schedule_booking/bindings/schedule_booking_binding.dart';
 import '../../modules/schedule_booking/views/schedule_booking_view.dart';
@@ -81,6 +89,10 @@ class AppRoutes {
   static const String CONSULTANT_PROFILE = '/consultant-profile';
   static const String CONSULTANT_BOOKING = '/consultant-booking';
   static const String SCHEDULE_BOOKING = '/schedule-booking';
+  static const String REQUEST_CALLBACK = '/request-callback';
+  static const String CONSULTANT_CONFIRMATION = '/consultant-confirmation';
+  static const String VIDEO_CALL = '/video-call';
+  static const String CONSULTATION_SUMMARY = '/consultation-summary';
 }
 
 final pages = [
@@ -104,7 +116,7 @@ final pages = [
     page: () => const ForgotPasswordView(),
     binding: AuthBinding(),
   ),
-  
+
   GetPage(
     name: AppRoutes.OTP,
     page: () => const OtpVerifyScreen(),
@@ -120,10 +132,7 @@ final pages = [
     page: () => const OtpVerifyScreen(),
     binding: AuthBinding(),
   ),
-  GetPage(
-    name: AppRoutes.SUCCESS,
-    page: () => const SuccessView(),
-  ),
+  GetPage(name: AppRoutes.SUCCESS, page: () => const SuccessView()),
   GetPage(
     name: AppRoutes.BOTTOM_NAV_BAR,
     page: () => const BottomNavBarView(),
@@ -178,5 +187,27 @@ final pages = [
     name: AppRoutes.SCHEDULE_BOOKING,
     page: () => const ScheduleBookingView(),
     binding: ScheduleBookingBinding(),
+  ),
+
+  GetPage(
+    name: AppRoutes.REQUEST_CALLBACK,
+    page: () => const RequestCallbackView(),
+    binding: RequestCallbackBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.CONSULTANT_CONFIRMATION,
+    page: () => const ConsultantConfirmationView(),
+    binding: ConsultantConfirmationBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.VIDEO_CALL,
+    page: () => const VideoCallView(),
+    binding: VideoCallBinding(),
+    transition: Transition.zoom,
+  ),
+  GetPage(
+    name: AppRoutes.CONSULTATION_SUMMARY,
+    page: () => const ConsultationSummaryView(),
+    binding: ConsultationSummaryBinding(),
   ),
 ];
