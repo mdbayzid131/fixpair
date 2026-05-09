@@ -97,128 +97,20 @@ class LoginView extends GetView<LoginController> {
                     ),
                     SizedBox(height: 32.h),
 
-                    // 3. Email / Phone Toggle
-                    Container(
-                      padding: EdgeInsets.all(4.w),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Obx(
-                        () => Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () =>
-                                    controller.isEmailLogin.value = true,
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 12.h),
-                                  decoration: BoxDecoration(
-                                    color: controller.isEmailLogin.value
-                                        ? Colors.white
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(10.r),
-                                    boxShadow: controller.isEmailLogin.value
-                                        ? [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(
-                                                0.05,
-                                              ),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ]
-                                        : [],
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Email',
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 14.sp,
-                                        fontWeight:
-                                            controller.isEmailLogin.value
-                                            ? FontWeight.w700
-                                            : FontWeight.w600,
-                                        color: controller.isEmailLogin.value
-                                            ? const Color(0xFF1D293D)
-                                            : const Color(0xFF6B7280),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () =>
-                                    controller.isEmailLogin.value = false,
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 12.h),
-                                  decoration: BoxDecoration(
-                                    color: !controller.isEmailLogin.value
-                                        ? Colors.white
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(10.r),
-                                    boxShadow: !controller.isEmailLogin.value
-                                        ? [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(
-                                                0.05,
-                                              ),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ]
-                                        : [],
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Phone Number',
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 14.sp,
-                                        fontWeight:
-                                            !controller.isEmailLogin.value
-                                            ? FontWeight.w700
-                                            : FontWeight.w600,
-                                        color: !controller.isEmailLogin.value
-                                            ? const Color(0xFF1D293D)
-                                            : const Color(0xFF6B7280),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                     SizedBox(height: 24.h),
 
-                    // 4. Input Fields
-                    Obx(
-                      () => CustomTextField(
-                        controller: controller.emailController,
-                        hintText: controller.isEmailLogin.value
-                            ? 'name@example.com'
-                            : 'Phone number',
-                        keyboardType: controller.isEmailLogin.value
-                            ? TextInputType.emailAddress
-                            : TextInputType.phone,
-                        validator: controller.isEmailLogin.value
-                            ? Validators.email
-                            : (v) =>
-                                  (v == null || v.isEmpty) ? 'Required' : null,
-                        label: '',
-                        isLabelVisible: false,
-                        fillColior: const Color(0xFFF8FAFC),
-                        prefixIcon: Icon(
-                          controller.isEmailLogin.value
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: const Color(0xFF9CA3AF),
-                          size: 20.sp,
-                        ),
+                    CustomTextField(
+                      controller: controller.emailController,
+                      hintText: 'name@example.com',
+                      keyboardType: TextInputType.emailAddress,
+                      validator: Validators.email,
+                      label: '',
+                      isLabelVisible: false,
+                      fillColior: const Color(0xFFF8FAFC),
+                      prefixIcon: Icon(
+                        Icons.mail_outline_rounded,
+                        color: const Color(0xFF9CA3AF),
+                        size: 20.sp,
                       ),
                     ),
                     SizedBox(height: 16.h),

@@ -13,13 +13,11 @@ class RegisterController extends GetxController {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
-  final phoneController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
   final isLoading = false.obs;
   final isPasswordVisible = false.obs;
   final isConfirmPasswordVisible = false.obs;
-  final isEmailLogin = true.obs; // Toggle between Email and Phone sign-up
   final agreeToTerms = false.obs; // Checkbox for terms and conditions
 
   @override
@@ -29,7 +27,6 @@ class RegisterController extends GetxController {
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
-    phoneController.dispose();
     super.onClose();
   }
 
@@ -51,7 +48,7 @@ class RegisterController extends GetxController {
         name: nameController.text,
         email: emailController.text,
         password: passwordController.text,
-        phone: phoneController.text,
+        phone: '',
         address: addressController.text,
       );
       ApiChecker.checkWriteApi(response);

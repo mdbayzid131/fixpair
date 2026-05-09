@@ -13,7 +13,6 @@ class LoginController extends GetxController {
 
   final isLoading = false.obs;
   final isPasswordVisible = false.obs;
-  final isEmailLogin = true.obs;
 
   @override
   void onClose() {

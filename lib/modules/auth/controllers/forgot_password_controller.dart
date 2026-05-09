@@ -9,7 +9,6 @@ class ForgotPasswordController extends GetxController {
 
   final emailController = TextEditingController();
   final formKey = GlobalKey<FormState>();
-  final isEmailLogin = true.obs;
 
   final isLoading = false.obs;
 
