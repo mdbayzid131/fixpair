@@ -58,26 +58,26 @@ class OtpController extends GetxController {
 
     try {
       isLoading.value = true;
-      // var response = await _authService.verifyOtp(
-      //   email: email,
-      //   otp: int.parse(otpController.text),
-      //   isForgotPassword: isForgotPassword,
-      // );
-      // ApiChecker.checkWriteApi(response);
-      // if (response.statusCode == 200 || response.statusCode == 201) {
-      //   Helpers.showCustomSnackBar('Verification successful', isError: false);
+      var response = await _authService.verifyOtp(
+        email: email,
+        otp: int.parse(otpController.text),
+        isForgotPassword: isForgotPassword,
+      );
 
-      //   if (isForgotPassword) {
-      //     final resetToken = response.data['data']['resetToken'];
-      //     // Ensure we have AppRoutes imported if we use SET_NEW_PASSWORD.
-      //     Get.toNamed(AppRoutes.SET_NEW_PASSWORD, arguments: {'resetToken': resetToken, 'email': email});
-      //   } else {
-      //     _authService.handleAuthResponse(response);
-      //     Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
-      //   }
-      // }
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Helpers.showCustomSnackBar('Verification successful', isError: false);
 
-      Get.toNamed(AppRoutes.SET_NEW_PASSWORD);
+        if (isForgotPassword) {
+          final resetToken = response.data['data'];
+          Get.toNamed(AppRoutes.SET_NEW_PASSWORD,
+              arguments: {'resetToken': resetToken, 'email': email});
+        } else {
+          await _authService.handleAuthResponse(response);
+          Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
+        }
+      } else {
+        Helpers.showCustomSnackBar(response.data['message'] ?? 'Verification failed');
+      }
     } catch (e) {
       Helpers.showDebugLog(e.toString());
     } finally {

@@ -26,43 +26,42 @@ class LoginController extends GetxController {
   }
 
   Future<void> login() async {
-    // if (!formKey.currentState!.validate()) return;
+    if (!formKey.currentState!.validate()) return;
 
     try {
       isLoading.value = true;
 
-      // final response = await _authService.login(
-      //   email: emailController.text,
-      //   password: passwordController.text,
-      // );
-      // ApiChecker.checkWriteApi(response);
-      // if (response.statusCode == 200) {
-      //   Helpers.showCustomSnackBar('Login successful', isError: false);
-      //   _authService.handleAuthResponse(response);
-      //   Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
-      // }
-      // if (response.statusCode == 403 &&
-      //     response.data['message'] == 'Verify account first') {
-      //   try {
-      //     await _authService.resendOtp(emailController.text);
-      //     Helpers.showCustomSnackBar(
-      //       'Verification needed. OTP sent to your email.',
-      //       isError: false,
-      //     );
-      //     Get.toNamed(
-      //       AppRoutes.OTP_FORM_REGISTER,
-      //       arguments: emailController.text,
-      //     );
-      //     return;
-      //   } catch (resendError) {
-      //     Helpers.showDebugLog(resendError.toString());
-      //     return;
-      //   }
-      // }
+      final response = await _authService.login(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
 
-      Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
+      if (response.statusCode == 200) {
+        Helpers.showCustomSnackBar('Login successful', isError: false);
+        await _authService.handleAuthResponse(response);
+        Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
+      } else if (response.statusCode == 403 &&
+          response.data['message'] == 'Verify account first') {
+        try {
+          await _authService.resendOtp(emailController.text.trim());
+          Helpers.showCustomSnackBar(
+            'Verification needed. OTP sent to your email.',
+            isError: false,
+          );
+          Get.toNamed(
+            AppRoutes.OTP_FORM_REGISTER,
+            arguments: emailController.text.trim(),
+          );
+        } catch (resendError) {
+          Helpers.showCustomSnackBar(resendError.toString());
+        }
+      } else {
+        // ApiChecker.checkWriteApi(response);
+        Helpers.showCustomSnackBar(response.data['message'] ?? 'Login failed');
+      }
     } catch (e) {
       Helpers.showDebugLog(e.toString());
+      Helpers.showCustomSnackBar(e.toString());
     } finally {
       isLoading.value = false;
     }

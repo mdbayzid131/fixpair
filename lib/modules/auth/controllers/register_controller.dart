@@ -45,22 +45,23 @@ class RegisterController extends GetxController {
       isLoading.value = true;
 
       var response = await _authService.signup(
-        name: nameController.text,
-        email: emailController.text,
+        name: nameController.text.trim(),
+        email: emailController.text.trim(),
         password: passwordController.text,
-        phone: '',
-        address: addressController.text,
       );
-      ApiChecker.checkWriteApi(response);
-      if (response.statusCode == 201) {
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
         Helpers.showCustomSnackBar(
           'Registration successful, please verify your email',
           isError: false,
         );
         Get.toNamed(
           AppRoutes.OTP_FORM_REGISTER,
-          arguments: emailController.text,
+          arguments: emailController.text.trim(),
         );
+      } else {
+        // ApiChecker.checkWriteApi(response);
+        Helpers.showCustomSnackBar(response.data['message'] ?? 'Registration failed');
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());

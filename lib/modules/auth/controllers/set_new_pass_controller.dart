@@ -63,34 +63,31 @@ class SetNewPassController extends GetxController {
   }
 
   Future<void> submitNewPassword() async {
-    // if (newPasswordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
-    //   Helpers.showCustomSnackBar('Please fill in both fields');
-    //   return;
-    // }
+    if (newPasswordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
+      Helpers.showCustomSnackBar('Please fill in both fields');
+      return;
+    }
 
-    // if (newPasswordController.text != confirmPasswordController.text) {
-    //   Helpers.showCustomSnackBar('Passwords do not match');
-    //   return;
-    // }
-
-    // // Ensure it complies with rules before submitting
-    // if (!hasMinLength.value || !hasUppercase.value || !hasNumberOrSpecial.value) {
-    //   Helpers.showCustomSnackBar('Please ensure all password requirements are met');
-    //   return;
-    // }
+    if (newPasswordController.text != confirmPasswordController.text) {
+      Helpers.showCustomSnackBar('Passwords do not match');
+      return;
+    }
 
     try {
-      Get.offAllNamed(AppRoutes.SUCCESS);
-      //   isLoading.value = true;
-      //   var response = await _authService.resetPassword(
-      //     resetToken: resetToken,
-      //     password: newPasswordController.text,
-      //   );
+      isLoading.value = true;
+      var response = await _authService.resetPassword(
+        resetToken: resetToken,
+        password: newPasswordController.text,
+      );
 
-      //   if (response.statusCode == 200 || response.statusCode == 201) {
-      //     Helpers.showCustomSnackBar('Password reset successfully', isError: false);
-      //     Get.offAllNamed(AppRoutes.SUCCESS);
-      //   }
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Helpers.showCustomSnackBar('Password reset successfully', isError: false);
+        Get.offAllNamed(AppRoutes.SUCCESS);
+      } else {
+        Helpers.showCustomSnackBar(
+          response.data['message'] ?? 'Failed to reset password',
+        );
+      }
       } catch (e) {
       Helpers.showCustomSnackBar(e.toString());
     } finally {

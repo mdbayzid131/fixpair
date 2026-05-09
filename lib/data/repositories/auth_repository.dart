@@ -33,18 +33,12 @@ class AuthRepo {
     required String name,
     required String email,
     required String password,
-    required String phone,
-    required String address,
   }) async {
     return await apiClient.postData(ApiConstants.signup, {
-  "email": email,
-  "name": name,
-  "address": address,
-  "password": password,
-  "phone": phone,
-});
-
-
+      "name": name,
+      "email": email,
+      "password": password,
+    });
   }
 
   /// ===================== LOGIN =====================
@@ -67,7 +61,7 @@ class AuthRepo {
 
   /// ===================== RESEND OTP =====================
   Future<Response> resentOtp({required String email}) async {
-    return await apiClient.postData(ApiConstants.resendOtp, {   
+    return await apiClient.postData(ApiConstants.resendOtp, {
       "email": email,
     });
   }
@@ -79,7 +73,7 @@ class AuthRepo {
   }) async {
     return await apiClient.postData(ApiConstants.verifyUser, {
       "email": email,
-      "otp": otp,
+      "oneTimeCode": otp,
     });
   }
 
@@ -89,9 +83,10 @@ class AuthRepo {
     required String resetToken,
   }) async {
     return await apiClient.postData(
-      ApiConstants.resetPassword, 
+      ApiConstants.resetPassword,
       {
-        "password": password,
+        "newPassword": password,
+        "confirmPassword": password,
       },
       resetToken: 'Bearer $resetToken',
     );
@@ -99,10 +94,7 @@ class AuthRepo {
 
   /// ===================== LOGOUT =====================
   Future<Response> logout() async {
-
-
-    return await apiClient.postData(ApiConstants.logout, {
-    });
+    return await apiClient.postData(ApiConstants.logout, {});
   }
 
   /// ===================== REFRESH TOKEN =====================
@@ -117,9 +109,10 @@ class AuthRepo {
     required String oldPassword,
     required String newPassword,
   }) async {
-    return await apiClient.postData(ApiConstants.changePassword, {      
+    return await apiClient.postData(ApiConstants.changePassword, {
       "oldPassword": oldPassword,
-      "newPassword": newPassword,
+      "newPassWord": newPassword,
+      "confirmPassword": newPassword,
     });
   }
 

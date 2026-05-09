@@ -24,23 +24,25 @@ class ForgotPasswordController extends GetxController {
     try {
       isLoading.value = true;
 
-      // var response = await _authService.forgotPassword(emailController.text);
+      var response = await _authService.forgotPassword(emailController.text.trim());
 
-      // if (response.statusCode == 200) {
-      //   Helpers.showCustomSnackBar(
-      //     'Reset link sent to your email',
-      //     isError: false,
-      //   );
-      //   Get.toNamed(
-      //     AppRoutes.OTP,
-      //     arguments: {'email': emailController.text, 'isForgotPassword': true},
-      //   );
-      // }
-
-      Get.toNamed(
-        AppRoutes.OTP,
-        arguments: {'email': emailController.text, 'isForgotPassword': true},
-      );
+      if (response.statusCode == 200) {
+        Helpers.showCustomSnackBar(
+          'Reset link sent to your email',
+          isError: false,
+        );
+        Get.toNamed(
+          AppRoutes.OTP,
+          arguments: {
+            'email': emailController.text.trim(),
+            'isForgotPassword': true
+          },
+        );
+      } else {
+        Helpers.showCustomSnackBar(
+          response.data['message'] ?? 'Failed to send reset link',
+        );
+      }
     } catch (e) {
       Helpers.showCustomSnackBar(e.toString());
     } finally {
