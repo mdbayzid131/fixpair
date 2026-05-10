@@ -37,31 +37,30 @@ class LoginController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        Helpers.showCustomSnackBar('Login successful', isError: false);
+        Helpers.showSuccess('Login successful');
         await _authService.handleAuthResponse(response);
         Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
       } else if (response.statusCode == 403 &&
           response.data['message'] == 'Verify account first') {
         try {
           await _authService.resendOtp(emailController.text.trim());
-          Helpers.showCustomSnackBar(
+          Helpers.showSuccess(
             'Verification needed. OTP sent to your email.',
-            isError: false,
           );
           Get.toNamed(
             AppRoutes.OTP_FORM_REGISTER,
             arguments: emailController.text.trim(),
           );
         } catch (resendError) {
-          Helpers.showCustomSnackBar(resendError.toString());
+          Helpers.showError(resendError.toString());
         }
       } else {
         // ApiChecker.checkWriteApi(response);
-        Helpers.showCustomSnackBar(response.data['message'] ?? 'Login failed');
+        Helpers.showError(response.data['message'] ?? 'Login failed');
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());
-      Helpers.showCustomSnackBar(e.toString());
+      Helpers.showError(e.toString());
     } finally {
       isLoading.value = false;
     }

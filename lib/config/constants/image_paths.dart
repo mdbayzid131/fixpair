@@ -1,22 +1,33 @@
+/// ===================== IMAGE PATHS =====================
+/// Centralized asset path constants for icons, images, and logos.
+/// Always use these constants instead of hardcoding paths.
 class ImagePaths {
-  ///<=====================Icons ===============>
+  ImagePaths._();
 
-  static String googleIcon = "assets/icons/googleIcon.svg";
-  static String facebookIcon = "assets/icons/facebook.svg";
+  // ─── Base Paths ───
+  static const String _icons = 'assets/icons';
+  static const String _images = 'assets/images';
+  static const String _logos = 'assets/logos';
+  static const String _dummy = 'assets/dummy_image';
 
+  // ─── Icons ───
+  static const String deleteIcon = '$_icons/delete_icon.svg';
+  static const String searchIcon = '$_icons/search_icon.svg';
+  static const String googleIcon = '$_icons/googleIcon.svg';
+  static const String appleIcon = '$_icons/apple_icon.svg';
+  static const String chosePlanIcon = '$_icons/chose_plan_icon.svg';
+  static const String homeIcon = '$_icons/home icon.svg';
+  static const String calenderIcon = '$_icons/calender.svg';
+  static const String libraryIcon = '$_icons/library.svg';
 
+  // ─── Images ───
+  static const String onboardingImage1 = '$_images/onbordingImage1.png';
+  static const String onboardingImage2 = '$_images/onbordingImage2.png';
+  static const String onboardingImage3 = '$_images/onbordingImage3.png';
 
-  static String shirtIcon = "assets/icons/shirt_svg.svg";
-  static String ironAndPressIcon = "assets/icons/iron_and_press.svg";
-  static String dryCleanIcon = "assets/icons/dry_clean.svg";
-  static String mapIcon = "assets/icons/map.svg";
-  static String deleteIcon = "assets/icons/delete_icon.svg";
-  static String appLogo = "assets/logos/app_logo.png";
+  // ─── Logos ───
+  static const String appLogo = '$_logos/app_logo.png';
 
-  ///<======================ImageIcon =======================>
-
-  static String stripeIcon = "assets/icons/stripe.svg";
-
-
-  
+  // ─── Dummy / Placeholders ───
+  static const String profileIcon = '$_dummy/profilePic.png';
 }

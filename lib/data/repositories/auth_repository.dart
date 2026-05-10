@@ -86,9 +86,11 @@ class AuthRepo {
       ApiConstants.resetPassword,
       {
         "newPassword": password,
-        "confirmPassword": password,
+        "confirmPassword": password
       },
-      resetToken: 'Bearer $resetToken',
+      extraHeaders: {
+        "Authorization": "Bearer $resetToken",
+      },
     );
   }
 

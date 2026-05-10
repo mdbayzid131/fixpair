@@ -4,6 +4,9 @@ import 'package:get_storage/get_storage.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
 import 'biometric_service.dart';
 
+/// ===================== APP LOCK SERVICE =====================
+/// Handles biometric authentication and app lock/unlock lifecycle.
+/// Requires get_storage and local_auth packages.
 class AppLockService extends GetxService with WidgetsBindingObserver {
   static AppLockService get to => Get.find<AppLockService>();
 
@@ -43,7 +46,6 @@ class AppLockService extends GetxService with WidgetsBindingObserver {
           return;
         }
 
-        // Small delay to let UI settle
         await Future.delayed(const Duration(milliseconds: 300));
         final ok = await BiometricService.instance.authenticate();
         if (!ok) {

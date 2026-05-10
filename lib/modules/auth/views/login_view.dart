@@ -100,13 +100,14 @@ class LoginView extends GetView<LoginController> {
                     SizedBox(height: 24.h),
 
                     CustomTextField(
+                      
                       controller: controller.emailController,
                       hintText: 'name@example.com',
                       keyboardType: TextInputType.emailAddress,
                       validator: Validators.email,
                       label: '',
                       isLabelVisible: false,
-                      fillColior: const Color(0xFFF8FAFC),
+                      fillColor: const Color(0xFFF8FAFC),
                       prefixIcon: Icon(
                         Icons.mail_outline_rounded,
                         color: const Color(0xFF9CA3AF),
@@ -122,7 +123,7 @@ class LoginView extends GetView<LoginController> {
                         obscureText: !controller.isPasswordVisible.value,
                         label: '',
                         isLabelVisible: false,
-                        fillColior: const Color(0xFFF8FAFC),
+                        fillColor: const Color(0xFFF8FAFC),
                         prefixIcon: Icon(
                           Icons.lock_outline_rounded,
                           color: const Color(0xFF9CA3AF),

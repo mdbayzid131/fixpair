@@ -105,7 +105,7 @@ class RegisterView extends GetView<RegisterController> {
                       validator: Validators.name,
                       label: '',
                       isLabelVisible: false,
-                      fillColior: const Color(0xFFF8FAFC),
+                      fillColor: const Color(0xFFF8FAFC),
                       prefixIcon: Icon(
                         Icons.person_outline_rounded,
                         color: const Color(0xFF9CA3AF),
@@ -121,7 +121,7 @@ class RegisterView extends GetView<RegisterController> {
                       validator: Validators.email,
                       label: '',
                       isLabelVisible: false,
-                      fillColior: const Color(0xFFF8FAFC),
+                      fillColor: const Color(0xFFF8FAFC),
                       prefixIcon: Icon(
                         Icons.mail_outline_rounded,
                         color: const Color(0xFF9CA3AF),
@@ -137,7 +137,7 @@ class RegisterView extends GetView<RegisterController> {
                         obscureText: !controller.isPasswordVisible.value,
                         label: '',
                         isLabelVisible: false,
-                        fillColior: const Color(0xFFF8FAFC),
+                        fillColor: const Color(0xFFF8FAFC),
                         prefixIcon: Icon(
                           Icons.lock_outline_rounded,
                           color: const Color(0xFF9CA3AF),
@@ -165,7 +165,7 @@ class RegisterView extends GetView<RegisterController> {
                         obscureText: !controller.isConfirmPasswordVisible.value,
                         label: '',
                         isLabelVisible: false,
-                        fillColior: const Color(0xFFF8FAFC),
+                        fillColor: const Color(0xFFF8FAFC),
                         prefixIcon: Icon(
                           Icons.lock_reset_rounded,
                           color: const Color(0xFF9CA3AF),

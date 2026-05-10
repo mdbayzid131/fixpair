@@ -119,7 +119,7 @@ class SetNewPasswordScreen extends GetView<SetNewPassController> {
                       hintText: 'New Password',
                       onChanged: controller.validatePasswordRules,
                       obscureText: !controller.isPasswordVisible.value,
-                      fillColior: const Color(0xFFF8FAFC),
+                      fillColor: const Color(0xFFF8FAFC),
                       isLabelVisible: false,
                       label: '',
                       prefixIcon: Icon(
@@ -145,7 +145,7 @@ class SetNewPasswordScreen extends GetView<SetNewPassController> {
                       controller: controller.confirmPasswordController,
                       hintText: 'Confirm Password',
                       obscureText: !controller.isConfirmPasswordVisible.value,
-                      fillColior: const Color(0xFFF8FAFC),
+                      fillColor: const Color(0xFFF8FAFC),
                       isLabelVisible: false,
                       label: '',
                       prefixIcon: Icon(

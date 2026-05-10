@@ -9,11 +9,11 @@ class PersonalInfoController extends GetxController {
   final phoneController = TextEditingController(text: '+49 151 23456789');
 
   void changePhoto() {
-    Helpers.showCustomSnackBar('Photo update will be available soon', isError: false);
+    Helpers.showCustomSnackBar('Photo update will be available soon',);
   }
 
   void saveChanges() {
-    Helpers.showCustomSnackBar('Profile updated successfully', isError: false);
+    Helpers.showCustomSnackBar('Profile updated successfully', );
   }
 
   @override

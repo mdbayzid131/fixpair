@@ -27,9 +27,8 @@ class ForgotPasswordController extends GetxController {
       var response = await _authService.forgotPassword(emailController.text.trim());
 
       if (response.statusCode == 200) {
-        Helpers.showCustomSnackBar(
+        Helpers.showSuccess(
           'Reset link sent to your email',
-          isError: false,
         );
         Get.toNamed(
           AppRoutes.OTP,
@@ -39,12 +38,12 @@ class ForgotPasswordController extends GetxController {
           },
         );
       } else {
-        Helpers.showCustomSnackBar(
+        Helpers.showError(
           response.data['message'] ?? 'Failed to send reset link',
         );
       }
     } catch (e) {
-      Helpers.showCustomSnackBar(e.toString());
+      Helpers.showError(e.toString());
     } finally {
       isLoading.value = false;
     }

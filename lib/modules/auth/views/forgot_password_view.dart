@@ -124,7 +124,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                       validator: Validators.email,
                       label: '',
                       isLabelVisible: false,
-                      fillColior: const Color(0xFFF8FAFC),
+                      fillColor: const Color(0xFFF8FAFC),
                       prefixIcon: Icon(
                         Icons.mail_outline_rounded,
                         color: const Color(0xFF9CA3AF),

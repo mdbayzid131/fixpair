@@ -11,7 +11,7 @@ class ProfileController extends GetxController {
     try {
       // await _authService.logout();
       Helpers.hideLoadingDialog();
-      Helpers.showCustomSnackBar('Logged out successfully', isError: false);
+      Helpers.showCustomSnackBar('Logged out successfully',);
       Get.offAllNamed(AppRoutes.LOGIN);
     } catch (e) {
       Helpers.hideLoadingDialog();

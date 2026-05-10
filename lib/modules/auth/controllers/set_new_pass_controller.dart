@@ -64,12 +64,12 @@ class SetNewPassController extends GetxController {
 
   Future<void> submitNewPassword() async {
     if (newPasswordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
-      Helpers.showCustomSnackBar('Please fill in both fields');
+      Helpers.showError('Please fill in both fields');
       return;
     }
 
     if (newPasswordController.text != confirmPasswordController.text) {
-      Helpers.showCustomSnackBar('Passwords do not match');
+      Helpers.showError('Passwords do not match');
       return;
     }
 
@@ -81,15 +81,15 @@ class SetNewPassController extends GetxController {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Helpers.showCustomSnackBar('Password reset successfully', isError: false);
+        Helpers.showSuccess('Password reset successfully');
         Get.offAllNamed(AppRoutes.SUCCESS);
       } else {
-        Helpers.showCustomSnackBar(
+        Helpers.showError(
           response.data['message'] ?? 'Failed to reset password',
         );
       }
       } catch (e) {
-      Helpers.showCustomSnackBar(e.toString());
+      Helpers.showError(e.toString());
     } finally {
       isLoading.value = false;
     }

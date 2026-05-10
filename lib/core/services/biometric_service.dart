@@ -2,6 +2,9 @@ import 'dart:io';
 import 'package:fixpair/core/utils/helpers.dart';
 import 'package:local_auth/local_auth.dart';
 
+/// ===================== BIOMETRIC SERVICE =====================
+/// Handles fingerprint, face ID, and other biometric authentication.
+/// Requires local_auth package.
 class BiometricService {
   BiometricService._();
   static final BiometricService instance = BiometricService._();

@@ -52,7 +52,7 @@ class OtpController extends GetxController {
 
   Future<void> verifyOtp() async {
     if (otpController.text.length < 6) {
-      Helpers.showCustomSnackBar('Please enter valid 6-digit OTP');
+      Helpers.showError('Please enter valid 6-digit OTP');
       return;
     }
 
@@ -65,7 +65,7 @@ class OtpController extends GetxController {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Helpers.showCustomSnackBar('Verification successful', isError: false);
+        Helpers.showSuccess('Verification successful');
 
         if (isForgotPassword) {
           final resetToken = response.data['data'];
@@ -76,7 +76,7 @@ class OtpController extends GetxController {
           Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
         }
       } else {
-        Helpers.showCustomSnackBar(response.data['message'] ?? 'Verification failed');
+        Helpers.showError(response.data['message'] ?? 'Verification failed');
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());
@@ -95,10 +95,10 @@ class OtpController extends GetxController {
         await _authService.resendOtp(email);
       }
 
-      Helpers.showCustomSnackBar('OTP resent successfully', isError: false);
+      Helpers.showSuccess('OTP resent successfully');
       startTimer();
     } catch (e) {
-      Helpers.showCustomSnackBar(e.toString());
+      Helpers.showError(e.toString());
     } finally {
       isLoading.value = false;
     }
