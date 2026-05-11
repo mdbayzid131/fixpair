@@ -80,22 +80,39 @@ class LegalFAQView extends GetView<LegalFAQController> {
   }
 
   Widget _buildFAQCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (controller.faqItems.isEmpty) {
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(20.w),
+            child: Text(
+              'No FAQs available',
+              style: GoogleFonts.manrope(
+                fontSize: 14.sp,
+                color: const Color(0xFF64748B),
+              ),
+            ),
           ),
-        ],
-      ),
-      child: Column(
-        children: List.generate(controller.faqItems.length, (index) {
-          final item = controller.faqItems[index];
-          return Obx(() {
+        );
+      }
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: List.generate(controller.faqItems.length, (index) {
+            final item = controller.faqItems[index];
             final isExpanded = controller.expandedStates[index];
             final isLast = index == controller.faqItems.length - 1;
 
@@ -110,11 +127,11 @@ class LegalFAQView extends GetView<LegalFAQController> {
                         controller.toggleExpanded(index),
                     initiallyExpanded: isExpanded,
                     key: PageStorageKey(
-                      'faq_$index',
-                    ), // Use PageStorageKey to maintain state across rebuilds
+                      'faq_${item.id}',
+                    ), // Use item.id to maintain state correctly
                     maintainState: true,
                     title: Text(
-                      item['question']!,
+                      item.question ?? '',
                       style: GoogleFonts.manrope(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
@@ -134,7 +151,7 @@ class LegalFAQView extends GetView<LegalFAQController> {
                       Padding(
                         padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 20.h),
                         child: Text(
-                          item['answer']!,
+                          item.answer ?? '',
                           style: GoogleFonts.manrope(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
@@ -155,10 +172,10 @@ class LegalFAQView extends GetView<LegalFAQController> {
                   ),
               ],
             );
-          });
-        }),
-      ),
-    );
+          }),
+        ),
+      );
+    });
   }
 
   Widget _buildLegalCard() {

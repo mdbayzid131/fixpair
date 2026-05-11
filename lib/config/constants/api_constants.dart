@@ -45,4 +45,9 @@ class ApiConstants {
   static const String getStoreDetails = '/store/:id';
   static const String getStoreServiceByStoreId = '/storeservice/store/:storeId';
   static const String getStoreBundleByStoreId = '/storebundle/store/:storeId';
+
+  // Legal & FAQ Endpoints
+  static const String privacyPolicy = '/privacy';
+  static const String termsConditions = '/terms';
+  static const String faq = '/faq';
 }

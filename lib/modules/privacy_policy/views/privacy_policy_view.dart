@@ -28,57 +28,57 @@ class PrivacyPolicyView extends GetView<PrivacyPolicyController> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
-        child: Container(
-          padding: EdgeInsets.all(24.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (controller.privacyPolicyItems.isEmpty) {
+          return Center(
+            child: Text(
+              'No Privacy Policy data available',
+              style: GoogleFonts.manrope(
+                fontSize: 14.sp,
+                color: const Color(0xFF64748B),
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSection(
-                '1. Data Collection',
-                'We collect personal information such as your name, email, and payment details to provide our consultation services. We ensure your data is processed securely and in accordance with GDPR regulations.',
-              ),
-              _buildSection(
-                '2. Use of Information',
-                'Your data is used to facilitate live video calls, process payments, and improve our services. We do not sell your personal data to third parties for marketing purposes.',
-              ),
-              _buildSection(
-                '3. Data Storage & Security',
-                'All personal data is encrypted and stored on secure servers located within the European Union. We implement strict technical and organizational measures to protect your information against unauthorized access.',
-              ),
-              _buildSection(
-                '4. Your Rights (GDPR)',
-                'Under GDPR, you have the right to access, rectify, or delete your personal data. You can also request a copy of your data or object to certain processing activities by contacting our support team.',
-              ),
-              _buildSection(
-                '5. Cookies & Tracking',
-                'We use essential cookies to maintain your session and ensure the platform works correctly. Any analytics tracking is performed anonymously and requires your explicit consent.',
-              ),
-              SizedBox(height: 32.h),
-              Text(
-                'Last updated: April 1, 2026',
-                style: GoogleFonts.manrope(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF94A3B8),
+            ),
+          );
+        }
+        return SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+          child: Container(
+            padding: EdgeInsets.all(24.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
                 ),
-              ),
-            ],
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...controller.privacyPolicyItems.map((item) => _buildSection(
+                      item.title ?? '',
+                      item.content ?? '',
+                    )),
+                SizedBox(height: 8.h),
+                Text(
+                  'Last updated: ${controller.privacyPolicyItems.first.updatedAt != null ? controller.privacyPolicyItems.first.updatedAt!.substring(0, 10) : 'April 1, 2026'}',
+                  style: GoogleFonts.manrope(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF94A3B8),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
