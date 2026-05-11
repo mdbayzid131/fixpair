@@ -27,109 +27,159 @@ class UserProfileResponseModel {
 }
 
 class UserData {
+  final AuthenticationModel? authentication;
   final String? id;
   final String? name;
+  final String? firstName;
+  final String? lastName;
+  final String? role;
   final String? email;
   final String? phone;
-  final String? role;
+  final String? image;
   final String? avatar;
   final String? status;
-  final bool? isVerified;
-  final bool? isDeleted;
-  final double? lat;
-  final double? lng;
-  final bool? isTwoFactorEnabled;
-  final List<dynamic>? userSubscriptions;
+  final bool? verified;
+  final String? provider;
+  final String? providerId;
+  final String? consultancyType;
+  final String? experience;
+  final List<dynamic>? languages;
+  final List<dynamic>? expertise;
+  final int? visitFee;
+  final int? perMinuteRate;
+  final String? activeStatus;
   final String? stripeCustomerId;
-  final bool? isSubscribed;
-  final String? internalUserId;
+  final String? paypalPayerId;
+  final List<dynamic>? paymentMethods;
   final String? createdAt;
   final String? updatedAt;
-  final List<UserAddress>? addresses;
-  final List<dynamic>? orders;
-  final List<dynamic>? reviews;
-  final CountModel? count;
 
   UserData({
+    this.authentication,
     this.id,
     this.name,
+    this.firstName,
+    this.lastName,
+    this.role,
     this.email,
     this.phone,
-    this.role,
+    this.image,
     this.avatar,
     this.status,
-    this.isVerified,
-    this.isDeleted,
-    this.lat,
-    this.lng,
-    this.isTwoFactorEnabled,
-    this.userSubscriptions,
+    this.verified,
+    this.provider,
+    this.providerId,
+    this.consultancyType,
+    this.experience,
+    this.languages,
+    this.expertise,
+    this.visitFee,
+    this.perMinuteRate,
+    this.activeStatus,
     this.stripeCustomerId,
-    this.isSubscribed,
-    this.internalUserId,
+    this.paypalPayerId,
+    this.paymentMethods,
     this.createdAt,
     this.updatedAt,
-    this.addresses,
-    this.orders,
-    this.reviews,
-    this.count,
   });
 
   factory UserData.fromJson(Map<String, dynamic> json) {
     return UserData(
-      id: json['id'],
+      authentication: json['authentication'] != null
+          ? AuthenticationModel.fromJson(json['authentication'])
+          : null,
+      id: json['_id'],
       name: json['name'],
+      firstName: json['firstName'],
+      lastName: json['lastName'],
+      role: json['role'],
       email: json['email'],
       phone: json['phone'],
-      role: json['role'],
+      image: json['image'],
       avatar: json['avatar'],
       status: json['status'],
-      isVerified: json['isVerified'],
-      isDeleted: json['isDeleted'],
-      lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
-      lng: json['lng'] != null ? double.tryParse(json['lng'].toString()) : null,
-      isTwoFactorEnabled: json['isTwoFactorEnabled'],
-      userSubscriptions: json['userSubscriptions'] ?? [],
+      verified: json['verified'],
+      provider: json['provider'],
+      providerId: json['providerId'],
+      consultancyType: json['consultancyType'],
+      experience: json['experience'],
+      languages: json['languages'] ?? [],
+      expertise: json['expertise'] ?? [],
+      visitFee: json['visitFee'] != null ? int.tryParse(json['visitFee'].toString()) : 0,
+      perMinuteRate: json['perMinuteRate'] != null ? int.tryParse(json['perMinuteRate'].toString()) : 0,
+      activeStatus: json['activeStatus'],
       stripeCustomerId: json['stripeCustomerId'],
-      isSubscribed: json['isSubscribed'],
-      internalUserId: json['userId'],
+      paypalPayerId: json['paypalPayerId'],
+      paymentMethods: json['paymentMethods'] ?? [],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
-      addresses: json['addresses'] != null
-          ? List<UserAddress>.from(
-              json['addresses'].map((x) => UserAddress.fromJson(x)),
-            )
-          : [],
-      orders: json['orders'] ?? [],
-      reviews: json['reviews'] ?? [],
-      count: json['_count'] != null ? CountModel.fromJson(json['_count']) : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'authentication': authentication?.toJson(),
+      '_id': id,
       'name': name,
+      'firstName': firstName,
+      'lastName': lastName,
+      'role': role,
       'email': email,
       'phone': phone,
-      'role': role,
+      'image': image,
       'avatar': avatar,
       'status': status,
-      'isVerified': isVerified,
-      'isDeleted': isDeleted,
-      'lat': lat,
-      'lng': lng,
-      'isTwoFactorEnabled': isTwoFactorEnabled,
-      'userSubscriptions': userSubscriptions,
+      'verified': verified,
+      'provider': provider,
+      'providerId': providerId,
+      'consultancyType': consultancyType,
+      'experience': experience,
+      'languages': languages,
+      'expertise': expertise,
+      'visitFee': visitFee,
+      'perMinuteRate': perMinuteRate,
+      'activeStatus': activeStatus,
       'stripeCustomerId': stripeCustomerId,
-      'isSubscribed': isSubscribed,
-      'userId': internalUserId,
+      'paypalPayerId': paypalPayerId,
+      'paymentMethods': paymentMethods,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
-      'addresses': addresses?.map((x) => x.toJson()).toList(),
-      'orders': orders,
-      'reviews': reviews,
-      '_count': count?.toJson(),
+    };
+  }
+}
+
+class AuthenticationModel {
+  final bool? isResetPassword;
+  final dynamic oneTimeCode;
+  final dynamic expireAt;
+  final int? otpRequestCount;
+  final dynamic lastOtpRequestTime;
+
+  AuthenticationModel({
+    this.isResetPassword,
+    this.oneTimeCode,
+    this.expireAt,
+    this.otpRequestCount,
+    this.lastOtpRequestTime,
+  });
+
+  factory AuthenticationModel.fromJson(Map<String, dynamic> json) {
+    return AuthenticationModel(
+      isResetPassword: json['isResetPassword'],
+      oneTimeCode: json['oneTimeCode'],
+      expireAt: json['expireAt'],
+      otpRequestCount: json['otpRequestCount'],
+      lastOtpRequestTime: json['lastOtpRequestTime'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'isResetPassword': isResetPassword,
+      'oneTimeCode': oneTimeCode,
+      'expireAt': expireAt,
+      'otpRequestCount': otpRequestCount,
+      'lastOtpRequestTime': lastOtpRequestTime,
     };
   }
 }
@@ -189,7 +239,6 @@ class UserAddress {
     };
   }
 }
-
 
 class CountModel {
   final int? orders;

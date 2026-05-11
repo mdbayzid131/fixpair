@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fixpair/config/constants/api_constants.dart';
 
 import '../controllers/personal_info_controller.dart';
 
@@ -41,45 +42,44 @@ class PersonalInfoView extends GetView<PersonalInfoController> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(24.w, 28.h, 24.w, 24.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: _buildPhotoPicker()),
-            SizedBox(height: 35.h),
-            Row(
-              children: [
-                Expanded(
-                  child: _ProfileInputField(
-                    label: 'FIRST NAME',
-                    controller: controller.firstNameController,
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(24.w, 28.h, 24.w, 24.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(child: _buildPhotoPicker()),
+              SizedBox(height: 35.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ProfileInputField(
+                      label: 'FIRST NAME',
+                      controller: controller.firstNameController,
+                    ),
                   ),
-                ),
-                SizedBox(width: 16.w),
-                Expanded(
-                  child: _ProfileInputField(
-                    label: 'LAST NAME',
-                    controller: controller.lastNameController,
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: _ProfileInputField(
+                      label: 'LAST NAME',
+                      controller: controller.lastNameController,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20.h),
-            _ProfileInputField(
-              label: 'EMAIL ADDRESS',
-              controller: controller.emailController,
-              keyboardType: TextInputType.emailAddress,
-            ),
-            SizedBox(height: 20.h),
-            _ProfileInputField(
-              label: 'PHONE NUMBER',
-              controller: controller.phoneController,
-              keyboardType: TextInputType.phone,
-            ),
-          ],
-        ),
-      ),
+                ],
+              ),
+              SizedBox(height: 20.h),
+              _ProfileInputField(
+                label: 'EMAIL ADDRESS',
+                controller: controller.emailController,
+                keyboardType: TextInputType.emailAddress,
+              ),
+            ],
+          ),
+        );
+      }),
       bottomNavigationBar: SafeArea(
         minimum: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 20.h),
         child: SizedBox(
@@ -101,22 +101,43 @@ class PersonalInfoView extends GetView<PersonalInfoController> {
         Stack(
           clipBehavior: Clip.none,
           children: [
-            Container(
-              width: 112.w,
-              height: 112.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFF1F5F9),
-                border: Border.all(color: Colors.white, width: 3.w),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.12),
-                    blurRadius: 12,
-                    offset: Offset(0, 7.h),
-                  ),
-                ],
-              ),
-            ),
+            Obx(() {
+              final rawUrl =
+                  controller.user.value?.image ?? controller.user.value?.avatar;
+              final imageUrl = ApiConstants.getImageUrl(rawUrl);
+              final pickedFile = controller.pickedImage.value;
+
+              return Container(
+                width: 112.w,
+                height: 112.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFF1F5F9),
+                  image: pickedFile != null
+                      ? DecorationImage(
+                          image: FileImage(pickedFile),
+                          fit: BoxFit.cover,
+                        )
+                      : imageUrl.isNotEmpty
+                      ? DecorationImage(
+                          image: NetworkImage(imageUrl),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                  border: Border.all(color: Colors.white, width: 3.w),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.12),
+                      blurRadius: 12,
+                      offset: Offset(0, 7.h),
+                    ),
+                  ],
+                ),
+                child: (imageUrl.isEmpty && pickedFile == null)
+                    ? Icon(Icons.person, size: 50.sp, color: _labelColor)
+                    : null,
+              );
+            }),
             Positioned(
               right: 6.w,
               bottom: 5.h,

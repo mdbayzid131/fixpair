@@ -11,4 +11,17 @@ class UserRepository {
   Future<Response> getProfile() async {
     return await _apiClient.getData(ApiConstants.profile);
   }
+
+  // Update user profile
+  Future<Response> updateProfile(Map<String, dynamic> body,
+      {List<MultipartBody>? multipartBody}) async {
+    if (multipartBody != null && multipartBody.isNotEmpty) {
+      return await _apiClient.patchMultipartData(
+        ApiConstants.profile,
+        body,
+        multipartBody: multipartBody,
+      );
+    }
+    return await _apiClient.patchData(ApiConstants.profile, body);
+  }
 }

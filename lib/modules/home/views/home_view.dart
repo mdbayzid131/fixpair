@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fixpair/modules/home/controllers/home_controller.dart';
+import 'package:fixpair/core/services/auth_service.dart';
+import 'package:fixpair/config/constants/api_constants.dart';
 import '../../../config/routes/app_pages.dart';
 
 class LaundryHomeScreen extends GetView<HomeController> {
@@ -110,15 +112,34 @@ class LaundryHomeScreen extends GetView<HomeController> {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 24.r,
-                      backgroundColor: Colors.white.withOpacity(0.3),
-                      child: Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 28.sp,
-                      ),
-                    ),
+                    Obx(() {
+                      final authService = Get.find<AuthService>();
+                      final rawUrl = authService.user.value?.image ??
+                          authService.user.value?.avatar;
+                      final imageUrl = ApiConstants.getImageUrl(rawUrl);
+
+                      return Container(
+                        width: 48.w,
+                        height: 48.w,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          shape: BoxShape.circle,
+                          image: imageUrl.isNotEmpty
+                              ? DecorationImage(
+                                  image: NetworkImage(imageUrl),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
+                        ),
+                        child: imageUrl.isEmpty
+                            ? Icon(
+                                Icons.person,
+                                color: Colors.white,
+                                size: 28.sp,
+                              )
+                            : null,
+                      );
+                    }),
                     SizedBox(width: 12.w),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,14 +152,20 @@ class LaundryHomeScreen extends GetView<HomeController> {
                             color: Colors.white.withOpacity(0.8),
                           ),
                         ),
-                        Text(
-                          'Klaus',
-                          style: GoogleFonts.manrope(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
+                        Obx(() {
+                          final authService = Get.find<AuthService>();
+                          final name = authService.user.value?.name ??
+                              authService.user.value?.firstName ??
+                              'User';
+                          return Text(
+                            name,
+                            style: GoogleFonts.manrope(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          );
+                        }),
                       ],
                     ),
                   ],

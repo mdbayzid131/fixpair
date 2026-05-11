@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../config/routes/app_pages.dart';
+import '../../../config/constants/api_constants.dart';
 import '../controllers/profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
@@ -57,62 +58,100 @@ class ProfileView extends GetView<ProfileController> {
   }
 
   Widget _buildUserInfoCard() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(24.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return Container(
+          width: double.infinity,
+          height: 120.h,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24.r),
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 80.w,
-            height: 80.w,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 4),
+          child: const Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      final userData = controller.user.value;
+      final name = userData?.name ??
+          ((userData?.firstName != null || userData?.lastName != null)
+              ? '${userData?.firstName ?? ''} ${userData?.lastName ?? ''}'
+                    .trim()
+              : 'User');
+      final email = userData?.email ?? 'No email provided';
+      final rawUrl = userData?.image ?? userData?.avatar;
+      final imageUrl = ApiConstants.getImageUrl(rawUrl);
+
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(24.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: Icon(
-              Icons.person,
-              size: 40.sp,
-              color: const Color(0xFF94A3B8),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 80.w,
+              height: 80.w,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 4),
+                image: imageUrl.isNotEmpty
+                    ? DecorationImage(
+                        image: NetworkImage(imageUrl),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: imageUrl.isEmpty
+                  ? Icon(
+                      Icons.person,
+                      size: 40.sp,
+                      color: const Color(0xFF94A3B8),
+                    )
+                  : null,
             ),
-          ),
-          SizedBox(width: 20.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Klaus M.',
-                style: GoogleFonts.manrope(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1D293D),
-                ),
+            SizedBox(width: 20.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.manrope(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1D293D),
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    email,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.manrope(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: 4.h),
-              Text(
-                '+49 151 23456789',
-                style: GoogleFonts.manrope(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF64748B),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildMenuCard() {

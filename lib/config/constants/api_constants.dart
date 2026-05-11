@@ -1,7 +1,13 @@
 class ApiConstants {
   // Base URLs
   static const String baseUrl = 'http://10.10.7.106:5000/api/v1';
-  // static const String apiVersion = '/api/v1';
+  static const String serverUrl = 'http://10.10.7.106:5000';
+
+  static String getImageUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    if (url.startsWith('http')) return url;
+    return '$serverUrl$url';
+  }
 
   // Auth Endpoints
   static const String login = '/auth/login';
@@ -15,7 +21,7 @@ class ApiConstants {
   static const String changePassword = '/auth/change-password';
 
   // User Profile Endpoints
-  static const String profile = '/user/get-me';
+  static const String profile = '/user/profile';
   // Category Endpoints
   static const String category = '/category';
   static const String getOperatorCategory = '/operatorcategory/:id';

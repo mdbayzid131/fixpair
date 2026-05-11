@@ -68,7 +68,8 @@ class ApiClient extends GetxService {
     _bearerToken = await StorageService.getString(StorageConstants.bearerToken);
 
     if (_bearerToken.isNotEmpty &&
-        !options.path.contains(ApiConstants.refreshToken)) {
+        !options.path.contains(ApiConstants.refreshToken) &&
+        !options.headers.containsKey('Authorization')) {
       options.headers['Authorization'] = 'Bearer $_bearerToken';
     }
 
@@ -107,6 +108,7 @@ class ApiClient extends GetxService {
       ApiConstants.forgotPassword,
       ApiConstants.verifyUser,
       ApiConstants.resendOtp,
+      ApiConstants.resetPassword,
     ];
 
     if (e.response?.statusCode == 401 &&
