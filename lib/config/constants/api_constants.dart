@@ -22,36 +22,6 @@ class ApiConstants {
 
   // User Profile Endpoints
   static const String profile = '/user/profile';
-  // Category Endpoints
-  static const String category = '/category';
-  static const String getOperatorCategory = '/operatorcategory/:id';
-  // Banner Endpoints
-  static const String banner = '/banner';
-
-  // Service Endpoints
-  static const String getStoreService = '/storeservice';
-  static const String getStoreServiceDetails = '/storeservice/:storeServiceId';
-
-  // Address Endpoints
-  static const String getAddresses = '/address/my-addresses';
-  static const String updateAddress = '/address';
-  static const String setDefaultAddress = '/address/:addressId/set-default';
-
-  // Cart Endpoints
-  static const String addToCart = '/cart/add';
-  static const String getMyCart = '/cart/my-cart';
-  static const String updateCartQuantity = '/cart/update-quantity/:cartItemId';
-  static const String deleteCartItem = '/cart/item/:cartItemId';
-
-  // Order Endpoints
-  static const String myOrders = '/order/my-orders';
-  static const String checkout = '/order/checkout';
-
-  // Store Endpoints
-  static const String getStoreDetails = '/store/:id';
-  static const String getStoreServiceByStoreId = '/storeservice/store/:storeId';
-  static const String getStoreBundleByStoreId = '/storebundle/store/:storeId';
-
   // Legal & FAQ Endpoints
   static const String privacyPolicy = '/privacy';
   static const String termsConditions = '/terms';

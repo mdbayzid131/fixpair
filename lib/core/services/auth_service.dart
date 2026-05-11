@@ -153,31 +153,6 @@ class AuthService extends GetxService {
     }
   }
 
-  // /// ===================== SOCIAL LOGIN =====================
-
-  // Future<void> signInWithGoogle() async {
-  //   try {
-  //     // AuthRepo returns raw map from apiClient.postData, which might be response.data or already nested.
-  //     // We need to wrap it back into a Response for _handleAuthResponse or refactor _handleAuthResponse.
-  //     // In AuthRepo, we already call _saveAuthResponse, so here we just need to update state.
-  //     final response = await _authRepo.signInWithGoogle();
-  //     await _handleAuthResponse(response);
-  //     isLoggedIn.value = true;
-  //   } catch (e) {
-  //     rethrow;
-  //   }
-  // }
-
-  // Future<void> signInWithApple() async {  
-  //   try {
-  //     final response = await _authRepo.signInWithApple();
-  //     await _handleAuthResponse(response);
-  //     isLoggedIn.value = true;
-  //   } catch (e) {
-  //     rethrow;
-  //   }
-  // }
-
   /// ===================== CHANGE PASSWORD =====================
   Future<Response> changePassword({
     required String oldPassword,
