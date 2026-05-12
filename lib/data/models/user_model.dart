@@ -1,13 +1,11 @@
+import 'package:flutter/foundation.dart';
+
 class UserProfileResponseModel {
   final bool? success;
   final String? message;
   final UserData? data;
 
-  UserProfileResponseModel({
-    this.success,
-    this.message,
-    this.data,
-  });
+  UserProfileResponseModel({this.success, this.message, this.data});
 
   factory UserProfileResponseModel.fromJson(Map<String, dynamic> json) {
     return UserProfileResponseModel(
@@ -18,11 +16,76 @@ class UserProfileResponseModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'success': success,
-      'message': message,
-      'data': data?.toJson(),
-    };
+    return {'success': success, 'message': message, 'data': data?.toJson()};
+  }
+}
+
+class ConsultantResponseModel {
+  final bool? success;
+  final String? message;
+  final PaginationModel? pagination;
+  final List<UserData>? data;
+
+  ConsultantResponseModel({
+    this.success,
+    this.message,
+    this.pagination,
+    this.data,
+  });
+
+  factory ConsultantResponseModel.fromJson(Map<String, dynamic> json) {
+    return ConsultantResponseModel(
+      success: json['success'],
+      message: json['message'],
+      pagination: json['pagination'] != null
+          ? PaginationModel.fromJson(json['pagination'])
+          : null,
+      data: json['data'] != null
+          ? (json['data'] as List).map((i) => UserData.fromJson(i)).toList()
+          : null,
+    );
+  }
+}
+
+class PaginationModel {
+  final int? total;
+  final int? limit;
+  final int? page;
+  final int? totalPage;
+
+  PaginationModel({this.total, this.limit, this.page, this.totalPage});
+
+  factory PaginationModel.fromJson(Map<String, dynamic> json) {
+    return PaginationModel(
+      total: json['total'],
+      limit: json['limit'],
+      page: json['page'],
+      totalPage: json['totalPage'],
+    );
+  }
+}
+
+class ConsultantStats {
+  final String? id;
+  final double? avgRating;
+  final int? totalReviews;
+
+  ConsultantStats({this.id, this.avgRating, this.totalReviews});
+
+  factory ConsultantStats.fromJson(Map<String, dynamic> json) {
+    return ConsultantStats(
+      id: json['_id'],
+      avgRating: json['avgRating'] != null
+          ? double.tryParse(json['avgRating'].toString())
+          : 0.0,
+      totalReviews: json['totalReviews'] != null
+          ? int.tryParse(json['totalReviews'].toString())
+          : 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'_id': id, 'avgRating': avgRating, 'totalReviews': totalReviews};
   }
 }
 
@@ -44,15 +107,17 @@ class UserData {
   final String? consultancyType;
   final String? experience;
   final List<dynamic>? languages;
-  final List<dynamic>? expertise;
+  final String? expertise;
   final int? visitFee;
   final int? perMinuteRate;
-  final String? activeStatus;
+  final bool? activeStatus;
   final String? stripeCustomerId;
   final String? paypalPayerId;
   final List<dynamic>? paymentMethods;
   final String? createdAt;
   final String? updatedAt;
+  final String? tags;
+  final ConsultantStats? stats;
 
   UserData({
     this.authentication,
@@ -81,39 +146,53 @@ class UserData {
     this.paymentMethods,
     this.createdAt,
     this.updatedAt,
+    this.tags,
+    this.stats,
   });
 
   factory UserData.fromJson(Map<String, dynamic> json) {
-    return UserData(
-      authentication: json['authentication'] != null
-          ? AuthenticationModel.fromJson(json['authentication'])
-          : null,
-      id: json['_id'],
-      name: json['name'],
-      firstName: json['firstName'],
-      lastName: json['lastName'],
-      role: json['role'],
-      email: json['email'],
-      phone: json['phone'],
-      image: json['image'],
-      avatar: json['avatar'],
-      status: json['status'],
-      verified: json['verified'],
-      provider: json['provider'],
-      providerId: json['providerId'],
-      consultancyType: json['consultancyType'],
-      experience: json['experience'],
-      languages: json['languages'] ?? [],
-      expertise: json['expertise'] ?? [],
-      visitFee: json['visitFee'] != null ? int.tryParse(json['visitFee'].toString()) : 0,
-      perMinuteRate: json['perMinuteRate'] != null ? int.tryParse(json['perMinuteRate'].toString()) : 0,
-      activeStatus: json['activeStatus'],
-      stripeCustomerId: json['stripeCustomerId'],
-      paypalPayerId: json['paypalPayerId'],
-      paymentMethods: json['paymentMethods'] ?? [],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
-    );
+    try {
+      return UserData(
+        authentication: json['authentication'] != null
+            ? AuthenticationModel.fromJson(json['authentication'])
+            : null,
+        id: json['_id']?.toString(),
+        name: json['name']?.toString(),
+        firstName: json['firstName']?.toString(),
+        lastName: json['lastName']?.toString(),
+        role: json['role']?.toString(),
+        email: json['email']?.toString(),
+        phone: json['phone']?.toString(),
+        image: json['image']?.toString(),
+        avatar: json['avatar']?.toString(),
+        status: json['status']?.toString(),
+        verified: json['verified'] == true,
+        provider: json['provider']?.toString(),
+        providerId: json['providerId']?.toString(),
+        consultancyType: json['consultancyType']?.toString(),
+        experience: json['experience']?.toString(),
+        languages: json['languages'] is List ? json['languages'] : [],
+        expertise: json['expertise']?.toString(),
+        visitFee: int.tryParse(json['visitFee']?.toString() ?? '0') ?? 0,
+        perMinuteRate:
+            int.tryParse(json['perMinuteRate']?.toString() ?? '0') ?? 0,
+        activeStatus: json['activeStatus'] == true,
+        stripeCustomerId: json['stripeCustomerId']?.toString(),
+        paypalPayerId: json['paypalPayerId']?.toString(),
+        paymentMethods: json['paymentMethods'] is List
+            ? json['paymentMethods']
+            : [],
+        createdAt: json['createdAt']?.toString(),
+        updatedAt: json['updatedAt']?.toString(),
+        tags: json['tags']?.toString(),
+        stats: json['stats'] != null
+            ? ConsultantStats.fromJson(json['stats'])
+            : null,
+      );
+    } catch (e) {
+      debugPrint('UserData Parsing Error: $e');
+      return UserData(id: json['_id']?.toString(), name: 'Error Parsing');
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -144,6 +223,8 @@ class UserData {
       'paymentMethods': paymentMethods,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      'tags': tags,
+      'stats': stats?.toJson(),
     };
   }
 }

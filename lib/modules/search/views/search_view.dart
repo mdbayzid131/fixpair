@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fixpair/config/constants/api_constants.dart';
+import '../../../data/models/user_model.dart';
 import '../controllers/search_controller.dart' as search_ctrl;
 
 class SearchView extends GetView<search_ctrl.SearchController> {
@@ -53,8 +55,9 @@ class SearchView extends GetView<search_ctrl.SearchController> {
                     ),
                     child: TextField(
                       controller: controller.searchController,
+                      onSubmitted: (_) => controller.fetchConsultants(),
                       decoration: InputDecoration(
-                        hintText: 'Search specialties, names...',
+                        hintText: 'Search by names...',
                         hintStyle: GoogleFonts.manrope(
                           fontSize: 14.sp,
                           color: const Color(0xFF94A3B8),
@@ -63,6 +66,20 @@ class SearchView extends GetView<search_ctrl.SearchController> {
                           Icons.search_rounded,
                           color: const Color(0xFF94A3B8),
                           size: 22.sp,
+                        ),
+                        suffixIcon: Obx(
+                          () => controller.searchQuery.value.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(
+                                    Icons.clear_rounded,
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                  onPressed: () {
+                                    controller.searchController.clear();
+                                    controller.fetchConsultants();
+                                  },
+                                )
+                              : const SizedBox.shrink(),
                         ),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(vertical: 18.h),
@@ -78,61 +95,56 @@ class SearchView extends GetView<search_ctrl.SearchController> {
 
           // 2. Expert List
           Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.all(24.w),
-              itemCount: 4,
-              separatorBuilder: (context, index) => SizedBox(height: 16.h),
-              itemBuilder: (context, index) {
-                final experts = [
-                  {
-                    'name': 'Dr. Thomas Weber',
-                    'role': 'General Medicine',
-                    'desc':
-                        'Friendly general practitioner available for quick medical',
-                    'rating': '4.9',
-                    'reviews': '124',
-                    'price': '4.00€/min',
-                    'status': 'Online Now',
-                    'image': 'https://i.pravatar.cc/150?u=thomas',
-                  },
-                  {
-                    'name': 'Sarah Müller',
-                    'role': 'Tax Consultation',
-                    'desc':
-                        'Certified Tax Advisor (Steuerberater) with expertise',
-                    'rating': '4.8',
-                    'reviews': '89',
-                    'price': '4.00€/min',
-                    'status': 'Online Now',
-                    'image': 'https://i.pravatar.cc/150?u=sarah',
-                  },
-                  {
-                    'name': 'Dr. Elena Schmidt',
-                    'role': 'General Medicine',
-                    'desc':
-                        'Friendly general practitioner available for quick medical',
-                    'rating': '4.9',
-                    'reviews': '210',
-                    'price': '4.00€/min',
-                    'status': 'Available Later',
-                    'image': 'https://i.pravatar.cc/150?u=elena',
-                  },
-                  {
-                    'name': 'Marcus Fischer',
-                    'role': 'Immigration Law',
-                    'desc':
-                        'Dedicated immigration lawyer helping with visas and',
-                    'rating': '4.7',
-                    'reviews': '56',
-                    'price': '4.00€/min',
-                    'status': 'Online Now',
-                    'image': 'https://i.pravatar.cc/150?u=marcus',
-                  },
-                ];
-                final expert = experts[index];
-                return _buildExpertCard(expert);
-              },
-            ),
+            child: Obx(() {
+              if (controller.isLoading.value &&
+                  controller.consultants.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (controller.consultants.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.search_off_rounded,
+                        size: 64.sp,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        'No consultants found',
+                        style: GoogleFonts.manrope(
+                          fontSize: 16.sp,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                controller: controller.scrollController,
+                padding: EdgeInsets.all(24.w),
+                itemCount:
+                    controller.consultants.length +
+                    (controller.isLoadingMore.value ? 1 : 0),
+                separatorBuilder: (context, index) => SizedBox(height: 16.h),
+                itemBuilder: (context, index) {
+                  if (index == controller.consultants.length) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  final expert = controller.consultants[index];
+                  return _buildExpertCard(expert);
+                },
+              );
+            }),
           ),
         ],
       ),
@@ -177,8 +189,9 @@ class SearchView extends GetView<search_ctrl.SearchController> {
     );
   }
 
-  Widget _buildExpertCard(Map<String, String> expert) {
-    final isOnline = expert['status'] == 'Online Now';
+  Widget _buildExpertCard(UserData expert) {
+    final isOnline = expert.status == 'active';
+    final imageUrl = ApiConstants.getImageUrl(expert.image ?? expert.avatar);
 
     return Container(
       decoration: BoxDecoration(
@@ -201,15 +214,21 @@ class SearchView extends GetView<search_ctrl.SearchController> {
                 Container(
                   width: 110.w,
                   decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(24.r),
                       bottomLeft: Radius.circular(24.r),
                     ),
-                    image: DecorationImage(
-                      image: NetworkImage(expert['image']!),
-                      fit: BoxFit.cover,
-                    ),
+                    image: imageUrl.isNotEmpty
+                        ? DecorationImage(
+                            image: NetworkImage(imageUrl),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
                   ),
+                  child: imageUrl.isEmpty
+                      ? Icon(Icons.person, size: 40.sp, color: Colors.grey)
+                      : null,
                 ),
                 Positioned(
                   top: 10.h,
@@ -248,7 +267,7 @@ class SearchView extends GetView<search_ctrl.SearchController> {
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          '${expert['rating']} (${expert['reviews']})',
+                          '${expert.stats?.avgRating ?? 0.0} (${expert.stats?.totalReviews ?? 0})',
                           style: GoogleFonts.manrope(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w700,
@@ -270,7 +289,7 @@ class SearchView extends GetView<search_ctrl.SearchController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      expert['name']!,
+                      expert.name ?? 'No Name',
                       style: GoogleFonts.manrope(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
@@ -278,7 +297,7 @@ class SearchView extends GetView<search_ctrl.SearchController> {
                       ),
                     ),
                     Text(
-                      expert['role']!,
+                      expert.consultancyType?.toUpperCase() ?? 'GENERAL',
                       style: GoogleFonts.manrope(
                         fontSize: 13.sp,
                         color: const Color(0xFF64748B),
@@ -287,7 +306,7 @@ class SearchView extends GetView<search_ctrl.SearchController> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      expert['desc']!,
+                      expert.expertise ?? 'No Expertise',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.manrope(
@@ -310,9 +329,9 @@ class SearchView extends GetView<search_ctrl.SearchController> {
                               color: const Color(0xFF1D293D),
                             ),
                             children: [
-                              TextSpan(text: expert['price']!.split('/')[0]),
+                              TextSpan(text: '${expert.perMinuteRate ?? 0}€'),
                               TextSpan(
-                                text: '/${expert['price']!.split('/')[1]}',
+                                text: '/min',
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   color: const Color(0xFF94A3B8),
@@ -334,7 +353,7 @@ class SearchView extends GetView<search_ctrl.SearchController> {
                             borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Text(
-                            expert['status']!,
+                            isOnline ? 'Online Now' : 'Offline',
                             style: GoogleFonts.manrope(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w700,

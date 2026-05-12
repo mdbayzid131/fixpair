@@ -22,6 +22,7 @@ class ApiConstants {
 
   // User Profile Endpoints
   static const String profile = '/user/profile';
+  static const String consultants = '/user/consultants';
   // Legal & FAQ Endpoints
   static const String privacyPolicy = '/privacy';
   static const String termsConditions = '/terms';

@@ -24,4 +24,21 @@ class UserRepository {
     }
     return await _apiClient.patchData(ApiConstants.profile, body);
   }
+
+  // Get consultants list with filters and pagination
+  Future<Response> getConsultants({
+    String? consultancyType,
+    String? name,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final query = {
+      if (consultancyType != null && consultancyType != 'All')
+        'consultancyType': consultancyType.toLowerCase(),
+      if (name != null && name.isNotEmpty) 'name': name,
+      'page': page,
+      'limit': limit,
+    };
+    return await _apiClient.getData(ApiConstants.consultants, query: query);
+  }
 }
