@@ -61,30 +61,58 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
           SizedBox(width: 8.w),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Obx(
-              () => _buildDateHeader(
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (controller.dates.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 64.sp,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  'No available slots found',
+                  style: GoogleFonts.manrope(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDateHeader(
                 context,
                 '1. Select Date',
                 DateFormat('MMMM yyyy').format(controller.focusedDate.value),
                 onPrev: controller.previousMonth,
                 onNext: controller.nextMonth,
               ),
-            ),
-            SizedBox(height: 16.h),
-            _buildDateSelector(),
-            SizedBox(height: 32.h),
-            _buildSectionHeader('2. Select Time', 'Germany (CET)'),
-            SizedBox(height: 16.h),
-            _buildTimeGrid(),
-            SizedBox(height: 40.h),
-          ],
-        ),
-      ),
+              SizedBox(height: 16.h),
+              _buildDateSelector(),
+              SizedBox(height: 32.h),
+              _buildSectionHeader('2. Select Time', 'Germany (CET)'),
+              SizedBox(height: 16.h),
+              _buildTimeGrid(),
+              SizedBox(height: 40.h),
+            ],
+          ),
+        );
+      }),
       bottomNavigationBar: _buildBottomConfirmBar(),
     );
   }
@@ -346,7 +374,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: '96,00',
+                          text: controller.totalPrice.toStringAsFixed(2),
                           style: GoogleFonts.manrope(
                             fontSize: 28.sp,
                             fontWeight: FontWeight.w800,
@@ -366,8 +394,14 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                   ),
                 ],
               ),
-              Obx(
-                () => Column(
+              Obx(() {
+                if (controller.dates.isEmpty) return const SizedBox.shrink();
+
+                final selectedDate =
+                    controller.dates[controller.selectedDateIndex.value];
+                final dateObj = DateTime.parse(selectedDate['fullDate']!);
+
+                return Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Row(
@@ -379,7 +413,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                         ),
                         SizedBox(width: 8.w),
                         Text(
-                          '${DateFormat('MMM').format(controller.focusedDate.value)} ${controller.dates[controller.selectedDateIndex.value]['date']}, ${controller.focusedDate.value.year}',
+                          '${DateFormat('MMM').format(dateObj)} ${selectedDate['date']}, ${dateObj.year}',
                           style: GoogleFonts.manrope(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w700,
@@ -412,8 +446,8 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                       ],
                     ),
                   ],
-                ),
-              ),
+                );
+              }),
             ],
           ),
           SizedBox(height: 24.h),
@@ -436,7 +470,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {},
+                onTap: () => controller.bookScheduled(),
                 borderRadius: BorderRadius.circular(16.r),
                 child: Center(
                   child: Text(

@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 enum SnackBarType { success, error, info, warning, secondary }
 
@@ -9,6 +10,72 @@ enum SnackBarType { success, error, info, warning, secondary }
 /// Common utility functions used across the app.
 class Helpers {
   Helpers._();
+
+  // ──────────────────── SNACKBAR (BOOKING SUCCESS) ────────────────────
+
+  static void showBookingSuccess() {
+    Get.rawSnackbar(
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: Colors.transparent,
+      margin: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+      duration: const Duration(seconds: 4),
+      messageText: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0FDF4),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: const Color(0xFFDCFCE7)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: const BoxDecoration(
+                color: Color(0xFFDCFCE7),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.check_rounded,
+                  color: const Color(0xFF10B981), size: 20.sp),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Successfully Requested',
+                    style: GoogleFonts.manrope(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF065F46),
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Your consultation has been confirmed. You can view details below.',
+                    style: GoogleFonts.manrope(
+                      fontSize: 13.sp,
+                      color: const Color(0xFF065F46).withOpacity(0.8),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   // ──────────────────── TIME FORMATTING ────────────────────
 

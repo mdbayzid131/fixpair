@@ -1,4 +1,6 @@
+import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
+import 'package:fixpair/data/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -66,7 +68,11 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildConsultantTopCard(),
+            Obx(() {
+              final expert = controller.expert.value;
+              if (expert == null) return const SizedBox.shrink();
+              return _buildConsultantTopCard(expert);
+            }),
             SizedBox(height: 32.h),
             Text(
               'How would you like to connect?',
@@ -77,11 +83,23 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
               ),
             ),
             SizedBox(height: 24.h),
-            _buildInstantCallOption(),
+            Obx(() {
+              final expert = controller.expert.value;
+              if (expert == null) return const SizedBox.shrink();
+              return _buildInstantCallOption(expert);
+            }),
             SizedBox(height: 16.h),
-            _buildBookingOption(),
+            Obx(() {
+              final expert = controller.expert.value;
+              if (expert == null) return const SizedBox.shrink();
+              return _buildBookingOption(expert);
+            }),
             SizedBox(height: 16.h),
-            _buildCallbackOption(),
+            Obx(() {
+              final expert = controller.expert.value;
+              if (expert == null) return const SizedBox.shrink();
+              return _buildCallbackOption(expert);
+            }),
             SizedBox(height: 24.h),
             _buildVATInfoBox(),
           ],
@@ -90,7 +108,9 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
     );
   }
 
-  Widget _buildConsultantTopCard() {
+  Widget _buildConsultantTopCard(UserData expert) {
+    final imageUrl = ApiConstants.getImageUrl(expert.image ?? expert.avatar);
+
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -110,12 +130,18 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
             width: 60.w,
             height: 60.w,
             decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(16.r),
-              image: const DecorationImage(
-                image: NetworkImage('https://i.pravatar.cc/150?u=sarah'),
-                fit: BoxFit.cover,
-              ),
+              image: imageUrl.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(imageUrl),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
+            child: imageUrl.isEmpty
+                ? Icon(Icons.person, size: 24.sp, color: Colors.grey)
+                : null,
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -123,7 +149,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Sarah Müller',
+                  expert.name ?? 'No Name',
                   style: GoogleFonts.manrope(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
@@ -131,7 +157,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                   ),
                 ),
                 Text(
-                  'Tax Consultation',
+                  expert.tags ?? 'General Consultant',
                   style: GoogleFonts.manrope(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
@@ -145,7 +171,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: '4.00€ ',
+                  text: '${expert.perMinuteRate ?? 0}€ ',
                   style: GoogleFonts.manrope(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
@@ -155,7 +181,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                 TextSpan(
                   text: '/min',
                   style: GoogleFonts.manrope(
-                    fontSize: 13.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF94A3B8),
                   ),
@@ -168,7 +194,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
     );
   }
 
-  Widget _buildInstantCallOption() {
+  Widget _buildInstantCallOption(UserData expert) {
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
@@ -229,16 +255,16 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
             ],
           ),
           SizedBox(height: 20.h),
-          _buildOptionButton('Start Now', [
+          _buildOptionButton('Book Instant Call', [
             const Color(0xFFFF6B00),
             const Color(0xFFFF8A00),
-          ], () => Get.toNamed(AppRoutes.CONSULTANT_CONFIRMATION)),
+          ], () => controller.bookInstant()),
         ],
       ),
     );
   }
 
-  Widget _buildBookingOption() {
+  Widget _buildBookingOption(UserData expert) {
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
@@ -292,18 +318,19 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
             ],
           ),
           SizedBox(height: 20.h),
-          _buildOptionButton('Choose Time', [
-            const Color(0xFF0066FF),
-            const Color(0xFF0052D1),
-          ], () => Get.toNamed(AppRoutes.SCHEDULE_BOOKING)),
+          _buildOptionButton(
+            'Choose Time',
+            [const Color(0xFF0066FF), const Color(0xFF0052D1)],
+            () => Get.toNamed(AppRoutes.SCHEDULE_BOOKING, arguments: expert),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildCallbackOption() {
+  Widget _buildCallbackOption(UserData expert) {
     return GestureDetector(
-      onTap: () => Get.toNamed(AppRoutes.REQUEST_CALLBACK),
+      onTap: () => Get.toNamed(AppRoutes.REQUEST_CALLBACK, arguments: expert),
       child: Container(
         padding: EdgeInsets.all(24.w),
         decoration: BoxDecoration(

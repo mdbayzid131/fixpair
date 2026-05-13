@@ -392,3 +392,95 @@ class CountModel {
     };
   }
 }
+
+class SlotModel {
+  final String? id;
+  final DateTime? date;
+  final String? startTime;
+  final String? endTime;
+  final bool? isBooked;
+
+  SlotModel({
+    this.id,
+    this.date,
+    this.startTime,
+    this.endTime,
+    this.isBooked,
+  });
+
+  factory SlotModel.fromJson(Map<String, dynamic> json) {
+    return SlotModel(
+      id: json['_id'],
+      date: json['date'] != null ? DateTime.tryParse(json['date']) : null,
+      startTime: json['startTime'],
+      endTime: json['endTime'],
+      isBooked: json['isBooked'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'date': date?.toIso8601String(),
+      'startTime': startTime,
+      'endTime': endTime,
+      'isBooked': isBooked,
+    };
+  }
+}
+
+class BookingModel {
+  final String? id;
+  final UserData? user;
+  final UserData? consultant;
+  final String? bookingType;
+  final String? notes;
+  final num? perMinuteRate;
+  final num? platformFee;
+  final num? totalAmount;
+  final String? status;
+  final String? paymentStatus;
+  final DateTime? createdAt;
+  final DateTime? date;
+  final String? startTime;
+  final String? endTime;
+  final String? preferredWindow;
+
+  BookingModel({
+    this.id,
+    this.user,
+    this.consultant,
+    this.bookingType,
+    this.notes,
+    this.perMinuteRate,
+    this.platformFee,
+    this.totalAmount,
+    this.status,
+    this.paymentStatus,
+    this.createdAt,
+    this.date,
+    this.startTime,
+    this.endTime,
+    this.preferredWindow,
+  });
+
+  factory BookingModel.fromJson(Map<String, dynamic> json) {
+    return BookingModel(
+      id: json['_id'],
+      user: json['user'] != null ? UserData.fromJson(json['user']) : null,
+      consultant: json['consultant'] != null ? UserData.fromJson(json['consultant']) : null,
+      bookingType: json['bookingType'],
+      notes: json['notes'],
+      perMinuteRate: json['perMinuteRate'],
+      platformFee: json['platformFee'],
+      totalAmount: json['totalAmount'],
+      status: json['status'],
+      paymentStatus: json['paymentStatus'],
+      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
+      date: json['date'] != null ? DateTime.tryParse(json['date']) : null,
+      startTime: json['startTime'],
+      endTime: json['endTime'],
+      preferredWindow: json['preferredWindow'],
+    );
+  }
+}

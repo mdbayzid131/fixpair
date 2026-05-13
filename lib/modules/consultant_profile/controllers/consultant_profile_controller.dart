@@ -1,27 +1,42 @@
+import 'package:fixpair/core/utils/logger.dart';
+import 'package:fixpair/data/models/user_model.dart';
+import 'package:fixpair/data/repositories/user_repository.dart';
 import 'package:get/get.dart';
 
 class ConsultantProfileController extends GetxController {
+  final UserRepository _userRepository = Get.find();
   final isAboutExpanded = false.obs;
+  final isLoading = false.obs;
+  final Rxn<UserData> expert = Rxn<UserData>();
+
+  @override
+  void onInit() {
+    super.onInit();
+    if (Get.arguments is UserData) {
+      expert.value = Get.arguments as UserData;
+      // Fetch fresh data to get full bio/details
+      fetchConsultantDetails(expert.value!.id!);
+    }
+  }
+
+  Future<void> fetchConsultantDetails(String id) async {
+    try {
+      isLoading.value = true;
+      final response = await _userRepository.getConsultantById(id);
+      if (response.statusCode == 200) {
+        final userData = UserData.fromJson(response.data['data']);
+        expert.value = userData;
+      }
+    } catch (e) {
+      AppLogger.warning('Error fetching consultant details: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void toggleAboutExpansion() {
     isAboutExpanded.value = !isAboutExpanded.value;
   }
-
-  final expertData = {
-    'name': 'Sarah Müller',
-    'role': 'Tax Consultation',
-    'rating': '4.8',
-    'reviewsCount': '89',
-    'pricePerMin': '4.00€/min',
-    'instantCallPrice': '3,20€/min',
-    'experience': '8 Years',
-    'consultations': '1k+',
-    'languages': 'German',
-    'about':
-        'Certified Tax Advisor (Steuerberaterin) specializing in freelance and small business taxation in Germany. With over 8 years of experience, I help freelancers, startups, and small businesses navigate the complexities of German tax law, ensuring compliance while maximizing financial efficiency. My services include annual tax return preparation, VAT (Umsatzsteuer) optimization, payroll accounting, and strategic tax planning. I am committed to providing clear, actionable advice tailored to your specific business needs. Whether you are just starting out or looking to optimize your existing structure, I am here to support your financial success.',
-    'isOnline': true,
-    'isVerified': true,
-  }.obs;
 
   final reviews = [
     {

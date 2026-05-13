@@ -4,9 +4,10 @@ class ApiConstants {
   static const String serverUrl = 'http://10.10.7.106:5000';
 
   static String getImageUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
+    if (url == null || url.isEmpty || url == 'null') return '';
     if (url.startsWith('http')) return url;
-    return '$serverUrl$url';
+    if (url.startsWith('/')) return '$serverUrl$url';
+    return '$serverUrl/$url';
   }
 
   // Auth Endpoints
@@ -23,6 +24,10 @@ class ApiConstants {
   // User Profile Endpoints
   static const String profile = '/user/profile';
   static const String consultants = '/user/consultants';
+  static String userById(String id) => '/user/$id';
+  static String availableSlots(String id) => '/consultation/available-slots/$id';
+  static const String bookConsultation = '/consultation/book';
+  static const String myBookings = '/consultation/my-bookings';
   // Legal & FAQ Endpoints
   static const String privacyPolicy = '/privacy';
   static const String termsConditions = '/terms';

@@ -41,4 +41,24 @@ class UserRepository {
     };
     return await _apiClient.getData(ApiConstants.consultants, query: query);
   }
+
+  // Get consultant details by ID
+  Future<Response> getConsultantById(String id) async {
+    return await _apiClient.getData(ApiConstants.userById(id));
+  }
+
+  // Get available slots for a consultant
+  Future<Response> getAvailableSlots(String id) async {
+    return await _apiClient.getData(ApiConstants.availableSlots(id));
+  }
+
+  // Book a consultation
+  Future<Response> bookConsultation(Map<String, dynamic> body) async {
+    return await _apiClient.postData(ApiConstants.bookConsultation, body);
+  }
+
+  // Get user's bookings
+  Future<Response> getMyBookings() async {
+    return await _apiClient.getData(ApiConstants.myBookings);
+  }
 }

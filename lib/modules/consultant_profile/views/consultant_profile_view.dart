@@ -1,4 +1,6 @@
+import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
+import 'package:fixpair/data/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -61,32 +63,46 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
           SizedBox(width: 8.w),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.only(bottom: 24.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-            SizedBox(height: 24.h),
-            _buildProfileHeader(),
-            SizedBox(height: 24.h),
-            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-            _buildStatsRow(),
-            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-            SizedBox(height: 24.h),
-            _buildAboutSection(),
-            SizedBox(height: 24.h),
-            const Divider(height: 1, color: Color(0xFFF1F5F9)),
-            SizedBox(height: 24.h),
-            _buildReviewsSection(),
-          ],
-        ),
-      ),
-      bottomNavigationBar: _buildBottomAction(),
+      body: Obx(() {
+        final UserData? expert = controller.expert.value;
+        if (expert == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: 24.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              SizedBox(height: 24.h),
+              _buildProfileHeader(expert),
+              SizedBox(height: 24.h),
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              _buildStatsRow(expert),
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              SizedBox(height: 24.h),
+              _buildAboutSection(expert),
+              SizedBox(height: 24.h),
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              SizedBox(height: 24.h),
+              _buildReviewsSection(),
+            ],
+          ),
+        );
+      }),
+      bottomNavigationBar: Obx(() {
+        final expert = controller.expert.value;
+        if (expert == null) return const SizedBox.shrink();
+        return _buildBottomAction(expert);
+      }),
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(UserData expert) {
+    final imageUrl = ApiConstants.getImageUrl(expert.image ?? expert.avatar);
+    final isOnline = expert.activeStatus ?? false;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Row(
@@ -99,10 +115,13 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                 height: 100.w,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24.r),
-                  image: const DecorationImage(
-                    image: NetworkImage('https://i.pravatar.cc/150?u=sarah'),
-                    fit: BoxFit.cover,
-                  ),
+                  color: const Color(0xFFF1F5F9),
+                  image: imageUrl.isNotEmpty
+                      ? DecorationImage(
+                          image: NetworkImage(imageUrl),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.08),
@@ -111,6 +130,9 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                     ),
                   ],
                 ),
+                child: imageUrl.isEmpty
+                    ? Icon(Icons.person, size: 40.sp, color: Colors.grey)
+                    : null,
               ),
               Positioned(
                 bottom: 4.h,
@@ -119,7 +141,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                   width: 18.w,
                   height: 18.w,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF10B981),
+                    color: isOnline ? const Color(0xFF10B981) : Colors.grey,
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 3),
                   ),
@@ -135,39 +157,50 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                 Row(
                   children: [
                     _buildBadge(
-                      'ADVISOR',
+                      expert.consultancyType?.toString().toUpperCase() ??
+                          'CONSULTANT',
                       const Color(0xFFE0EFFF),
                       const Color(0xFF0066FF),
                     ),
                     SizedBox(width: 8.w),
                     _buildBadge(
-                      'ONLINE',
-                      const Color(0xFFDCFCE7),
-                      const Color(0xFF10B981),
+                      isOnline ? 'ONLINE' : 'OFFLINE',
+                      isOnline
+                          ? const Color(0xFFDCFCE7)
+                          : const Color(0xFFF1F5F9),
+                      isOnline
+                          ? const Color(0xFF10B981)
+                          : const Color(0xFF64748B),
                     ),
                   ],
                 ),
                 SizedBox(height: 12.h),
                 Row(
                   children: [
-                    Text(
-                      controller.expertData['name'].toString(),
-                      style: GoogleFonts.manrope(
-                        fontSize: 22.sp,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFF1D293D),
+                    Flexible(
+                      child: Text(
+                        expert.name ?? 'No Name',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.manrope(
+                          fontSize: 22.sp,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF1D293D),
+                        ),
                       ),
                     ),
-                    SizedBox(width: 8.w),
-                    Icon(
-                      Icons.verified_rounded,
-                      color: const Color(0xFF0066FF),
-                      size: 20.sp,
-                    ),
+                    if (expert.verified == true) ...[
+                      SizedBox(width: 8.w),
+                      Icon(
+                        Icons.verified_rounded,
+                        color: const Color(0xFF0066FF),
+                        size: 20.sp,
+                      ),
+                    ],
                   ],
                 ),
                 Text(
-                  controller.expertData['role'].toString(),
+                  expert.tags ?? 'General Consultant',
                   style: GoogleFonts.manrope(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w500,
@@ -195,7 +228,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            '${controller.expertData['rating']} ',
+                            '${expert.stats?.avgRating ?? 0.0} ',
                             style: GoogleFonts.manrope(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w700,
@@ -203,7 +236,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                             ),
                           ),
                           Text(
-                            '(${controller.expertData['reviewsCount']})',
+                            '(${expert.stats?.totalReviews ?? 0})',
                             style: GoogleFonts.manrope(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w500,
@@ -215,7 +248,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                     ),
                     SizedBox(width: 16.w),
                     Text(
-                      controller.expertData['pricePerMin'].toString(),
+                      '${expert.perMinuteRate ?? 0}€/min',
                       style: GoogleFonts.manrope(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
@@ -250,7 +283,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(UserData expert) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 24.h),
       child: Row(
@@ -259,7 +292,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
             child: _buildStatItem(
               Icons.workspace_premium_outlined,
               'EXPERIENCE',
-              '8 Years',
+              expert.experience ?? 'N/A',
               const Color(0xFFE0EFFF),
               const Color(0xFF0066FF),
             ),
@@ -269,7 +302,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
             child: _buildStatItem(
               Icons.chat_bubble_outline_rounded,
               'CONSULTATIONS',
-              '1k+',
+              '${expert.stats?.totalReviews ?? 0}+',
               const Color(0xFFF5F3FF),
               const Color(0xFF7C3AED),
             ),
@@ -279,9 +312,16 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
             child: _buildStatItem(
               Icons.translate_rounded,
               'LANGUAGES',
-              'German',
+              (expert.languages != null && expert.languages!.isNotEmpty)
+                  ? (expert.languages!.length > 1
+                        ? '${expert.languages!.first} +${expert.languages!.length - 1}'
+                        : expert.languages!.first.toString())
+                  : 'N/A',
               const Color(0xFFECFDF5),
               const Color(0xFF059669),
+              onTap: (expert.languages != null && expert.languages!.length > 1)
+                  ? () => _showLanguagesDialog(expert.languages!)
+                  : null,
             ),
           ),
         ],
@@ -294,39 +334,118 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
     String label,
     String value,
     Color iconBg,
-    Color iconColor,
-  ) {
-    return Column(
-      children: [
-        Container(
-          padding: EdgeInsets.all(10.w),
-          decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
-          child: Icon(icon, color: iconColor, size: 20.sp),
-        ),
-        SizedBox(height: 12.h),
-        Text(
-          label,
-          style: GoogleFonts.manrope(
-            fontSize: 10.sp,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF94A3B8),
-            letterSpacing: 0.5,
+    Color iconColor, {
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+            child: Icon(icon, color: iconColor, size: 20.sp),
           ),
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          value,
-          style: GoogleFonts.manrope(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w800,
-            color: const Color(0xFF334155),
+          SizedBox(height: 12.h),
+          Text(
+            label,
+            style: GoogleFonts.manrope(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF94A3B8),
+              letterSpacing: 0.5,
+            ),
           ),
-        ),
-      ],
+          SizedBox(height: 4.h),
+          Text(
+            value,
+            style: GoogleFonts.manrope(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF334155),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildAboutSection() {
+  void _showLanguagesDialog(List<dynamic> languages) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24.r),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(24.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Spoken Languages',
+                style: GoogleFonts.manrope(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1D293D),
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Wrap(
+                spacing: 8.w,
+                runSpacing: 8.h,
+                children: languages.map((lang) {
+                  return Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Text(
+                      lang.toString(),
+                      style: GoogleFonts.manrope(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF475569),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              SizedBox(height: 24.h),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Get.back(),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    backgroundColor: const Color(0xFF0066FF),
+                  ),
+                  child: Text(
+                    'Close',
+                    style: GoogleFonts.manrope(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAboutSection(UserData expert) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
@@ -343,11 +462,14 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
           SizedBox(height: 16.h),
           Obx(() {
             final isExpanded = controller.isAboutExpanded.value;
+            final aboutText =
+                expert.expertise ??
+                'No detailed information available for this consultant yet.';
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  controller.expertData['about'].toString(),
+                  aboutText,
                   maxLines: isExpanded ? null : 3,
                   overflow: isExpanded
                       ? TextOverflow.visible
@@ -359,30 +481,32 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                     height: 1.6,
                   ),
                 ),
-                SizedBox(height: 8.h),
-                InkWell(
-                  onTap: () => controller.toggleAboutExpansion(),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        isExpanded ? 'Read less' : 'Read more',
-                        style: GoogleFonts.manrope(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF0066FF),
+                if (aboutText.length > 100) ...[
+                  SizedBox(height: 8.h),
+                  InkWell(
+                    onTap: () => controller.toggleAboutExpansion(),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          isExpanded ? 'Read less' : 'Read more',
+                          style: GoogleFonts.manrope(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF0066FF),
+                          ),
                         ),
-                      ),
-                      Icon(
-                        isExpanded
-                            ? Icons.keyboard_arrow_up_rounded
-                            : Icons.chevron_right_rounded,
-                        color: const Color(0xFF0066FF),
-                        size: 18.sp,
-                      ),
-                    ],
+                        Icon(
+                          isExpanded
+                              ? Icons.keyboard_arrow_up_rounded
+                              : Icons.chevron_right_rounded,
+                          color: const Color(0xFF0066FF),
+                          size: 18.sp,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ],
             );
           }),
@@ -493,7 +617,8 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
     );
   }
 
-  Widget _buildBottomAction() {
+  Widget _buildBottomAction(UserData expert) {
+    final isOnline = expert.activeStatus ?? false;
     return Container(
       padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 32.h),
       decoration: BoxDecoration(
@@ -517,14 +642,16 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                   Container(
                     width: 12.w,
                     height: 12.w,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF10B981),
+                    decoration: BoxDecoration(
+                      color: isOnline ? const Color(0xFF10B981) : Colors.grey,
                       shape: BoxShape.circle,
                     ),
                   ),
                   SizedBox(width: 8.w),
                   Text(
-                    'Available for instant call',
+                    isOnline
+                        ? 'Available for instant call'
+                        : 'Currently Offline',
                     style: GoogleFonts.manrope(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
@@ -537,7 +664,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '3,20€',
+                      text: '${expert.perMinuteRate ?? 0}€',
                       style: GoogleFonts.manrope(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w800,
@@ -562,26 +689,35 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
             width: double.infinity,
             height: 56.h,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFF6B00), Color(0xFFFF8A00)],
+              gradient: LinearGradient(
+                colors: isOnline
+                    ? [const Color(0xFFFF6B00), const Color(0xFFFF8A00)]
+                    : [Colors.grey.shade400, Colors.grey.shade500],
               ),
               borderRadius: BorderRadius.circular(16.r),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFFF6B00).withOpacity(0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+              boxShadow: isOnline
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFFFF6B00).withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ]
+                  : [],
             ),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => Get.toNamed(AppRoutes.CONSULTANT_BOOKING),
+                onTap: isOnline
+                    ? () => Get.toNamed(
+                        AppRoutes.CONSULTANT_BOOKING,
+                        arguments: expert,
+                      )
+                    : null,
                 borderRadius: BorderRadius.circular(16.r),
                 child: Center(
                   child: Text(
-                    'Book Consultation',
+                    isOnline ? 'Book Consultation' : 'Unavailable',
                     style: GoogleFonts.manrope(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,

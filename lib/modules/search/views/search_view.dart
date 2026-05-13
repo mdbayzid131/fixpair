@@ -1,3 +1,4 @@
+import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -190,186 +191,189 @@ class SearchView extends GetView<search_ctrl.SearchController> {
   }
 
   Widget _buildExpertCard(UserData expert) {
-    final isOnline = expert.status == 'active';
+    final isOnline = expert.activeStatus ?? false;
     final imageUrl = ApiConstants.getImageUrl(expert.image ?? expert.avatar);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            // Left: Image
-            Stack(
-              children: [
-                Container(
-                  width: 110.w,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(24.r),
-                      bottomLeft: Radius.circular(24.r),
-                    ),
-                    image: imageUrl.isNotEmpty
-                        ? DecorationImage(
-                            image: NetworkImage(imageUrl),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
-                  ),
-                  child: imageUrl.isEmpty
-                      ? Icon(Icons.person, size: 40.sp, color: Colors.grey)
-                      : null,
-                ),
-                Positioned(
-                  top: 10.h,
-                  right: 10.w,
-                  child: Container(
-                    width: 12.w,
-                    height: 12.w,
-                    decoration: BoxDecoration(
-                      color: isOnline ? const Color(0xFF10B981) : Colors.grey,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 10.h,
-                  left: 10.w,
-                  right: 10.w,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.6),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.star_rounded,
-                          color: const Color(0xFFFF6B00),
-                          size: 14.sp,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          '${expert.stats?.avgRating ?? 0.0} (${expert.stats?.totalReviews ?? 0})',
-                          style: GoogleFonts.manrope(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Right: Info
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(16.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      expert.name ?? 'No Name',
-                      style: GoogleFonts.manrope(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1D293D),
-                      ),
-                    ),
-                    Text(
-                      expert.consultancyType?.toUpperCase() ?? 'GENERAL',
-                      style: GoogleFonts.manrope(
-                        fontSize: 13.sp,
-                        color: const Color(0xFF64748B),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      expert.expertise ?? 'No Expertise',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.manrope(
-                        fontSize: 12.sp,
-                        color: const Color(0xFF94A3B8),
-                        height: 1.4,
-                      ),
-                    ),
-                    const Spacer(),
-                    const Divider(color: Color(0xFFF1F5F9), height: 1),
-                    SizedBox(height: 12.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            style: GoogleFonts.manrope(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1D293D),
-                            ),
-                            children: [
-                              TextSpan(text: '${expert.perMinuteRate ?? 0}€'),
-                              TextSpan(
-                                text: '/min',
-                                style: TextStyle(
-                                  fontSize: 11.sp,
-                                  color: const Color(0xFF94A3B8),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10.w,
-                            vertical: 6.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isOnline
-                                ? const Color(0xFFDCFCE7)
-                                : const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
-                          child: Text(
-                            isOnline ? 'Online Now' : 'Offline',
-                            style: GoogleFonts.manrope(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w700,
-                              color: isOnline
-                                  ? const Color(0xFF10B981)
-                                  : const Color(0xFF64748B),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.CONSULTANT_PROFILE, arguments: expert),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              // Left: Image
+              Stack(
+                children: [
+                  Container(
+                    width: 110.w,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24.r),
+                        bottomLeft: Radius.circular(24.r),
+                      ),
+                      image: imageUrl.isNotEmpty
+                          ? DecorationImage(
+                              image: NetworkImage(imageUrl),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: imageUrl.isEmpty
+                        ? Icon(Icons.person, size: 40.sp, color: Colors.grey)
+                        : null,
+                  ),
+                  Positioned(
+                    top: 10.h,
+                    right: 10.w,
+                    child: Container(
+                      width: 12.w,
+                      height: 12.w,
+                      decoration: BoxDecoration(
+                        color: isOnline ? const Color(0xFF10B981) : Colors.grey,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 10.h,
+                    left: 10.w,
+                    right: 10.w,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.star_rounded,
+                            color: const Color(0xFFFF6B00),
+                            size: 14.sp,
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            '${expert.stats?.avgRating ?? 0.0} (${expert.stats?.totalReviews ?? 0})',
+                            style: GoogleFonts.manrope(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              // Right: Info
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(16.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        expert.name ?? 'No Name',
+                        style: GoogleFonts.manrope(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1D293D),
+                        ),
+                      ),
+                      Text(
+                        expert.tags?.toString() ?? 'No Tags available',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13.sp,
+                          color: const Color(0xFF64748B),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        expert.expertise ?? 'No Expertise',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.manrope(
+                          fontSize: 12.sp,
+                          color: const Color(0xFF94A3B8),
+                          height: 1.4,
+                        ),
+                      ),
+                      const Spacer(),
+                      const Divider(color: Color(0xFFF1F5F9), height: 1),
+                      SizedBox(height: 12.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              style: GoogleFonts.manrope(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF1D293D),
+                              ),
+                              children: [
+                                TextSpan(text: '${expert.perMinuteRate ?? 0}€'),
+                                TextSpan(
+                                  text: '/min',
+                                  style: TextStyle(
+                                    fontSize: 11.sp,
+                                    color: const Color(0xFF94A3B8),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 6.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isOnline
+                                  ? const Color(0xFFDCFCE7)
+                                  : const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(6.r),
+                            ),
+                            child: Text(
+                              isOnline ? 'Online Now' : 'Offline',
+                              style: GoogleFonts.manrope(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w700,
+                                color: isOnline
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFF64748B),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

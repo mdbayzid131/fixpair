@@ -1,8 +1,11 @@
+import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../controllers/history_controller.dart';
+import 'package:fixpair/data/models/user_model.dart';
 
 class HistoryView extends GetView<HistoryController> {
   const HistoryView({super.key});
@@ -26,7 +29,11 @@ class HistoryView extends GetView<HistoryController> {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: Icon(Icons.search_rounded, color: const Color(0xFF64748B), size: 24.sp),
+            icon: Icon(
+              Icons.search_rounded,
+              color: const Color(0xFF64748B),
+              size: 24.sp,
+            ),
           ),
           SizedBox(width: 8.w),
         ],
@@ -59,40 +66,55 @@ class HistoryView extends GetView<HistoryController> {
 
           // 2. Main Content
           Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-              child: Column(
-                children: [
-                  // Success Banner
-                  _buildSuccessBanner(),
-                  SizedBox(height: 20.h),
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-                  // Consultation List
-                  _buildConsultationCard(
-                    status: 'PENDING',
-                    statusColor: const Color(0xFFF59E0B),
-                    name: 'Dr. Elena Schmidt',
-                    role: 'General Medicine',
-                    date: 'Apr 02, 01:33',
-                    image: 'https://i.pravatar.cc/150?u=elena',
-                    icon: Icons.phone_rounded,
+              final bookings = controller.selectedTab.value == 0
+                  ? controller.upcomingBookings
+                  : controller.pastBookings;
+
+              if (bookings.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 64.sp,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        'No bookings found',
+                        style: GoogleFonts.manrope(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 16.h),
-                  _buildConsultationCard(
-                    status: 'SCHEDULED',
-                    statusColor: const Color(0xFF0066FF),
-                    name: 'Sarah Müller',
-                    role: 'Tax Consultation',
-                    date: 'Apr 03, 01:33',
-                    duration: '30 min',
-                    price: '96,00€',
-                    image: 'https://i.pravatar.cc/150?u=sarah',
-                    icon: Icons.videocam_rounded,
-                    isExtended: true,
+                );
+              }
+
+              return RefreshIndicator(
+                onRefresh: controller.fetchMyBookings,
+                child: ListView.separated(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 20.h,
                   ),
-                ],
-              ),
-            ),
+                  itemCount: bookings.length,
+                  separatorBuilder: (context, index) => SizedBox(height: 16.h),
+                  itemBuilder: (context, index) {
+                    final booking = bookings[index];
+                    return _buildBookingCard(booking);
+                  },
+                ),
+              );
+            }),
           ),
         ],
       ),
@@ -104,7 +126,7 @@ class HistoryView extends GetView<HistoryController> {
     return Expanded(
       child: GestureDetector(
         onTap: () => controller.selectTab(index),
-                behavior: HitTestBehavior.opaque,
+        behavior: HitTestBehavior.opaque,
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 12.h),
           decoration: BoxDecoration(
@@ -126,7 +148,9 @@ class HistoryView extends GetView<HistoryController> {
               style: GoogleFonts.manrope(
                 fontSize: 14.sp,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                color: isSelected ? const Color(0xFF0066FF) : const Color(0xFF64748B),
+                color: isSelected
+                    ? const Color(0xFF0066FF)
+                    : const Color(0xFF64748B),
               ),
             ),
           ),
@@ -135,67 +159,48 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  Widget _buildSuccessBanner() {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0FDF4),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFDCFCE7)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: const BoxDecoration(
-              color: Color(0xFFDCFCE7),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.check_rounded, color: const Color(0xFF10B981), size: 20.sp),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Successfully Requested',
-                  style: GoogleFonts.manrope(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF065F46),
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  'Your consultation has been confirmed. You can view details below.',
-                  style: GoogleFonts.manrope(
-                    fontSize: 13.sp,
-                    color: const Color(0xFF065F46).withOpacity(0.8),
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildBookingCard(BookingModel booking) {
+    Color statusColor;
+    switch (booking.status?.toLowerCase()) {
+      case 'confirmed':
+        statusColor = const Color(0xFF0066FF);
+        break;
+      case 'pending':
+        statusColor = const Color(0xFFF59E0B);
+        break;
+      case 'completed':
+        statusColor = const Color(0xFF10B981);
+        break;
+      case 'cancelled':
+      case 'expired':
+      case 'rejected':
+        statusColor = const Color(0xFFEF4444);
+        break;
+      default:
+        statusColor = const Color(0xFF64748B);
+    }
 
-  Widget _buildConsultationCard({
-    required String status,
-    required Color statusColor,
-    required String name,
-    required String role,
-    required String date,
-    required String image,
-    required IconData icon,
-    String? duration,
-    String? price,
-    bool isExtended = false,
-  }) {
+    IconData typeIcon;
+    switch (booking.bookingType?.toLowerCase()) {
+      case 'instant':
+        typeIcon = Icons.bolt_rounded;
+        break;
+      case 'callback':
+        typeIcon = Icons.phone_callback_rounded;
+        break;
+      case 'scheduled':
+      default:
+        typeIcon = Icons.videocam_rounded;
+    }
+
+    String displayDate = '';
+    if (booking.bookingType == 'scheduled' && booking.date != null) {
+      displayDate =
+          '${DateFormat('MMM dd').format(booking.date!)}, ${booking.startTime}';
+    } else if (booking.createdAt != null) {
+      displayDate = DateFormat('MMM dd, HH:mm').format(booking.createdAt!);
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -223,7 +228,14 @@ class HistoryView extends GetView<HistoryController> {
                       height: 70.w,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16.r),
-                        image: DecorationImage(image: NetworkImage(image), fit: BoxFit.cover),
+                        image: DecorationImage(
+                          image: NetworkImage(
+                            ApiConstants.getImageUrl(
+                              booking.consultant?.image ?? '',
+                            ),
+                          ),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                     Container(
@@ -238,7 +250,11 @@ class HistoryView extends GetView<HistoryController> {
                           ),
                         ],
                       ),
-                      child: Icon(icon, color: const Color(0xFFFF6B00), size: 14.sp),
+                      child: Icon(
+                        typeIcon,
+                        color: const Color(0xFFFF6B00),
+                        size: 14.sp,
+                      ),
                     ),
                   ],
                 ),
@@ -252,13 +268,16 @@ class HistoryView extends GetView<HistoryController> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 4.h,
+                            ),
                             decoration: BoxDecoration(
                               color: statusColor.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(6.r),
                             ),
                             child: Text(
-                              status,
+                              (booking.status ?? 'PENDING').toUpperCase(),
                               style: GoogleFonts.manrope(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.w800,
@@ -266,9 +285,10 @@ class HistoryView extends GetView<HistoryController> {
                               ),
                             ),
                           ),
-                          if (price != null)
+                          if (booking.totalAmount != null &&
+                              booking.totalAmount! > 0)
                             Text(
-                              price,
+                              '${booking.totalAmount!.toString().replaceAll('.', ',')}€',
                               style: GoogleFonts.manrope(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w800,
@@ -279,7 +299,7 @@ class HistoryView extends GetView<HistoryController> {
                       ),
                       SizedBox(height: 6.h),
                       Text(
-                        name,
+                        booking.consultant?.name ?? 'Unknown Consultant',
                         style: GoogleFonts.manrope(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
@@ -287,7 +307,7 @@ class HistoryView extends GetView<HistoryController> {
                         ),
                       ),
                       Text(
-                        role,
+                        booking.consultant?.tags ?? "General consultant",
                         style: GoogleFonts.manrope(
                           fontSize: 13.sp,
                           color: const Color(0xFF64748B),
@@ -312,24 +332,36 @@ class HistoryView extends GetView<HistoryController> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.calendar_month_rounded, color: const Color(0xFF0066FF), size: 18.sp),
+                  Icon(
+                    Icons.calendar_month_rounded,
+                    color: const Color(0xFF0066FF),
+                    size: 18.sp,
+                  ),
                   SizedBox(width: 8.w),
                   Text(
-                    date,
+                    displayDate,
                     style: GoogleFonts.manrope(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF1D293D),
                     ),
                   ),
-                  if (duration != null) ...[
+                  if (booking.bookingType == 'scheduled') ...[
                     const Spacer(),
-                    Container(width: 1.w, height: 14.h, color: const Color(0xFFE2E8F0)),
+                    Container(
+                      width: 1.w,
+                      height: 14.h,
+                      color: const Color(0xFFE2E8F0),
+                    ),
                     const Spacer(),
-                    Icon(Icons.videocam_rounded, color: const Color(0xFF0066FF), size: 18.sp),
+                    Icon(
+                      Icons.videocam_rounded,
+                      color: const Color(0xFF0066FF),
+                      size: 18.sp,
+                    ),
                     SizedBox(width: 8.w),
                     Text(
-                      duration,
+                      '30 min', // Ideally this comes from backend duration
                       style: GoogleFonts.manrope(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -342,71 +374,128 @@ class HistoryView extends GetView<HistoryController> {
             ),
           ),
 
-          // Actions
-          if (isExtended) ...[
+          // Actions Section
+          if (booking.status?.toLowerCase() == 'confirmed')
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: _buildPrimaryButton('Join Call', () {}),
+            )
+          else if (booking.status?.toLowerCase() == 'pending')
             Padding(
               padding: EdgeInsets.all(16.w),
               child: Row(
                 children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        side: const BorderSide(color: Color(0xFFE2E8F0)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                      ),
-                      child: Text(
-                        'Reschedule',
-                        style: GoogleFonts.manrope(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF475569),
-                        ),
-                      ),
-                    ),
-                  ),
+                  Expanded(child: _buildSecondaryButton('Reschedule', () {})),
                   SizedBox(width: 12.w),
-                  Expanded(
-                    child: Container(
-                      height: 48.h,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFF6B00), Color(0xFFFF8A00)],
-                        ),
-                        borderRadius: BorderRadius.circular(12.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFFF6B00).withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                        ),
-                        child: Text(
-                          'Join Call',
-                          style: GoogleFonts.manrope(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  Expanded(child: _buildSecondaryButton('Cancel', () {})),
                 ],
               ),
-            ),
-          ] else
+            )
+          else if (booking.status?.toLowerCase() == 'completed')
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Row(
+                children: [
+                  Expanded(child: _buildSecondaryButton('Book Again', () {})),
+                  SizedBox(width: 12.w),
+                  Expanded(child: _buildLightButton('View Report', () {})),
+                ],
+              ),
+            )
+          else
             SizedBox(height: 16.h),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPrimaryButton(String text, VoidCallback onTap) {
+    return Container(
+      height: 48.h,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF6B00), Color(0xFFFF8A00)],
+        ),
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF6B00).withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12.r),
+          child: Center(
+            child: Text(
+              text,
+              style: GoogleFonts.manrope(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSecondaryButton(String text, VoidCallback onTap) {
+    return Container(
+      height: 48.h,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12.r),
+          child: Center(
+            child: Text(
+              text,
+              style: GoogleFonts.manrope(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF475569),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLightButton(String text, VoidCallback onTap) {
+    return Container(
+      height: 48.h,
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF6FF),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12.r),
+          child: Center(
+            child: Text(
+              text,
+              style: GoogleFonts.manrope(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF0066FF),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

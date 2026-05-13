@@ -242,22 +242,27 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            Get.snackbar(
-              'Success',
-              'Your callback request has been sent!',
-              snackPosition: SnackPosition.BOTTOM,
-            );
-          },
+          onTap: () => controller.submitCallback(),
           borderRadius: BorderRadius.circular(16.r),
           child: Center(
-            child: Text(
-              'Request Callback',
-              style: GoogleFonts.manrope(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
+            child: Obx(
+              () => controller.isLoading.value
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      'Request Callback',
+                      style: GoogleFonts.manrope(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ),
         ),

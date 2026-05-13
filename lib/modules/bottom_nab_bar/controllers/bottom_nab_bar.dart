@@ -8,6 +8,14 @@ class BottomNavBarController extends GetxController {
 
   final currentIndex = 0.obs;
 
+  @override
+  void onInit() {
+    super.onInit();
+    if (Get.arguments is int) {
+      currentIndex.value = Get.arguments as int;
+    }
+  }
+
   void changeTab(int index) {
     currentIndex.value = index;
   }
