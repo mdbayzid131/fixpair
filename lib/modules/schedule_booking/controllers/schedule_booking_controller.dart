@@ -1,3 +1,4 @@
+import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/core/services/api_checker.dart';
 import 'package:fixpair/core/utils/helpers.dart';
 import 'package:fixpair/data/models/user_model.dart';
@@ -21,6 +22,10 @@ class ScheduleBookingController extends GetxController {
 
   final RxList<Map<String, String>> dates = <Map<String, String>>[].obs;
   final RxList<String> times = <String>[].obs;
+  
+  final isRescheduling = false.obs;
+  String? bookingId;
+
 
   @override
   void onInit() {
@@ -28,8 +33,17 @@ class ScheduleBookingController extends GetxController {
     if (Get.arguments is UserData) {
       expert.value = Get.arguments as UserData;
       fetchSlots();
+    } else if (Get.arguments is Map) {
+      final args = Get.arguments as Map;
+      expert.value = args['expert'];
+      isRescheduling.value = args['isRescheduling'] ?? false;
+      bookingId = args['bookingId'];
+      if (expert.value != null) {
+        fetchSlots();
+      }
     }
   }
+
 
   Future<void> fetchSlots() async {
     if (expert.value == null) return;
@@ -149,22 +163,38 @@ class ScheduleBookingController extends GetxController {
 
     try {
       isLoading.value = true;
-      final body = {
-        "consultantId": expert.value!.id,
-        "bookingType": "scheduled",
-        "slotId": slot.id,
-      };
+      if (isRescheduling.value && bookingId != null) {
+        final response = await _userRepository.rescheduleBooking(
+          bookingId!,
+          slot.id!,
+        );
+        if (response.statusCode == 200) {
+          Helpers.showSuccess(
+              'Booking rescheduled successfully. Waiting for consultant approval.');
+          Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR, arguments: 2);
+        } else {
+          Helpers.showError(
+              response.data['message'] ?? 'Failed to reschedule booking');
+        }
+      } else {
+        final body = {
+          "consultantId": expert.value!.id,
+          "bookingType": "scheduled",
+          "slotId": slot.id,
+        };
 
-      final response = await _userRepository.bookConsultation(body);
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Helpers.showBookingSuccess();
-        Get.offAllNamed('/bottom-nav-bar', arguments: 2);
+        final response = await _userRepository.bookConsultation(body);
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          Helpers.showBookingSuccess();
+          Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR, arguments: 2);
+        }
+        ApiChecker.checkWriteApi(response);
       }
-      ApiChecker.checkWriteApi(response);
     } catch (e) {
       Helpers.showDebugLog('Booking error: $e');
     } finally {
       isLoading.value = false;
     }
   }
+
 }

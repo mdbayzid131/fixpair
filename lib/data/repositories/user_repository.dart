@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import '../../core/services/api_client.dart';
 import '../../config/constants/api_constants.dart';
@@ -13,8 +12,10 @@ class UserRepository {
   }
 
   // Update user profile
-  Future<Response> updateProfile(Map<String, dynamic> body,
-      {List<MultipartBody>? multipartBody}) async {
+  Future<Response> updateProfile(
+    Map<String, dynamic> body, {
+    List<MultipartBody>? multipartBody,
+  }) async {
     if (multipartBody != null && multipartBody.isNotEmpty) {
       return await _apiClient.patchMultipartData(
         ApiConstants.profile,
@@ -58,7 +59,30 @@ class UserRepository {
   }
 
   // Get user's bookings
-  Future<Response> getMyBookings() async {
-    return await _apiClient.getData(ApiConstants.myBookings);
+  Future<Response> getMyBookings({int page = 1, int limit = 10}) async {
+    return await _apiClient.getData(
+      ApiConstants.myBookings,
+      query: {"page": page, "limit": limit},
+    );
+  }
+
+  // Cancel a booking
+  Future<Response> cancelBooking(String id, {String? reason}) async {
+    return await _apiClient.patchData(ApiConstants.cancelBooking(id), {
+      'cancelReason': reason ?? 'User cancelled the booking',
+    });
+  }
+
+  // Reschedule a booking
+  Future<Response> rescheduleBooking(String id, String newSlotId) async {
+    return await _apiClient.patchData(ApiConstants.rescheduleBooking(id), {
+      'newSlotId': newSlotId,
+    });
+  }
+
+  // Delete user account
+  Future<Response> deleteAccount() async {
+    return await _apiClient.deleteData(ApiConstants.profile);
   }
 }
+

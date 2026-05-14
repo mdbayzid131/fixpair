@@ -4,7 +4,10 @@ class ApiConstants {
   static const String serverUrl = 'http://10.10.7.106:5000';
 
   static String getImageUrl(String? url) {
-    if (url == null || url.isEmpty || url == 'null') return '';
+    const String placeholder = 'https://i.ibb.co/z5YHLV9/profile.png';
+    if (url == null || url.isEmpty || url == 'null' || url == '/') {
+      return placeholder;
+    }
     if (url.startsWith('http')) return url;
     if (url.startsWith('/')) return '$serverUrl$url';
     return '$serverUrl/$url';
@@ -25,9 +28,13 @@ class ApiConstants {
   static const String profile = '/user/profile';
   static const String consultants = '/user/consultants';
   static String userById(String id) => '/user/$id';
-  static String availableSlots(String id) => '/consultation/available-slots/$id';
+  static String availableSlots(String id) =>
+      '/consultation/available-slots/$id';
   static const String bookConsultation = '/consultation/book';
   static const String myBookings = '/consultation/my-bookings';
+  static String cancelBooking(String id) => '/consultation/cancel/$id';
+  static String rescheduleBooking(String id) => '/consultation/reschedule/$id';
+
   // Legal & FAQ Endpoints
   static const String privacyPolicy = '/privacy';
   static const String termsConditions = '/terms';

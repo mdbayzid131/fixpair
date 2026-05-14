@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
+
 
 class UserProfileResponseModel {
   final bool? success;
@@ -483,4 +485,45 @@ class BookingModel {
       preferredWindow: json['preferredWindow'],
     );
   }
+
+  String get durationText {
+    if (startTime == null || endTime == null) return '30 min';
+    try {
+      // Common formats: "10:00 AM" or "14:30"
+      DateFormat format12 = DateFormat("hh:mm a");
+      DateFormat format24 = DateFormat("HH:mm");
+
+      DateTime start;
+      DateTime end;
+
+      try {
+        start = format24.parse(startTime!);
+        end = format24.parse(endTime!);
+      } catch (_) {
+        try {
+          start = format12.parse(startTime!);
+          end = format12.parse(endTime!);
+        } catch (_) {
+          return '30 min';
+        }
+      }
+
+      final diff = end.difference(start);
+      final minutes = diff.inMinutes;
+
+      if (minutes <= 0) return '30 min';
+
+      if (minutes >= 60) {
+        final hours = minutes ~/ 60;
+        final remainingMinutes = minutes % 60;
+        if (remainingMinutes == 0) return '${hours}h';
+        return '${hours}h ${remainingMinutes}m';
+      }
+
+      return '$minutes min';
+    } catch (e) {
+      return '30 min';
+    }
+  }
 }
+

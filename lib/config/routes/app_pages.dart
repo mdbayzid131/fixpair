@@ -8,7 +8,10 @@ import 'package:fixpair/modules/video_call/bindings/video_call_binding.dart';
 import 'package:fixpair/modules/video_call/views/video_call_view.dart';
 import '../../modules/consultation_summary/bindings/consultation_summary_binding.dart';
 import '../../modules/consultation_summary/views/consultation_summary_view.dart';
+import '../../modules/booking_details/bindings/booking_details_binding.dart';
+import '../../modules/booking_details/views/booking_details_view.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
+
 import 'package:get/get_navigation/src/routes/transitions_type.dart';
 
 import '../../modules/auth/bindings/auth_binding.dart';
@@ -93,7 +96,9 @@ class AppRoutes {
   static const String CONSULTANT_CONFIRMATION = '/consultant-confirmation';
   static const String VIDEO_CALL = '/video-call';
   static const String CONSULTATION_SUMMARY = '/consultation-summary';
+  static const String BOOKING_DETAILS = '/booking-details';
 }
+
 
 final pages = [
   GetPage(
@@ -210,4 +215,10 @@ final pages = [
     page: () => const ConsultationSummaryView(),
     binding: ConsultationSummaryBinding(),
   ),
+  GetPage(
+    name: AppRoutes.BOOKING_DETAILS,
+    page: () => const BookingDetailsView(),
+    binding: BookingDetailsBinding(),
+  ),
+
 ];
