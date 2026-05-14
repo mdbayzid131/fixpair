@@ -1,7 +1,9 @@
+import 'package:fixpair/data/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:fixpair/modules/home/controllers/home_controller.dart';
 import 'package:fixpair/core/services/auth_service.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
@@ -14,74 +16,104 @@ class LaundryHomeScreen extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Blue Header Section
-            _buildHeader(),
+      body: RefreshIndicator(
+        onRefresh: controller.fetchUpcomingBookings,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Blue Header Section
+              _buildHeader(),
 
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 32.h),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 32.h),
 
-                  // 2. Categories Section
-                  _buildSectionTitle('Categories'),
-                  SizedBox(height: 12.h),
-                  _buildCategories(),
+                    // 2. Categories Section
+                    _buildSectionTitle('Categories'),
+                    SizedBox(height: 12.h),
+                    _buildCategories(),
 
-                  SizedBox(height: 32.h),
+                    SizedBox(height: 32.h),
 
-                  // 3. Upcoming Booking
-                  _buildSectionTitle('Upcoming Booking'),
-                  SizedBox(height: 12.h),
-                  _buildUpcomingBooking(),
+                    // 3. Upcoming Booking
+                    Obx(() {
+                      if (controller.confirmedBookings.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionTitle('Upcoming Booking'),
+                          SizedBox(height: 12.h),
+                          SizedBox(
+                            height: 190.h,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: controller.confirmedBookings.length,
+                              itemBuilder: (context, index) {
+                                final booking =
+                                    controller.confirmedBookings[index];
+                                return Padding(
+                                  padding: EdgeInsets.only(right: 16.w),
+                                  child: SizedBox(
+                                    width: 320.w,
+                                    child: _buildUpcomingBooking(booking),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(height: 32.h),
+                        ],
+                      );
+                    }),
 
-                  SizedBox(height: 32.h),
-
-                  // 4. Recommended Experts
-                  _buildSectionTitle('Recommended Experts'),
-                  SizedBox(height: 12.h),
-                  _buildExpertCard(
-                    name: 'Dr. Thomas Weber',
-                    role: 'Doctor',
-                    category: 'HEALTH',
-                    rating: '4.9',
-                    price: '4.00€/min',
-                    status: 'Immediate',
-                    statusColor: const Color(0xFF0066FF),
-                    image: 'https://i.pravatar.cc/150?u=thomas',
-                  ),
-                  SizedBox(height: 16.h),
-                  _buildExpertCard(
-                    name: 'Sarah Müller',
-                    role: 'Tax Consultation',
-                    category: 'ADVISOR',
-                    rating: '4.8',
-                    price: '4.00€/min',
-                    status: 'In 10 mins',
-                    statusColor: const Color(0xFF0066FF),
-                    image: 'https://i.pravatar.cc/150?u=sarah',
-                  ),
-                  SizedBox(height: 16.h),
-                  _buildExpertCard(
-                    name: 'Dr. Elena Schmidt',
-                    role: 'Doctor',
-                    category: 'HEALTH',
-                    rating: '4.9',
-                    price: '4.00€/min',
-                    status: 'Tomorrow, 09:00',
-                    statusColor: const Color(0xFF0066FF),
-                    image: 'https://i.pravatar.cc/150?u=elena',
-                  ),
-                  SizedBox(height: 100.h), // Spacing for navbar
-                ],
+                    // 4. Recommended Experts
+                    _buildSectionTitle('Recommended Experts'),
+                    SizedBox(height: 12.h),
+                    _buildExpertCard(
+                      name: 'Dr. Thomas Weber',
+                      role: 'Doctor',
+                      category: 'HEALTH',
+                      rating: '4.9',
+                      price: '4.00€/min',
+                      status: 'Immediate',
+                      statusColor: const Color(0xFF0066FF),
+                      image: 'https://i.pravatar.cc/150?u=thomas',
+                    ),
+                    SizedBox(height: 16.h),
+                    _buildExpertCard(
+                      name: 'Sarah Müller',
+                      role: 'Tax Consultation',
+                      category: 'ADVISOR',
+                      rating: '4.8',
+                      price: '4.00€/min',
+                      status: 'In 10 mins',
+                      statusColor: const Color(0xFF0066FF),
+                      image: 'https://i.pravatar.cc/150?u=sarah',
+                    ),
+                    SizedBox(height: 16.h),
+                    _buildExpertCard(
+                      name: 'Dr. Elena Schmidt',
+                      role: 'Doctor',
+                      category: 'HEALTH',
+                      rating: '4.9',
+                      price: '4.00€/min',
+                      status: 'Tomorrow, 09:00',
+                      statusColor: const Color(0xFF0066FF),
+                      image: 'https://i.pravatar.cc/150?u=elena',
+                    ),
+                    SizedBox(height: 100.h), // Spacing for navbar
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -114,7 +146,8 @@ class LaundryHomeScreen extends GetView<HomeController> {
                   children: [
                     Obx(() {
                       final authService = Get.find<AuthService>();
-                      final rawUrl = authService.user.value?.image ??
+                      final rawUrl =
+                          authService.user.value?.image ??
                           authService.user.value?.avatar;
                       final imageUrl = ApiConstants.getImageUrl(rawUrl);
 
@@ -154,7 +187,8 @@ class LaundryHomeScreen extends GetView<HomeController> {
                         ),
                         Obx(() {
                           final authService = Get.find<AuthService>();
-                          final name = authService.user.value?.name ??
+                          final name =
+                              authService.user.value?.name ??
                               authService.user.value?.firstName ??
                               'User';
                           return Text(
@@ -280,17 +314,43 @@ class LaundryHomeScreen extends GetView<HomeController> {
     );
   }
 
-  Widget _buildUpcomingBooking() {
+  Widget _buildUpcomingBooking(BookingModel booking) {
+    final expert = booking.consultant;
+    final imageUrl = ApiConstants.getImageUrl(expert?.image);
+
+    // Format date and time
+    String timeStr = 'N/A';
+    if (booking.date != null && booking.startTime != null) {
+      final now = DateTime.now();
+      final date = booking.date!;
+      final isToday =
+          date.year == now.year &&
+          date.month == now.month &&
+          date.day == now.day;
+
+      if (isToday) {
+        timeStr = 'Today, ${booking.startTime}';
+      } else {
+        timeStr = '${DateFormat('MMM dd').format(date)}, ${booking.startTime}';
+      }
+    } else if (booking.startTime != null) {
+      timeStr = 'Today, ${booking.startTime}';
+    }
+
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: const Color(0xFF0066FF),
-        borderRadius: BorderRadius.circular(20.r),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0066FF), Color(0xFF0052CC)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0066FF).withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: const Color(0xFF0066FF).withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -303,16 +363,20 @@ class LaundryHomeScreen extends GetView<HomeController> {
                 children: [
                   CircleAvatar(
                     radius: 24.r,
-                    backgroundImage: const NetworkImage(
-                      'https://i.pravatar.cc/150?u=sarah',
-                    ),
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundImage: imageUrl.isNotEmpty
+                        ? NetworkImage(imageUrl)
+                        : null,
+                    child: imageUrl.isEmpty
+                        ? const Icon(Icons.person, color: Colors.white)
+                        : null,
                   ),
                   SizedBox(width: 12.w),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Sarah Müller',
+                        expert?.name ?? 'Consultant',
                         style: GoogleFonts.manrope(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
@@ -320,7 +384,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                         ),
                       ),
                       Text(
-                        'Tax Consultation',
+                        expert?.tags ?? 'Expert Consultation',
                         style: GoogleFonts.manrope(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w400,
@@ -364,7 +428,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                     ),
                     SizedBox(width: 8.w),
                     Text(
-                      'Today, 14:30 - 15:00',
+                      timeStr,
                       style: GoogleFonts.manrope(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -373,21 +437,26 @@ class LaundryHomeScreen extends GetView<HomeController> {
                     ),
                   ],
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 8.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF6B00),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Text(
-                    'Join',
-                    style: GoogleFonts.manrope(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                GestureDetector(
+                  onTap: () {
+                    Get.toNamed(AppRoutes.BOOKING_DETAILS, arguments: booking);
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 8.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF6B00),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Text(
+                      'Join',
+                      style: GoogleFonts.manrope(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),

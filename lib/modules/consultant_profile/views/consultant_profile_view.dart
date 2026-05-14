@@ -64,10 +64,16 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
         ],
       ),
       body: Obx(() {
-        final UserData? expert = controller.expert.value;
-        if (expert == null) {
+        if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
+
+        final UserData? expert = controller.expert.value;
+        if (expert == null) {
+          return const Center(child: Text('Consultant not found'));
+        }
+
+
 
         return SingleChildScrollView(
           padding: EdgeInsets.only(bottom: 24.h),

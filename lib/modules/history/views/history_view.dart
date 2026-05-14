@@ -60,62 +60,61 @@ class HistoryView extends GetView<HistoryController> {
           ),
 
           Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value &&
-                  controller.upcomingBookings.isEmpty &&
-                  controller.pastBookings.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
-              }
+            child: RefreshIndicator(
+              onRefresh: controller.fetchMyBookings,
+              child: Obx(() {
+                if (controller.isLoading.value &&
+                    controller.upcomingBookings.isEmpty &&
+                    controller.pastBookings.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              final bookings = controller.selectedTab.value == 0
-                  ? controller.upcomingBookings
-                  : controller.pastBookings;
+                final bookings = controller.selectedTab.value == 0
+                    ? controller.upcomingBookings
+                    : controller.pastBookings;
 
-              if (bookings.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 64.sp,
-                        color: Colors.grey.withOpacity(0.5),
-                      ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        'No bookings found',
-                        style: GoogleFonts.manrope(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF64748B),
-                        ),
-                      ),
-                      SizedBox(height: 24.h),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 48.w),
-                        child: _buildPrimaryButton(
-                          'Book a Consultant',
-                          () => Get.offAllNamed(
-                            AppRoutes.BOTTOM_NAV_BAR,
-                            arguments: 0,
+                if (bookings.isEmpty) {
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Container(
+                      height: 500.h, // Sufficient height to allow scrolling
+                      alignment: Alignment.center,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 64.sp,
+                            color: Colors.grey.withOpacity(0.5),
                           ),
-                        ),
+                          SizedBox(height: 16.h),
+                          Text(
+                            controller.selectedTab.value == 0
+                                ? 'No upcoming bookings found'
+                                : 'No past bookings found',
+                            style: GoogleFonts.manrope(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF64748B),
+                            ),
+                          ),
+                          SizedBox(height: 24.h),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              }
+                    ),
+                  );
+                }
 
-              return RefreshIndicator(
-                onRefresh: controller.fetchMyBookings,
-                child: ListView.separated(
+                return ListView.separated(
                   controller: controller.scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
                   padding: EdgeInsets.symmetric(
                     horizontal: 24.w,
                     vertical: 20.h,
                   ),
                   itemCount:
-                      bookings.length + (controller.isLoadingMore.value ? 1 : 0),
+                      bookings.length +
+                      (controller.isLoadingMore.value ? 1 : 0),
                   separatorBuilder: (context, index) => SizedBox(height: 16.h),
                   itemBuilder: (context, index) {
                     if (index >= bookings.length) {
@@ -124,9 +123,9 @@ class HistoryView extends GetView<HistoryController> {
                     final booking = bookings[index];
                     return _buildBookingCard(booking);
                   },
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ],
       ),
@@ -244,14 +243,13 @@ class HistoryView extends GetView<HistoryController> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(16.r),
                           child: Image.network(
-                            ApiConstants.getImageUrl(
-                              booking.consultant?.image,
-                            ),
+                            ApiConstants.getImageUrl(booking.consultant?.image),
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
                                 Image.network(
-                                    'https://i.ibb.co/z5YHLV9/profile.png',
-                                    fit: BoxFit.cover),
+                                  'https://i.ibb.co/z5YHLV9/profile.png',
+                                  fit: BoxFit.cover,
+                                ),
                           ),
                         ),
                       ),

@@ -153,7 +153,9 @@ class RegisterView extends GetView<RegisterController> {
                             size: 20.sp,
                           ),
                         ),
-                        validator: Validators.password,
+                        validator: (value) {
+                          return Validators.password(value, minLength: 8);
+                        },
                       ),
                     ),
                     SizedBox(height: 16.h),

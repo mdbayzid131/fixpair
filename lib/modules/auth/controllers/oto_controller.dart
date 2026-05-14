@@ -69,11 +69,14 @@ class OtpController extends GetxController {
 
         if (isForgotPassword) {
           final resetToken = response.data['data'];
-          Get.toNamed(AppRoutes.SET_NEW_PASSWORD,
-              arguments: {'resetToken': resetToken, 'email': email});
+          Get.toNamed(
+            AppRoutes.SET_NEW_PASSWORD,
+            arguments: {'resetToken': resetToken, 'email': email},
+          );
         } else {
-          await _authService.handleAuthResponse(response);
-          Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
+          // await _authService.handleAuthResponse(response);
+          // Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
+          Get.offAllNamed(AppRoutes.LOGIN);
         }
       } else {
         Helpers.showError(response.data['message'] ?? 'Verification failed');
