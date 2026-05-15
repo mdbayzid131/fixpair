@@ -1,3 +1,4 @@
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -44,30 +45,34 @@ class VideoCallView extends GetView<VideoCallController> {
   }
 
   Widget _buildConsultantVideo() {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: NetworkImage('https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop'),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.black.withOpacity(0.4),
-              Colors.transparent,
-              Colors.transparent,
-              Colors.black.withOpacity(0.6),
+    return Obx(() {
+      if (controller.remoteUid.value != 0) {
+        return AgoraVideoView(
+          controller: VideoViewController.remote(
+            rtcEngine: controller.engine,
+            canvas: VideoCanvas(uid: controller.remoteUid.value),
+            connection: RtcConnection(channelId: controller.channelName),
+          ),
+        );
+      } else {
+        return Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: Colors.grey[900],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(color: Colors.white),
+              SizedBox(height: 20.h),
+              Text(
+                'Waiting for consultant...',
+                style: GoogleFonts.manrope(color: Colors.white70, fontSize: 16.sp),
+              ),
             ],
           ),
-        ),
-      ),
-    );
+        );
+      }
+    });
   }
 
   Widget _buildTopOverlay() {
@@ -95,7 +100,7 @@ class VideoCallView extends GetView<VideoCallController> {
         Column(
           children: [
             Text(
-              'Sarah Müller',
+              controller.booking.consultant?.name ?? 'Consultant',
               style: GoogleFonts.manrope(
                 color: Colors.white,
                 fontSize: 16.sp,
@@ -103,7 +108,7 @@ class VideoCallView extends GetView<VideoCallController> {
               ),
             ),
             Text(
-              'TAX CONSULTATION',
+              controller.booking.consultant?.tags?.toUpperCase() ?? 'TAX CONSULTATION',
               style: GoogleFonts.manrope(
                 color: Colors.white.withOpacity(0.7),
                 fontSize: 11.sp,
@@ -157,25 +162,35 @@ class VideoCallView extends GetView<VideoCallController> {
   }
 
   Widget _buildUserPiP() {
-    return Container(
-      width: 100.w,
-      height: 140.h,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
-        image: const DecorationImage(
-          image: NetworkImage('https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1974&auto=format&fit=crop'),
-          fit: BoxFit.cover,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+    return Obx(() {
+      if (controller.isJoined.value) {
+        return Container(
+          width: 100.w,
+          height: 140.h,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20.r),
+            child: AgoraVideoView(
+              controller: VideoViewController(
+                rtcEngine: controller.engine,
+                canvas: const VideoCanvas(uid: 0),
+              ),
+            ),
+          ),
+        );
+      }
+      return const SizedBox.shrink();
+    });
   }
 
   Widget _buildBottomControls() {

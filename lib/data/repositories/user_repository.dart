@@ -84,5 +84,56 @@ class UserRepository {
   Future<Response> deleteAccount() async {
     return await _apiClient.deleteData(ApiConstants.profile);
   }
+
+  // --- Video Session Methods ---
+
+  // Create or get a video session for a consultation
+  Future<Response> createVideoSession(String consultationId) async {
+    return await _apiClient.postData(ApiConstants.videoSession, {
+      'consultationId': consultationId,
+    });
+  }
+
+  // Get current session details
+  Future<Response> getVideoSession(String consultationId) async {
+    return await _apiClient.getData(ApiConstants.videoSession, query: {
+      'consultationId': consultationId,
+    });
+  }
+
+  // Join a video session
+  Future<Response> joinVideoSession(String sessionId) async {
+    return await _apiClient.postData(ApiConstants.joinVideoSession, {
+      'sessionId': sessionId,
+    });
+  }
+
+  // End a video session
+  Future<Response> endVideoSession(String sessionId) async {
+    return await _apiClient.postData(ApiConstants.endVideoSession, {
+      'sessionId': sessionId,
+    });
+  }
+
+  // --- Payment Methods ---
+
+  // Create Stripe customer
+  Future<Response> createStripeCustomer() async {
+    return await _apiClient.postData(ApiConstants.createCustomer, {});
+  }
+
+  // Attach payment method
+  Future<Response> attachPaymentMethod(String paymentMethodId) async {
+    return await _apiClient.postData(ApiConstants.attachPaymentMethod, {
+      'paymentMethodId': paymentMethodId,
+    });
+  }
+
+  // Get saved payment methods
+  Future<Response> getPaymentMethods() async {
+    return await _apiClient.getData(ApiConstants.paymentMethods);
+  }
 }
+
+
 

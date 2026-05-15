@@ -1,3 +1,4 @@
+import 'package:fixpair/modules/booking_details/bindings/booking_details_binding.dart';
 import 'package:fixpair/modules/bottom_nab_bar/bindings/bottom_nab_bar_binding.dart';
 import 'package:fixpair/modules/bottom_nab_bar/views/bottom_nab_bar_view.dart';
 import 'package:fixpair/modules/request_callback/bindings/request_callback_binding.dart';
@@ -8,8 +9,10 @@ import 'package:fixpair/modules/video_call/bindings/video_call_binding.dart';
 import 'package:fixpair/modules/video_call/views/video_call_view.dart';
 import '../../modules/consultation_summary/bindings/consultation_summary_binding.dart';
 import '../../modules/consultation_summary/views/consultation_summary_view.dart';
-import '../../modules/booking_details/bindings/booking_details_binding.dart';
 import '../../modules/booking_details/views/booking_details_view.dart';
+import '../../modules/payment/bindings/payment_binding.dart';
+import '../../modules/payment/views/add_card_view.dart';
+import '../../modules/payment/views/payment_methods_view.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 
 import 'package:get/get_navigation/src/routes/transitions_type.dart';
@@ -97,7 +100,11 @@ class AppRoutes {
   static const String VIDEO_CALL = '/video-call';
   static const String CONSULTATION_SUMMARY = '/consultation-summary';
   static const String BOOKING_DETAILS = '/booking-details';
+  static const String ADD_CARD = '/add-card';
+  static const String PAYMENT_METHODS = '/payment-methods';
 }
+
+
 
 
 final pages = [
@@ -220,5 +227,15 @@ final pages = [
     page: () => const BookingDetailsView(),
     binding: BookingDetailsBinding(),
   ),
-
+  GetPage(
+    name: AppRoutes.ADD_CARD,
+    page: () => const AddCardView(),
+    binding: PaymentBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.PAYMENT_METHODS,
+    page: () => const PaymentMethodsView(),
+    binding: PaymentBinding(),
+  ),
 ];
+

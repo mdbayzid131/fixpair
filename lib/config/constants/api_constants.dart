@@ -39,4 +39,16 @@ class ApiConstants {
   static const String privacyPolicy = '/privacy';
   static const String termsConditions = '/terms';
   static const String faq = '/faq';
+
+  // Video Session Endpoints
+  static const String videoSession = '/video-session';
+  static const String joinVideoSession = '/video-session/join';
+  static const String endVideoSession = '/video-session/end';
+
+  // Payment Endpoints
+  static const String createCustomer = '/payment/create-customer';
+  static const String attachPaymentMethod = '/payment/attach-method';
+  static const String paymentMethods = '/payment/methods';
 }
+
+

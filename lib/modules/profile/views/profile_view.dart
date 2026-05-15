@@ -187,8 +187,9 @@ class ProfileView extends GetView<ProfileController> {
             iconBg: const Color(0xFFDCFCE7),
             iconColor: const Color(0xFF10B981),
             label: 'Payment Methods',
-            onTap: () {},
+            onTap: () => Get.toNamed(AppRoutes.PAYMENT_METHODS),
           ),
+
           const Divider(
             height: 1,
             color: Color(0xFFF1F5F9),
