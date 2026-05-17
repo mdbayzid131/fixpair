@@ -5,7 +5,6 @@ import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../../bottom_nab_bar/controllers/bottom_nab_bar.dart';
 
 class ScheduleBookingController extends GetxController {
   final UserRepository _userRepository = Get.find();
@@ -22,10 +21,9 @@ class ScheduleBookingController extends GetxController {
 
   final RxList<Map<String, String>> dates = <Map<String, String>>[].obs;
   final RxList<String> times = <String>[].obs;
-  
+
   final isRescheduling = false.obs;
   String? bookingId;
-
 
   @override
   void onInit() {
@@ -44,7 +42,6 @@ class ScheduleBookingController extends GetxController {
     }
   }
 
-
   Future<void> fetchSlots() async {
     if (expert.value == null) return;
 
@@ -60,7 +57,7 @@ class ScheduleBookingController extends GetxController {
         _organizeSlots();
       }
     } catch (e) {
-      print('Error fetching slots: $e');
+      Helpers.showDebugLog('Error fetching slots: $e');
     } finally {
       isLoading.value = false;
     }
@@ -69,6 +66,7 @@ class ScheduleBookingController extends GetxController {
   void _organizeSlots() {
     slotsByDate.clear();
     for (var slot in allSlots) {
+      if (slot.isBooked == true) continue;
       if (slot.date != null) {
         final dateKey = DateFormat('yyyy-MM-dd').format(slot.date!);
         if (!slotsByDate.containsKey(dateKey)) {
@@ -96,6 +94,7 @@ class ScheduleBookingController extends GetxController {
 
     if (dates.isNotEmpty) {
       selectedDateIndex.value = 0;
+      focusedDate.value = DateTime.parse(dates[0]['fullDate']!);
       _updateTimesForSelectedDate();
     }
   }
@@ -109,7 +108,12 @@ class ScheduleBookingController extends GetxController {
     final selectedDateKey = dates[selectedDateIndex.value]['fullDate'];
     final slots = slotsByDate[selectedDateKey] ?? [];
 
-    times.value = slots.map((s) => s.startTime ?? '').toList();
+    times.value = slots.map((s) {
+      if (s.startTime != null && s.endTime != null) {
+        return '${s.startTime} - ${s.endTime}';
+      }
+      return s.startTime ?? '';
+    }).toList();
   }
 
   void selectDate(int index) {
@@ -142,11 +146,19 @@ class ScheduleBookingController extends GetxController {
   }
 
   void nextMonth() {
-    // This might need adjustment if we only show dates from API
+    focusedDate.value = DateTime(
+      focusedDate.value.year,
+      focusedDate.value.month + 1,
+      1,
+    );
   }
 
   void previousMonth() {
-    // This might need adjustment if we only show dates from API
+    focusedDate.value = DateTime(
+      focusedDate.value.year,
+      focusedDate.value.month - 1,
+      1,
+    );
   }
 
   Future<void> bookScheduled() async {
@@ -170,11 +182,13 @@ class ScheduleBookingController extends GetxController {
         );
         if (response.statusCode == 200) {
           Helpers.showSuccess(
-              'Booking rescheduled successfully. Waiting for consultant approval.');
+            'Booking rescheduled successfully. Waiting for consultant approval.',
+          );
           Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR, arguments: 2);
         } else {
           Helpers.showError(
-              response.data['message'] ?? 'Failed to reschedule booking');
+            response.data['message'] ?? 'Failed to reschedule booking',
+          );
         }
       } else {
         final body = {
@@ -196,5 +210,4 @@ class ScheduleBookingController extends GetxController {
       isLoading.value = false;
     }
   }
-
 }

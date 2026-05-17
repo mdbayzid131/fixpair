@@ -103,7 +103,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                 onNext: controller.nextMonth,
               ),
               SizedBox(height: 16.h),
-              _buildDateSelector(),
+              _buildMonthCalendar(),
               SizedBox(height: 32.h),
               _buildSectionHeader('2. Select Time', 'Germany (CET)'),
               SizedBox(height: 16.h),
@@ -209,83 +209,153 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
     );
   }
 
-  Widget _buildDateSelector() {
-    return SizedBox(
-      height: 90.h,
-      child: Obx(
-        () => ListView.separated(
-          scrollDirection: Axis.horizontal,
-          itemCount: controller.dates.length,
-          separatorBuilder: (context, index) => SizedBox(width: 12.w),
-          itemBuilder: (context, index) {
-            return Obx(() {
-              final date = controller.dates[index];
-              final isPast = date['isPast'] == 'true';
-              final isSelected = controller.selectedDateIndex.value == index;
-              return GestureDetector(
-                onTap: isPast ? null : () => controller.selectDate(index),
-                child: Opacity(
-                  opacity: isPast ? 0.3 : 1.0,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 70.w,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xFF0066FF)
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(20.r),
-                      border: Border.all(
-                        color: isSelected
-                            ? const Color(0xFF0066FF)
-                            : isPast
-                            ? const Color(0xFFE2E8F0).withOpacity(0.5)
-                            : const Color(0xFFE2E8F0),
-                        width: 1.5,
-                      ),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: const Color(0xFF0066FF).withOpacity(0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ]
-                          : [],
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          date['day']!,
-                          style: GoogleFonts.manrope(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w800,
-                            color: isSelected
-                                ? Colors.white.withOpacity(0.8)
-                                : const Color(0xFF94A3B8),
+  Widget _buildMonthCalendar() {
+    return Obx(() {
+      final focused = controller.focusedDate.value;
+      final year = focused.year;
+      final month = focused.month;
+
+      final firstDayOfMonth = DateTime(year, month, 1);
+      final totalDays = DateTime(year, month + 1, 0).day;
+
+      final startOffset = firstDayOfMonth.weekday - 1;
+
+      final List<Widget> dayWidgets = [];
+
+      final weekdays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+      for (var day in weekdays) {
+        dayWidgets.add(
+          Center(
+            child: Text(
+              day,
+              style: GoogleFonts.manrope(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF94A3B8),
+              ),
+            ),
+          ),
+        );
+      }
+
+      for (var i = 0; i < startOffset; i++) {
+        dayWidgets.add(const SizedBox.shrink());
+      }
+
+      final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+      String? selectedDateKey;
+      if (controller.selectedDateIndex.value != -1 &&
+          controller.dates.isNotEmpty) {
+        selectedDateKey =
+            controller.dates[controller.selectedDateIndex.value]['fullDate'];
+      }
+
+      for (var day = 1; day <= totalDays; day++) {
+        final currentDayObj = DateTime(year, month, day);
+        final dateKey = DateFormat('yyyy-MM-dd').format(currentDayObj);
+        final hasSlots = controller.slotsByDate.containsKey(dateKey);
+
+        final isSelected = selectedDateKey == dateKey;
+        final isToday = todayKey == dateKey;
+
+        dayWidgets.add(
+          GestureDetector(
+            onTap: hasSlots
+                ? () {
+                    final index = controller.dates.indexWhere(
+                      (d) => d['fullDate'] == dateKey,
+                    );
+                    if (index != -1) {
+                      controller.selectDate(index);
+                    }
+                  }
+                : null,
+            behavior: HitTestBehavior.opaque,
+            child: Center(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 38.w,
+                height: 38.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected
+                      ? const Color(0xFF0066FF)
+                      : (isToday
+                            ? const Color(0xFFEFF6FF)
+                            : Colors.transparent),
+                  border: isToday && !isSelected
+                      ? Border.all(color: const Color(0xFF0066FF), width: 1.w)
+                      : null,
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: const Color(
+                              0xFF0066FF,
+                            ).withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
                           ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          date['date']!,
-                          style: GoogleFonts.manrope(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.w800,
-                            color: isSelected
-                                ? Colors.white
-                                : const Color(0xFF334155),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                        ]
+                      : [],
                 ),
-              );
-            });
-          },
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Text(
+                      '$day',
+                      style: GoogleFonts.manrope(
+                        fontSize: 14.sp,
+                        fontWeight: isSelected || isToday
+                            ? FontWeight.w800
+                            : FontWeight.w600,
+                        color: isSelected
+                            ? Colors.white
+                            : (hasSlots
+                                  ? const Color(0xFF1D293D)
+                                  : const Color(0xFFCBD5E1)),
+                      ),
+                    ),
+                    if (hasSlots && !isSelected)
+                      Positioned(
+                        bottom: 4.h,
+                        child: Container(
+                          width: 4.w,
+                          height: 4.w,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFF6B00),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      return Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(24.r),
+          border: Border.all(color: const Color(0xFFF1F5F9)),
         ),
-      ),
-    );
+        child: GridView.custom(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 7,
+            mainAxisSpacing: 8.h,
+            crossAxisSpacing: 8.w,
+            childAspectRatio: 1.0,
+          ),
+          childrenDelegate: SliverChildListDelegate(dayWidgets),
+        ),
+      );
+    });
   }
 
   Widget _buildTimeGrid() {
@@ -293,10 +363,10 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 12.w,
-        mainAxisSpacing: 12.h,
-        childAspectRatio: 1.8,
+        crossAxisCount: 3,
+        crossAxisSpacing: 10.w,
+        mainAxisSpacing: 10.h,
+        childAspectRatio: 2.6,
       ),
       itemCount: controller.times.length,
       itemBuilder: (context, index) {
@@ -320,9 +390,11 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
               child: Center(
                 child: Text(
                   time,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.manrope(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w700,
                     color: isSelected ? Colors.white : const Color(0xFF334155),
                   ),
                 ),
@@ -345,7 +417,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 20,
             offset: const Offset(0, -10),
           ),
@@ -461,7 +533,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFFF6B00).withOpacity(0.3),
+                  color: const Color(0xFFFF6B00).withValues(alpha: 0.3),
                   blurRadius: 15,
                   offset: const Offset(0, 8),
                 ),
