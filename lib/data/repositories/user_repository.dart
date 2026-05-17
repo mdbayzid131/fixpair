@@ -66,6 +66,27 @@ class UserRepository {
     );
   }
 
+  // Get bookings with custom status URL query
+  Future<Response> getBookingsWithUrl(String url) async {
+    return await _apiClient.getData(url);
+  }
+
+  // Get recommended consultants
+  Future<Response> getRecommendedConsultants({
+    String? consultancyType,
+    String? name,
+  }) async {
+    final query = {
+      if (consultancyType != null && consultancyType != 'All')
+        'consultancyType': consultancyType.toLowerCase(),
+      if (name != null && name.isNotEmpty) 'name': name,
+    };
+    return await _apiClient.getData(
+      ApiConstants.recommended,
+      query: query,
+    );
+  }
+
   // Cancel a booking
   Future<Response> cancelBooking(String id, {String? reason}) async {
     return await _apiClient.patchData(ApiConstants.cancelBooking(id), {
@@ -132,6 +153,40 @@ class UserRepository {
   // Get saved payment methods
   Future<Response> getPaymentMethods() async {
     return await _apiClient.getData(ApiConstants.paymentMethods);
+  }
+
+  // --- Reviews ---
+
+  // Post a review for a consultation
+  Future<Response> postReview({
+    required String consultationId,
+    required double rating,
+    required String comment,
+  }) async {
+    return await _apiClient.postData(ApiConstants.review, {
+      'consultationId': consultationId,
+      'rating': rating,
+      'comment': comment,
+    });
+  }
+
+  // Get reviews of a consultant
+  Future<Response> getConsultantReviews(
+    String consultantId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return await _apiClient.getData(
+      ApiConstants.consultantReviews(consultantId),
+      query: {'page': page, 'limit': limit},
+    );
+  }
+
+  // Get statistics/average rating of a consultant
+  Future<Response> getConsultantStats(String consultantId) async {
+    return await _apiClient.getData(
+      ApiConstants.consultantStats(consultantId),
+    );
   }
 }
 

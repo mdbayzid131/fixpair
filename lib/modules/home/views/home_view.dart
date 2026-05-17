@@ -8,6 +8,7 @@ import 'package:fixpair/modules/home/controllers/home_controller.dart';
 import 'package:fixpair/core/services/auth_service.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
 import '../../../config/routes/app_pages.dart';
+import 'package:fixpair/modules/bottom_nab_bar/controllers/bottom_nab_bar.dart';
 
 class LaundryHomeScreen extends GetView<HomeController> {
   const LaundryHomeScreen({super.key});
@@ -17,7 +18,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: RefreshIndicator(
-        onRefresh: controller.fetchUpcomingBookings,
+        onRefresh: controller.onRefresh,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
@@ -76,38 +77,51 @@ class LaundryHomeScreen extends GetView<HomeController> {
                     // 4. Recommended Experts
                     _buildSectionTitle('Recommended Experts'),
                     SizedBox(height: 12.h),
-                    _buildExpertCard(
-                      name: 'Dr. Thomas Weber',
-                      role: 'Doctor',
-                      category: 'HEALTH',
-                      rating: '4.9',
-                      price: '4.00€/min',
-                      status: 'Immediate',
-                      statusColor: const Color(0xFF0066FF),
-                      image: 'https://i.pravatar.cc/150?u=thomas',
-                    ),
-                    SizedBox(height: 16.h),
-                    _buildExpertCard(
-                      name: 'Sarah Müller',
-                      role: 'Tax Consultation',
-                      category: 'ADVISOR',
-                      rating: '4.8',
-                      price: '4.00€/min',
-                      status: 'In 10 mins',
-                      statusColor: const Color(0xFF0066FF),
-                      image: 'https://i.pravatar.cc/150?u=sarah',
-                    ),
-                    SizedBox(height: 16.h),
-                    _buildExpertCard(
-                      name: 'Dr. Elena Schmidt',
-                      role: 'Doctor',
-                      category: 'HEALTH',
-                      rating: '4.9',
-                      price: '4.00€/min',
-                      status: 'Tomorrow, 09:00',
-                      statusColor: const Color(0xFF0066FF),
-                      image: 'https://i.pravatar.cc/150?u=elena',
-                    ),
+                    Obx(() {
+                      if (controller.isLoading.value &&
+                          controller.recommendedConsultants.isEmpty) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFFFF6B00),
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+
+                      if (controller.recommendedConsultants.isEmpty) {
+                        return Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 32.h),
+                            child: Text(
+                              'No recommended consultants found',
+                              style: GoogleFonts.manrope(
+                                fontSize: 14.sp,
+                                color: const Color(0xFF94A3B8),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: controller.recommendedConsultants.length,
+                        itemBuilder: (context, index) {
+                          final consultant =
+                              controller.recommendedConsultants[index];
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 16.h),
+                            child: _buildExpertCard(consultant),
+                          );
+                        },
+                      );
+                    }),
                     SizedBox(height: 100.h), // Spacing for navbar
                   ],
                 ),
@@ -155,7 +169,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                         width: 48.w,
                         height: 48.w,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.3),
+                          color: const Color(0x4DFFFFFF),
                           shape: BoxShape.circle,
                           image: imageUrl.isNotEmpty
                               ? DecorationImage(
@@ -182,7 +196,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                           style: GoogleFonts.manrope(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w500,
-                            color: Colors.white.withOpacity(0.8),
+                            color: const Color(0xCCFFFFFF),
                           ),
                         ),
                         Obx(() {
@@ -210,7 +224,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                   child: Container(
                     padding: EdgeInsets.all(10.w),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: const Color(0x33FFFFFF),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -246,13 +260,17 @@ class LaundryHomeScreen extends GetView<HomeController> {
                 borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: const Color(0x0D000000),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: TextField(
+                readOnly: true,
+                onTap: () {
+                  Get.find<BottomNavBarController>().changeTab(1);
+                },
                 decoration: InputDecoration(
                   hintText: 'Search for doctors, lawyers...',
                   hintStyle: GoogleFonts.manrope(
@@ -348,7 +366,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0066FF).withOpacity(0.2),
+            color: const Color(0x330066FF),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -363,7 +381,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                 children: [
                   CircleAvatar(
                     radius: 24.r,
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundColor: const Color(0x33FFFFFF),
                     backgroundImage: imageUrl.isNotEmpty
                         ? NetworkImage(imageUrl)
                         : null,
@@ -388,7 +406,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                         style: GoogleFonts.manrope(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w400,
-                          color: Colors.white.withOpacity(0.8),
+                          color: const Color(0xCCFFFFFF),
                         ),
                       ),
                     ],
@@ -398,7 +416,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
               Container(
                 padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: const Color(0x33FFFFFF),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -413,7 +431,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: const Color(0x1AFFFFFF),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Row(
@@ -469,19 +487,19 @@ class LaundryHomeScreen extends GetView<HomeController> {
     );
   }
 
-  Widget _buildExpertCard({
-    required String name,
-    required String role,
-    required String category,
-    required String rating,
-    required String price,
-    required String status,
-    required Color statusColor,
-    required String image,
-  }) {
+  Widget _buildExpertCard(UserData consultant) {
+    final name = consultant.name ?? 'Consultant';
+    final role = consultant.expertise ?? consultant.consultancyType ?? 'Expert';
+    final category = (consultant.consultancyType ?? 'Expert').toUpperCase();
+    final averageRating = consultant.stats?.avgRating ?? 0.0;
+    final rating = averageRating > 0 ? averageRating.toStringAsFixed(1) : 'New';
+    final price = '${consultant.perMinuteRate ?? 0}.00€/min';
+    final status = consultant.activeStatus == true ? 'Immediate' : 'Offline';
+    final image = ApiConstants.getImageUrl(consultant.image);
+
     return GestureDetector(
       onTap: () {
-        Get.toNamed(AppRoutes.CONSULTANT_PROFILE);
+        Get.toNamed(AppRoutes.CONSULTANT_PROFILE, arguments: consultant);
       },
       child: Container(
         padding: EdgeInsets.all(16.w),
@@ -490,7 +508,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
           borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: const Color(0x0A000000),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -518,7 +536,9 @@ class LaundryHomeScreen extends GetView<HomeController> {
                     width: 12.w,
                     height: 12.w,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF10B981),
+                      color: consultant.activeStatus == true
+                          ? const Color(0xFF10B981)
+                          : const Color(0xFF94A3B8),
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 2),
                     ),
@@ -588,6 +608,8 @@ class LaundryHomeScreen extends GetView<HomeController> {
                       color: const Color(0xFF94A3B8),
                       fontWeight: FontWeight.w500,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 8.h),
                   Row(

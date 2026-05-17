@@ -32,6 +32,7 @@ class ApiConstants {
       '/consultation/available-slots/$id';
   static const String bookConsultation = '/consultation/book';
   static const String myBookings = '/consultation/my-bookings';
+  static const String recommended = '/recommendation/recommended';
   static String cancelBooking(String id) => '/consultation/cancel/$id';
   static String rescheduleBooking(String id) => '/consultation/reschedule/$id';
 
@@ -49,6 +50,11 @@ class ApiConstants {
   static const String createCustomer = '/payment/create-customer';
   static const String attachPaymentMethod = '/payment/attach-method';
   static const String paymentMethods = '/payment/methods';
+
+  // Review Endpoints
+  static const String review = '/review';
+  static String consultantReviews(String id) => '/review/consultant/$id';
+  static String consultantStats(String id) => '/review/stats/$id';
 }
 
 

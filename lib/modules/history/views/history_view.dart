@@ -85,7 +85,7 @@ class HistoryView extends GetView<HistoryController> {
                           Icon(
                             Icons.calendar_today_outlined,
                             size: 64.sp,
-                            color: Colors.grey.withOpacity(0.5),
+                            color: const Color(0x8094A3B8),
                           ),
                           SizedBox(height: 16.h),
                           Text(
@@ -146,7 +146,7 @@ class HistoryView extends GetView<HistoryController> {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: const Color(0x0D000000),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -222,7 +222,7 @@ class HistoryView extends GetView<HistoryController> {
           borderRadius: BorderRadius.circular(24.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: const Color(0x0A000000),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
@@ -237,7 +237,7 @@ class HistoryView extends GetView<HistoryController> {
                   Stack(
                     alignment: Alignment.bottomRight,
                     children: [
-                      Container(
+                      SizedBox(
                         width: 70.w,
                         height: 70.w,
                         child: ClipRRect(
@@ -260,7 +260,7 @@ class HistoryView extends GetView<HistoryController> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: const Color(0x1A000000),
                               blurRadius: 4,
                             ),
                           ],
@@ -287,7 +287,7 @@ class HistoryView extends GetView<HistoryController> {
                                 vertical: 4.h,
                               ),
                               decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.12),
+                                color: statusColor.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6.r),
                               ),
                               child: Text(
@@ -385,10 +385,14 @@ class HistoryView extends GetView<HistoryController> {
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.all(16.w),
-              child: _renderActionButtons(booking),
-            ),
+            if (booking.status?.toLowerCase() == 'confirmed' ||
+                booking.status?.toLowerCase() == 'accepted' ||
+                booking.status?.toLowerCase() == 'pending' ||
+                booking.status?.toLowerCase() == 'completed')
+              Padding(
+                padding: EdgeInsets.all(16.w),
+                child: _renderActionButtons(booking),
+              ),
           ],
         ),
       ),
@@ -397,7 +401,7 @@ class HistoryView extends GetView<HistoryController> {
 
   Widget _renderActionButtons(BookingModel booking) {
     if (booking.status?.toLowerCase() == 'confirmed') {
-      return _buildPrimaryButton('Join Call', () {});
+      return _buildPrimaryButton('Join', () {});
     } else if (booking.status?.toLowerCase() == 'accepted') {
       return Row(
         children: [
@@ -424,28 +428,197 @@ class HistoryView extends GetView<HistoryController> {
         ],
       );
     } else if (booking.status?.toLowerCase() == 'pending') {
-      return _buildDangerButton(
-        'Cancel Booking',
-        () => _showCancelDialog(booking.id!),
-      );
+      return _buildDangerButton('Cancel', () => _showCancelDialog(booking.id!));
     } else if (booking.status?.toLowerCase() == 'completed') {
-      return Row(
+      return Column(
         children: [
-          Expanded(
-            child: _buildSecondaryButton(
-              'Book Again',
-              () => Get.toNamed(
-                AppRoutes.CONSULTANT_PROFILE,
-                arguments: booking.consultant,
+          Row(
+            children: [
+              Expanded(
+                child: _buildSecondaryButton(
+                  'Book Again',
+                  () => Get.toNamed(
+                    AppRoutes.CONSULTANT_PROFILE,
+                    arguments: booking.consultant,
+                  ),
+                ),
               ),
-            ),
+              SizedBox(width: 12.w),
+              Expanded(child: _buildLightButton('View Report', () {})),
+            ],
           ),
-          SizedBox(width: 12.w),
-          Expanded(child: _buildLightButton('View Report', () {})),
+          SizedBox(height: 12.h),
+          _buildPrimaryButton(
+            'Leave Review',
+            () => _showReviewDialog(booking),
+          ),
         ],
       );
     }
     return const SizedBox.shrink();
+  }
+
+  void _showReviewDialog(BookingModel booking) {
+    double selectedRating = 5.0;
+    final TextEditingController commentController = TextEditingController();
+
+    Get.dialog(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24.r),
+            ),
+            child: Container(
+              padding: EdgeInsets.all(24.w),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24.r),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Leave a Review',
+                    style: GoogleFonts.manrope(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1D293D),
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    'Rate your consultation with ${booking.consultant?.name ?? "your expert"}',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.manrope(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+                  
+                  // Stars selection
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      5,
+                      (index) => GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedRating = index + 1.0;
+                          });
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4.w),
+                          child: Icon(
+                            Icons.star_rounded,
+                            color: index < selectedRating
+                                ? const Color(0xFFF59E0B)
+                                : const Color(0xFFE2E8F0),
+                            size: 36.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
+                  
+                  // Comment box
+                  TextField(
+                    controller: commentController,
+                    maxLines: 4,
+                    style: GoogleFonts.manrope(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF1D293D),
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Share your experience with this consultant...',
+                      hintStyle: GoogleFonts.manrope(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF94A3B8),
+                      ),
+                      fillColor: const Color(0xFFF8FAFC),
+                      filled: true,
+                      contentPadding: EdgeInsets.all(16.w),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                        borderSide: const BorderSide(color: Color(0xFF0066FF)),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
+                  
+                  // Action buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Get.back(),
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 14.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            side: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: GoogleFonts.manrope(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF64748B),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final success = await controller.submitReview(
+                              consultationId: booking.id!,
+                              rating: selectedRating,
+                              comment: commentController.text.trim(),
+                            );
+                            if (success) {
+                              Get.back();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF6B00),
+                            padding: EdgeInsets.symmetric(vertical: 14.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'Submit',
+                            style: GoogleFonts.manrope(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+      barrierDismissible: false,
+    );
   }
 
   Widget _buildPrimaryButton(String text, VoidCallback onTap) {
@@ -458,7 +631,7 @@ class HistoryView extends GetView<HistoryController> {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFFF6B00).withOpacity(0.3),
+            color: const Color(0x4DFF6B00),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -606,7 +779,9 @@ class HistoryView extends GetView<HistoryController> {
                     ),
                   ),
                   value: reason,
+                  // ignore: deprecated_member_use
                   groupValue: selectedReason,
+                  // ignore: deprecated_member_use
                   onChanged: (value) {
                     setState(() => selectedReason = value!);
                   },

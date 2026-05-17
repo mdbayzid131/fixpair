@@ -1,5 +1,6 @@
 import 'package:fixpair/core/utils/logger.dart';
 import 'package:fixpair/data/models/user_model.dart';
+import 'package:fixpair/data/models/review_model.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
 import 'package:get/get.dart';
 
@@ -7,7 +8,11 @@ class ConsultantProfileController extends GetxController {
   final UserRepository _userRepository = Get.find();
   final isAboutExpanded = false.obs;
   final isLoading = false.obs;
+  final isLoadingReviews = false.obs;
   final Rxn<UserData> expert = Rxn<UserData>();
+
+  final RxList<ReviewModel> consultantReviews = <ReviewModel>[].obs;
+  final Rxn<ConsultantStats> stats = Rxn<ConsultantStats>();
 
   @override
   void onInit() {
@@ -27,6 +32,9 @@ class ConsultantProfileController extends GetxController {
         final userData = UserData.fromJson(response.data['data']);
         expert.value = userData;
       }
+
+      // Fetch reviews and stats in parallel
+      await Future.wait([fetchReviews(id), fetchStats(id)]);
     } catch (e) {
       AppLogger.warning('Error fetching consultant details: ${e.toString()}');
     } finally {
@@ -34,18 +42,39 @@ class ConsultantProfileController extends GetxController {
     }
   }
 
+  Future<void> fetchReviews(String id) async {
+    try {
+      isLoadingReviews.value = true;
+      final response = await _userRepository.getConsultantReviews(
+        id,
+        page: 1,
+        limit: 5,
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        consultantReviews.assignAll(
+          data.map((e) => ReviewModel.fromJson(e)).toList(),
+        );
+      }
+    } catch (e) {
+      AppLogger.warning('Error fetching consultant reviews: ${e.toString()}');
+    } finally {
+      isLoadingReviews.value = false;
+    }
+  }
+
+  Future<void> fetchStats(String id) async {
+    try {
+      final response = await _userRepository.getConsultantStats(id);
+      if (response.statusCode == 200) {
+        stats.value = ConsultantStats.fromJson(response.data['data']);
+      }
+    } catch (e) {
+      AppLogger.warning('Error fetching consultant stats: ${e.toString()}');
+    }
+  }
+
   void toggleAboutExpansion() {
     isAboutExpanded.value = !isAboutExpanded.value;
   }
-
-  final reviews = [
-    {
-      'name': 'Max M.',
-      'date': '2 days ago',
-      'rating': 5,
-      'comment':
-          'Very professional and knowledgeable. Solved my issue in just 15 minutes. Highly recommended for quick consultations!',
-      'avatar': '', // Placeholder
-    },
-  ].obs;
 }

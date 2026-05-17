@@ -1,11 +1,14 @@
 import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/data/models/user_model.dart';
+import 'package:fixpair/data/models/review_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../controllers/consultant_profile_controller.dart';
+import 'see_all_reviews_view.dart';
 
 class ConsultantProfileView extends GetView<ConsultantProfileController> {
   const ConsultantProfileView({super.key});
@@ -73,8 +76,6 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
           return const Center(child: Text('Consultant not found'));
         }
 
-
-
         return SingleChildScrollView(
           padding: EdgeInsets.only(bottom: 24.h),
           child: Column(
@@ -130,7 +131,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                       : null,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withValues(alpha: 0.08),
                       blurRadius: 15,
                       offset: const Offset(0, 8),
                     ),
@@ -233,22 +234,29 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                             size: 16.sp,
                           ),
                           SizedBox(width: 4.w),
-                          Text(
-                            '${expert.stats?.avgRating ?? 0.0} ',
-                            style: GoogleFonts.manrope(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1D293D),
-                            ),
-                          ),
-                          Text(
-                            '(${expert.stats?.totalReviews ?? 0})',
-                            style: GoogleFonts.manrope(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF64748B),
-                            ),
-                          ),
+                          Obx(() {
+                            final stats = controller.stats.value;
+                            return Row(
+                              children: [
+                                Text(
+                                  '${stats?.avgRating ?? expert.stats?.avgRating ?? 0.0} ',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF1D293D),
+                                  ),
+                                ),
+                                Text(
+                                  '(${stats?.totalReviews ?? expert.stats?.totalReviews ?? 0})',
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: const Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
                         ],
                       ),
                     ),
@@ -305,13 +313,19 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
           ),
           Container(height: 40.h, width: 1, color: const Color(0xFFF1F5F9)),
           Expanded(
-            child: _buildStatItem(
-              Icons.chat_bubble_outline_rounded,
-              'CONSULTATIONS',
-              '${expert.stats?.totalReviews ?? 0}+',
-              const Color(0xFFF5F3FF),
-              const Color(0xFF7C3AED),
-            ),
+            child: Obx(() {
+              final totalReviews =
+                  controller.stats.value?.totalReviews ??
+                  expert.stats?.totalReviews ??
+                  0;
+              return _buildStatItem(
+                Icons.chat_bubble_outline_rounded,
+                'CONSULTATIONS',
+                '$totalReviews+',
+                const Color(0xFFF5F3FF),
+                const Color(0xFF7C3AED),
+              );
+            }),
           ),
           Container(height: 40.h, width: 1, color: const Color(0xFFF1F5F9)),
           Expanded(
@@ -522,42 +536,99 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
   }
 
   Widget _buildReviewsSection() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Reviews',
-                style: GoogleFonts.manrope(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1D293D),
+    return Obx(() {
+      final total = controller.stats.value?.totalReviews ?? 0;
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Reviews',
+                  style: GoogleFonts.manrope(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1D293D),
+                  ),
                 ),
-              ),
-              Text(
-                'See all 89',
-                style: GoogleFonts.manrope(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0066FF),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          _buildReviewCard(),
+                if (total > 0)
+                  GestureDetector(
+                    onTap: () => Get.to(
+                      () => SeeAllReviewsView(
+                        consultantId: controller.expert.value!.id!,
+                      ),
+                    ),
+                    behavior: HitTestBehavior.opaque,
+                    child: Text(
+                      'See all $total',
+                      style: GoogleFonts.manrope(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF0066FF),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            SizedBox(height: 16.h),
 
-          SizedBox(height: 40.h),
-        ],
-      ),
-    );
+            if (controller.isLoadingReviews.value)
+              const Center(child: CircularProgressIndicator())
+            else if (controller.consultantReviews.isEmpty)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.h),
+                child: Center(
+                  child: Text(
+                    'No reviews yet',
+                    style: GoogleFonts.manrope(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+              )
+            else
+              Column(
+                children: controller.consultantReviews
+                    .take(3)
+                    .map(
+                      (review) => Padding(
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        child: _buildReviewCard(review),
+                      ),
+                    )
+                    .toList(),
+              ),
+
+            SizedBox(height: 40.h),
+          ],
+        ),
+      );
+    });
   }
 
-  Widget _buildReviewCard() {
-    final review = controller.reviews[0];
+  Widget _buildReviewCard(ReviewModel review) {
+    final imageUrl = ApiConstants.getImageUrl(review.user?.image);
+    final ratingCount = (review.rating ?? 5.0).toInt();
+
+    String timeStr = 'Some time ago';
+    if (review.createdAt != null) {
+      final difference = DateTime.now().difference(review.createdAt!);
+      if (difference.inDays == 0) {
+        timeStr = 'Today';
+      } else if (difference.inDays == 1) {
+        timeStr = '1 day ago';
+      } else if (difference.inDays < 7) {
+        timeStr = '${difference.inDays} days ago';
+      } else {
+        timeStr = DateFormat('MMM dd, yyyy').format(review.createdAt!);
+      }
+    }
+
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -565,12 +636,19 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
         borderRadius: BorderRadius.circular(24.r),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               CircleAvatar(
                 radius: 20.r,
                 backgroundColor: const Color(0xFFE2E8F0),
+                backgroundImage: imageUrl.isNotEmpty
+                    ? NetworkImage(imageUrl)
+                    : null,
+                child: imageUrl.isEmpty
+                    ? const Icon(Icons.person, color: Color(0xFF64748B))
+                    : null,
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -578,7 +656,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      review['name'].toString(),
+                      review.user?.name ?? 'Anonymous User',
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
@@ -586,7 +664,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                       ),
                     ),
                     Text(
-                      review['date'].toString(),
+                      timeStr,
                       style: GoogleFonts.manrope(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
@@ -601,7 +679,9 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                   5,
                   (index) => Icon(
                     Icons.star_rounded,
-                    color: const Color(0xFFF59E0B),
+                    color: index < ratingCount
+                        ? const Color(0xFFF59E0B)
+                        : const Color(0xFFE2E8F0),
                     size: 16.sp,
                   ),
                 ),
@@ -610,7 +690,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
           ),
           SizedBox(height: 12.h),
           Text(
-            review['comment'].toString(),
+            review.comment ?? 'No comment provided.',
             style: GoogleFonts.manrope(
               fontSize: 13.sp,
               fontWeight: FontWeight.w500,
@@ -631,7 +711,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, -10),
           ),
@@ -704,7 +784,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
               boxShadow: isOnline
                   ? [
                       BoxShadow(
-                        color: const Color(0xFFFF6B00).withOpacity(0.3),
+                        color: const Color(0xFFFF6B00).withValues(alpha: 0.3),
                         blurRadius: 15,
                         offset: const Offset(0, 8),
                       ),

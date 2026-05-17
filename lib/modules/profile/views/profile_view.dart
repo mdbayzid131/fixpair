@@ -25,17 +25,17 @@ class ProfileView extends GetView<ProfileController> {
             color: const Color(0xFF1D293D),
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.settings_outlined,
-              color: const Color(0xFF64748B),
-              size: 24.sp,
-            ),
-          ),
-          SizedBox(width: 8.w),
-        ],
+        // actions: [
+        //   IconButton(
+        //     onPressed: () {},
+        //     icon: Icon(
+        //       Icons.settings_outlined,
+        //       color: const Color(0xFF64748B),
+        //       size: 24.sp,
+        //     ),
+        //   ),
+        //   SizedBox(width: 8.w),
+        // ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(24.w),
@@ -72,7 +72,8 @@ class ProfileView extends GetView<ProfileController> {
       }
 
       final userData = controller.user.value;
-      final name = userData?.name ??
+      final name =
+          userData?.name ??
           ((userData?.firstName != null || userData?.lastName != null)
               ? '${userData?.firstName ?? ''} ${userData?.lastName ?? ''}'
                     .trim()

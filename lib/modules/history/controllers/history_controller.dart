@@ -1,6 +1,7 @@
 import 'package:fixpair/core/utils/helpers.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
+import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,9 +15,19 @@ class HistoryController extends GetxController {
   final RxList<BookingModel> pastBookings = <BookingModel>[].obs;
 
   final scrollController = ScrollController();
-  final currentPage = 1.obs;
-  final hasMore = true.obs;
-  final isLoadingMore = false.obs;
+
+  // Independent pagination states for each tab
+  final upcomingPage = 1.obs;
+  final pastPage = 1.obs;
+  final upcomingHasMore = true.obs;
+  final pastHasMore = true.obs;
+  final upcomingLoadingMore = false.obs;
+  final pastLoadingMore = false.obs;
+
+  // Reactively forward properties to preserve view bindings
+  RxBool get hasMore => selectedTab.value == 0 ? upcomingHasMore : pastHasMore;
+  RxBool get isLoadingMore =>
+      selectedTab.value == 0 ? upcomingLoadingMore : pastLoadingMore;
 
   @override
   void onInit() {
@@ -40,75 +51,76 @@ class HistoryController extends GetxController {
   }
 
   Future<void> fetchMyBookings({bool isLoadMore = false}) async {
+    final tab = selectedTab.value;
+
+    // Determine target pagination state
+    RxInt pageVar = tab == 0 ? upcomingPage : pastPage;
+    RxBool hasMoreVar = tab == 0 ? upcomingHasMore : pastHasMore;
+    RxBool loadMoreVar = tab == 0 ? upcomingLoadingMore : pastLoadingMore;
+    RxList<BookingModel> listVar = tab == 0 ? upcomingBookings : pastBookings;
+
     try {
       if (isLoadMore) {
-        isLoadingMore.value = true;
-        currentPage.value++;
+        if (!hasMoreVar.value) return;
+        loadMoreVar.value = true;
+        pageVar.value++;
       } else {
         isLoading.value = true;
-        currentPage.value = 1;
-        hasMore.value = true;
-        upcomingBookings.clear();
-        pastBookings.clear();
+        pageVar.value = 1;
+        hasMoreVar.value = true;
+        listVar.clear();
       }
 
-      final response = await _userRepository.getMyBookings(
-        page: currentPage.value,
-        limit: 10,
-      );
+      // Build specific query path based on tab as requested by the user:
+      // Tab 0 (Upcoming): status=pending&status=accepted&status=confirmed
+      // Tab 1 (Past): status=completed&status=rejected&status=cancelled&status=expired
+      final String statusQuery = tab == 0
+          ? 'status=pending&status=accepted&status=confirmed'
+          : 'status=completed&status=rejected&status=cancelled&status=expired';
+
+      final String 
+      uri =
+          '${ApiConstants.myBookings}?$statusQuery&page=${pageVar.value}&limit=10';
+
+      final response = await _userRepository.getBookingsWithUrl(uri);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
-        final List<BookingModel> allBookings = data
+        final List<BookingModel> fetchedBookings = data
             .map((e) => BookingModel.fromJson(e))
             .toList();
 
-        final upcoming = allBookings
-            .where(
-              (b) =>
-                  b.status == 'pending' ||
-                  b.status == 'confirmed' ||
-                  b.status == 'accepted',
-            )
-            .toList();
-
-        final past = allBookings
-            .where(
-              (b) =>
-                  b.status == 'completed' ||
-                  b.status == 'cancelled' ||
-                  b.status == 'expired' ||
-                  b.status == 'rejected',
-            )
-            .toList();
-
         if (isLoadMore) {
-          upcomingBookings.addAll(upcoming);
-          pastBookings.addAll(past);
+          listVar.addAll(fetchedBookings);
         } else {
-          upcomingBookings.assignAll(upcoming);
-          pastBookings.assignAll(past);
+          listVar.assignAll(fetchedBookings);
         }
 
         // Pagination metadata check
         if (response.data['pagination'] != null) {
           final pagination = response.data['pagination'];
           final totalPage = pagination['totalPage'] ?? 1;
-          hasMore.value = currentPage.value < totalPage;
+          hasMoreVar.value = pageVar.value < totalPage;
         } else {
-          hasMore.value = false;
+          hasMoreVar.value = false;
         }
       }
     } catch (e) {
-      Helpers.showDebugLog('Error fetching bookings: $e');
+      Helpers.showDebugLog('Error fetching bookings for tab $tab: $e');
     } finally {
       isLoading.value = false;
-      isLoadingMore.value = false;
+      loadMoreVar.value = false;
     }
   }
 
   void selectTab(int index) {
     selectedTab.value = index;
+    // Load tab-specific bookings if empty
+    if (index == 0 && upcomingBookings.isEmpty) {
+      fetchMyBookings();
+    } else if (index == 1 && pastBookings.isEmpty) {
+      fetchMyBookings();
+    }
   }
 
   Future<void> cancelBooking(String id, {String? reason}) async {
@@ -127,6 +139,38 @@ class HistoryController extends GetxController {
     } catch (e) {
       Helpers.showDebugLog('Error cancelling booking: $e');
       Helpers.showError('An unexpected error occurred');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> submitReview({
+    required String consultationId,
+    required double rating,
+    required String comment,
+  }) async {
+    try {
+      isLoading.value = true;
+      final response = await _userRepository.postReview(
+        consultationId: consultationId,
+        rating: rating,
+        comment: comment,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Helpers.showSuccess('Review submitted successfully!');
+        fetchMyBookings(); // Refresh the list
+        return true;
+      } else {
+        Helpers.showError(
+          response.data['message'] ?? 'Failed to submit review',
+        );
+        return false;
+      }
+    } catch (e) {
+      Helpers.showDebugLog('Error submitting review: $e');
+      Helpers.showError('An unexpected error occurred while posting review');
+      return false;
     } finally {
       isLoading.value = false;
     }

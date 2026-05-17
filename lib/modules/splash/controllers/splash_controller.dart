@@ -7,7 +7,7 @@ import '../../../core/services/auth_service.dart';
 
 class SplashController extends GetxController {
   final AuthService _authService = Get.find();
-  final Color bgColor = const Color(0xFF81A5DC);
+  final Color bgColor = const Color(0xFF090E1A);
   final String image = ImagePaths.appLogo;
 
   @override
