@@ -1,4 +1,5 @@
 import 'package:fixpair/config/routes/app_pages.dart';
+import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -45,37 +46,50 @@ class ConsultantConfirmationView
           SizedBox(width: 8.w),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildConsultantCard(),
-            SizedBox(height: 24.h),
-            _buildBillingSummary(),
-            SizedBox(height: 24.h),
-            Text(
-              'PAYMENT METHOD',
-              style: GoogleFonts.manrope(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w800,
-                color: const Color(0xFF64748B),
-                letterSpacing: 0.5,
-              ),
+      body: Obx(() {
+        if (controller.isLoading.value &&
+            controller.consultantNameRx.value == 'Sarah Müller') {
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF6B00)),
             ),
-            SizedBox(height: 12.h),
-            _buildPaymentMethod(),
-            SizedBox(height: 24.h),
-            _buildSecurePaymentInfo(),
-            SizedBox(height: 32.h),
-            _buildConfirmButton(),
-          ],
-        ),
-      ),
+          );
+        }
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(20.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildConsultantCard(),
+              SizedBox(height: 24.h),
+              _buildBillingSummary(),
+              SizedBox(height: 24.h),
+              Text(
+                'PAYMENT METHOD',
+                style: GoogleFonts.manrope(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF64748B),
+                  letterSpacing: 0.5,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              _buildPaymentMethod(),
+              SizedBox(height: 24.h),
+              _buildSecurePaymentInfo(),
+              SizedBox(height: 32.h),
+              _buildConfirmButton(),
+            ],
+          ),
+        );
+      }),
     );
   }
 
   Widget _buildConsultantCard() {
+    final imageUrl = ApiConstants.getImageUrl(controller.consultantImage);
+
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -97,11 +111,16 @@ class ConsultantConfirmationView
             height: 56.w,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16.r),
-              image: const DecorationImage(
-                image: NetworkImage('https://i.pravatar.cc/150?u=sarah'),
-                fit: BoxFit.cover,
-              ),
+              image: imageUrl.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(imageUrl),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
+            child: imageUrl.isEmpty
+                ? const Icon(Icons.person, color: Color(0xFF94A3B8))
+                : null,
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -262,8 +281,12 @@ class ConsultantConfirmationView
                 Row(
                   children: [
                     Icon(
-                      Icons.check_circle_rounded,
-                      color: const Color(0xFF22C55E),
+                      controller.hasCard.value
+                          ? Icons.check_circle_rounded
+                          : Icons.warning_amber_rounded,
+                      color: controller.hasCard.value
+                          ? const Color(0xFF22C55E)
+                          : const Color(0xFFEF4444),
                       size: 14.sp,
                     ),
                     SizedBox(width: 4.w),
@@ -272,7 +295,9 @@ class ConsultantConfirmationView
                       style: GoogleFonts.manrope(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF22C55E),
+                        color: controller.hasCard.value
+                            ? const Color(0xFF22C55E)
+                            : const Color(0xFFEF4444),
                       ),
                     ),
                   ],
@@ -281,9 +306,12 @@ class ConsultantConfirmationView
             ),
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () async {
+              await Get.toNamed(AppRoutes.PAYMENT_METHODS);
+              controller.fetchPaymentMethods();
+            },
             child: Text(
-              'Change',
+              controller.hasCard.value ? 'Change' : 'Add Card',
               style: GoogleFonts.manrope(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
@@ -359,39 +387,50 @@ class ConsultantConfirmationView
   }
 
   Widget _buildConfirmButton() {
+    final isEnabled = controller.hasCard.value && !controller.isLoading.value;
+
     return Container(
       width: double.infinity,
       height: 60.h,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFF6B00), Color(0xFFFF8A00)],
-        ),
+        gradient: isEnabled
+            ? const LinearGradient(
+                colors: [Color(0xFFFF6B00), Color(0xFFFF8A00)],
+              )
+            : null,
+        color: isEnabled ? null : const Color(0xFFCBD5E1),
         borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFFF6B00).withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: isEnabled
+            ? [
+                BoxShadow(
+                  color: const Color(0xFFFF6B00).withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : [],
       ),
 
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => Get.offNamed(AppRoutes.VIDEO_CALL),
+          onTap: isEnabled ? () => controller.startVideoCall() : null,
           borderRadius: BorderRadius.circular(20.r),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.lock_rounded, color: Colors.white, size: 20.sp),
+              Icon(
+                Icons.lock_rounded,
+                color: isEnabled ? Colors.white : const Color(0xFF94A3B8),
+                size: 20.sp,
+              ),
               SizedBox(width: 12.w),
               Text(
                 'Authorize Payment & Start Call',
                 style: GoogleFonts.manrope(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  color: isEnabled ? Colors.white : const Color(0xFF94A3B8),
                 ),
               ),
             ],

@@ -1,4 +1,4 @@
-
+import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fixpair/core/utils/logger.dart';
@@ -39,8 +39,27 @@ class FirebaseNotificationService {
     );
     AppLogger.debug('FCM Permission: ${settings.authorizationStatus}');
 
+    // Get APNS token for iOS reliability
+    try {
+      if (Platform.isIOS) {
+        String? apnsToken = await _messaging.getAPNSToken();
+        int retryCount = 0;
+        while (apnsToken == null && retryCount < 3) {
+          await Future.delayed(const Duration(seconds: 2));
+          apnsToken = await _messaging.getAPNSToken();
+          retryCount++;
+          AppLogger.debug('⏳ Waiting for APNS Token... (Retry: $retryCount)');
+        }
+      }
+    } catch (e) {
+      AppLogger.debug('Error fetching APNS Token: $e');
+    }
+
     // Get FCM token
     final token = await _messaging.getToken();
+    print('🔥 [FCM SERVICE] ---------------------------------------------');
+    print('🔥 FCM TOKEN: $token');
+    print('🔥 -----------------------------------------------------------');
     AppLogger.debug('FCM Token: $token');
 
     // Listen for token refresh
@@ -69,9 +88,7 @@ class FirebaseNotificationService {
     }
 
     // Register background handler
-    FirebaseMessaging.onBackgroundMessage(
-      _firebaseMessagingBackgroundHandler,
-    );
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     return token;
   }

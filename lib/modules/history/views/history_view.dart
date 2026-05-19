@@ -401,7 +401,9 @@ class HistoryView extends GetView<HistoryController> {
 
   Widget _renderActionButtons(BookingModel booking) {
     if (booking.status?.toLowerCase() == 'confirmed') {
-      return _buildPrimaryButton('Join', () {});
+      return _buildPrimaryButton('Join', () {
+        Get.toNamed(AppRoutes.CONSULTANT_CONFIRMATION, arguments: booking);
+      });
     } else if (booking.status?.toLowerCase() == 'accepted') {
       return Row(
         children: [

@@ -83,7 +83,7 @@ class UserRepository {
     };
     return await _apiClient.getData(
       ApiConstants.recommended,
-      query: query,
+      // query: query,
     );
   }
 
@@ -117,9 +117,10 @@ class UserRepository {
 
   // Get current session details
   Future<Response> getVideoSession(String consultationId) async {
-    return await _apiClient.getData(ApiConstants.videoSession, query: {
-      'consultationId': consultationId,
-    });
+    return await _apiClient.getData(
+      ApiConstants.videoSession,
+      query: {'consultationId': consultationId},
+    );
   }
 
   // Join a video session
@@ -184,11 +185,15 @@ class UserRepository {
 
   // Get statistics/average rating of a consultant
   Future<Response> getConsultantStats(String consultantId) async {
-    return await _apiClient.getData(
-      ApiConstants.consultantStats(consultantId),
-    );
+    return await _apiClient.getData(ApiConstants.consultantStats(consultantId));
+  }
+
+  // Save FCM device token for push notifications
+  Future<Response> saveDeviceToken(String deviceToken) async {
+    return await _apiClient.postData('/user/device-token', {
+      'deviceToken': deviceToken,
+      'deviceType': GetPlatform.isIOS ? 'ios' : 'android',
+      "action": "add",
+    });
   }
 }
-
-
-

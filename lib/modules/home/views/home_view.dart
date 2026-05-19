@@ -457,7 +457,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    controller.startVideoCall(booking);
+                    Get.toNamed(AppRoutes.CONSULTANT_CONFIRMATION, arguments: booking);
                   },
 
                   child: Container(
