@@ -120,6 +120,9 @@ class UserData {
   final String? updatedAt;
   final String? tags;
   final ConsultantStats? stats;
+  final double? rating;
+  final double? averageRating;
+  final String? tag;
 
   UserData({
     this.authentication,
@@ -150,6 +153,9 @@ class UserData {
     this.updatedAt,
     this.tags,
     this.stats,
+    this.rating,
+    this.averageRating,
+    this.tag,
   });
 
   factory UserData.fromJson(Map<String, dynamic> json) {
@@ -178,7 +184,7 @@ class UserData {
         visitFee: int.tryParse(json['visitFee']?.toString() ?? '0') ?? 0,
         perMinuteRate:
             int.tryParse(json['perMinuteRate']?.toString() ?? '0') ?? 0,
-        activeStatus: json['activeStatus'] == true,
+        activeStatus: json['activeStatus'] == true || json['activeStatus']?.toString() == 'true',
         stripeCustomerId: json['stripeCustomerId']?.toString(),
         paypalPayerId: json['paypalPayerId']?.toString(),
         paymentMethods: json['paymentMethods'] is List
@@ -190,6 +196,13 @@ class UserData {
         stats: json['stats'] != null
             ? ConsultantStats.fromJson(json['stats'])
             : null,
+        rating: json['rating'] != null
+            ? double.tryParse(json['rating'].toString())
+            : null,
+        averageRating: json['averageRating'] != null
+            ? double.tryParse(json['averageRating'].toString())
+            : null,
+        tag: json['tag']?.toString(),
       );
     } catch (e) {
       debugPrint('UserData Parsing Error: $e');
@@ -227,8 +240,15 @@ class UserData {
       'updatedAt': updatedAt,
       'tags': tags,
       'stats': stats?.toJson(),
+      'rating': rating,
+      'averageRating': averageRating,
+      'tag': tag,
     };
   }
+
+  double get ratingValue => rating ?? averageRating ?? stats?.avgRating ?? 0.0;
+  String get displayRating => ratingValue > 0 ? ratingValue.toStringAsFixed(1) : 'New';
+  String? get activeTag => (tag != null && tag!.isNotEmpty) ? tag : tags;
 }
 
 class AuthenticationModel {

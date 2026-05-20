@@ -457,7 +457,10 @@ class LaundryHomeScreen extends GetView<HomeController> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    Get.toNamed(AppRoutes.CONSULTANT_CONFIRMATION, arguments: booking);
+                    Get.toNamed(
+                      AppRoutes.CONSULTANT_CONFIRMATION,
+                      arguments: booking,
+                    );
                   },
 
                   child: Container(
@@ -491,10 +494,10 @@ class LaundryHomeScreen extends GetView<HomeController> {
     final name = consultant.name ?? 'Consultant';
     final role = consultant.expertise ?? consultant.consultancyType ?? 'Expert';
     final category = (consultant.consultancyType ?? 'Expert').toUpperCase();
-    final averageRating = consultant.stats?.avgRating ?? 0.0;
-    final rating = averageRating > 0 ? averageRating.toStringAsFixed(1) : 'New';
+    final rating = consultant.displayRating;
     final price = '${consultant.perMinuteRate ?? 0}.00€/min';
-    final status = consultant.activeStatus == true ? 'Immediate' : 'Offline';
+    final isOnline = consultant.activeStatus == true;
+    final status = isOnline ? 'Online' : 'Offline';
     final image = ApiConstants.getImageUrl(consultant.image);
 
     return GestureDetector(
@@ -536,7 +539,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                     width: 12.w,
                     height: 12.w,
                     decoration: BoxDecoration(
-                      color: consultant.activeStatus == true
+                      color: isOnline
                           ? const Color(0xFF10B981)
                           : const Color(0xFF94A3B8),
                       shape: BoxShape.circle,
@@ -554,23 +557,49 @@ class LaundryHomeScreen extends GetView<HomeController> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
-                          vertical: 4.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE0EFFF),
-                          borderRadius: BorderRadius.circular(6.r),
-                        ),
-                        child: Text(
-                          category,
-                          style: GoogleFonts.manrope(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF0066FF),
+                      Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 4.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE0EFFF),
+                              borderRadius: BorderRadius.circular(6.r),
+                            ),
+                            child: Text(
+                              category,
+                              style: GoogleFonts.manrope(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF0066FF),
+                              ),
+                            ),
                           ),
-                        ),
+                          if (consultant.activeTag != null &&
+                              consultant.activeTag!.isNotEmpty) ...[
+                            SizedBox(width: 6.w),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8.w,
+                                vertical: 4.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF3EB),
+                                borderRadius: BorderRadius.circular(6.r),
+                              ),
+                              child: Text(
+                                consultant.activeTag!.toUpperCase(),
+                                style: GoogleFonts.manrope(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFFFF6B00),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       Row(
                         children: [
@@ -629,7 +658,9 @@ class LaundryHomeScreen extends GetView<HomeController> {
                           vertical: 6.h,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE0EFFF),
+                          color: isOnline
+                              ? const Color(0xFFDCFCE7)
+                              : const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(6.r),
                         ),
                         child: Text(
@@ -637,7 +668,9 @@ class LaundryHomeScreen extends GetView<HomeController> {
                           style: GoogleFonts.manrope(
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF0066FF),
+                            color: isOnline
+                                ? const Color(0xFF10B981)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                       ),

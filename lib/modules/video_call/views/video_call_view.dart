@@ -11,7 +11,8 @@ class VideoCallView extends GetView<VideoCallController> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final isPipMode = mediaQuery.size.width < 280 || mediaQuery.size.height < 280;
+    final isPipMode =
+        mediaQuery.size.width < 280 || mediaQuery.size.height < 280;
 
     return PopScope(
       canPop: false,
@@ -36,8 +37,8 @@ class VideoCallView extends GetView<VideoCallController> {
               ),
 
             // 3. User Video (PiP Window)
-            if (!isPipMode)
-              _buildUserPiP(),
+            if (!isPipMode) _buildUserPiP(),
+
 
             // 4. Bottom Controls
             if (!isPipMode)
@@ -588,6 +589,7 @@ class VideoCallView extends GetView<VideoCallController> {
           ),
         ),
 
+
         // Switch Camera (Flip)
         _buildStaticControlButton(
           icon: Icons.flip_camera_ios_rounded,
@@ -601,12 +603,14 @@ class VideoCallView extends GetView<VideoCallController> {
     required IconData activeIcon,
     required IconData inactiveIcon,
     required VoidCallback onTap,
+    VoidCallback? onLongPress,
     required RxBool isActive,
   }) {
     return Obx(() {
       final active = isActive.value;
       return GestureDetector(
         onTap: onTap,
+        onLongPress: onLongPress,
         child: Container(
           width: 54.w,
           height: 54.w,

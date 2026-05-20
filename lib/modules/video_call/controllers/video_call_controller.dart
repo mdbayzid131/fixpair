@@ -8,7 +8,7 @@ import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../../../core/utils/helpers.dart';
+import '../../../core/utils/logger.dart';
 
 class VideoCallController extends GetxController {
   final UserRepository _userRepository = Get.find();
@@ -94,36 +94,49 @@ class VideoCallController extends GetxController {
     await engine.initialize(
       const RtcEngineContext(
         appId: appId,
-        channelProfile: ChannelProfileType.channelProfileCommunication,
+        channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
+        audioScenario: AudioScenarioType.audioScenarioGameStreaming,
       ),
     );
 
     // 3. Register Event Handlers
     engine.registerEventHandler(
       RtcEngineEventHandler(
-        onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
+        onJoinChannelSuccess: (RtcConnection connection, int elapsed) async {
           isJoined.value = true;
           _setNativeCallActive(true);
-          // Timer does NOT start here. We wait for the consultant to join.
+          AppLogger.info(
+            '[Agora] Channel joined successfully! elapsed: $elapsed',
+          );
         },
         onUserJoined: (RtcConnection connection, int uid, int elapsed) {
           remoteUid.value = uid;
           isRemoteVideoMuted.value = false;
+          AppLogger.info(
+            '[Agora] Remote user joined: uid: $uid, elapsed: $elapsed',
+          );
           // Start timing & billing ONLY when the consultant joins!
           startTimer();
         },
         onUserOffline:
             (RtcConnection connection, int uid, UserOfflineReasonType reason) {
+              AppLogger.info(
+                '[Agora] Remote user offline: uid: $uid, reason: $reason',
+              );
               remoteUid.value = 0;
               isRemoteVideoMuted.value = false;
               endCall();
             },
         onUserMuteVideo: (RtcConnection connection, int uid, bool muted) {
+          AppLogger.info(
+            '[Agora] Remote user muted video: uid: $uid, muted: $muted',
+          );
           if (uid == remoteUid.value) {
             isRemoteVideoMuted.value = muted;
           }
         },
         onLeaveChannel: (RtcConnection connection, RtcStats stats) {
+          AppLogger.info('[Agora] Left channel: stats: $stats');
           isJoined.value = false;
         },
       ),
@@ -166,6 +179,7 @@ class VideoCallController extends GetxController {
 
   void toggleMic() async {
     isMicOn.value = !isMicOn.value;
+    AppLogger.info('[Agora] toggleMic() called. isMicOn: ${isMicOn.value}');
     await engine.muteLocalAudioStream(!isMicOn.value);
   }
 
@@ -303,7 +317,7 @@ class VideoCallController extends GetxController {
     if (overlay != null) {
       overlay.insert(_overlayEntry!);
     } else {
-      Helpers.showDebugLog('Could not find root OverlayState!');
+      AppLogger.warning('[Agora] Could not find root OverlayState!');
     }
   }
 
@@ -315,7 +329,11 @@ class VideoCallController extends GetxController {
         return Container(
           color: const Color(0xFF1E293B),
           child: const Center(
-            child: Icon(Icons.videocam_off_rounded, color: Color(0xFFEF4444), size: 24),
+            child: Icon(
+              Icons.videocam_off_rounded,
+              color: Color(0xFFEF4444),
+              size: 24,
+            ),
           ),
         );
       }
@@ -332,7 +350,11 @@ class VideoCallController extends GetxController {
           return Container(
             color: const Color(0xFF1E293B),
             child: const Center(
-              child: Icon(Icons.videocam_off_rounded, color: Color(0xFFEF4444), size: 24),
+              child: Icon(
+                Icons.videocam_off_rounded,
+                color: Color(0xFFEF4444),
+                size: 24,
+              ),
             ),
           );
         }
@@ -345,7 +367,10 @@ class VideoCallController extends GetxController {
         );
       } else {
         return const Center(
-          child: CircularProgressIndicator(color: Color(0xFF22C55E), strokeWidth: 2),
+          child: CircularProgressIndicator(
+            color: Color(0xFF22C55E),
+            strokeWidth: 2,
+          ),
         );
       }
     }
@@ -361,7 +386,7 @@ class VideoCallController extends GetxController {
     try {
       await _userRepository.endVideoSession(sessionId);
     } catch (e) {
-      Helpers.showDebugLog('Error ending session: $e');
+      AppLogger.warning('[Agora] Error ending session: $e');
     }
     _timer?.cancel();
     await engine.leaveChannel();
@@ -386,7 +411,9 @@ class VideoCallController extends GetxController {
     try {
       _channel.invokeMethod('setCallActive', {'isActive': isActive});
     } catch (e) {
-      Helpers.showDebugLog('Error invoking setCallActive MethodChannel: $e');
+      AppLogger.warning(
+        '[Agora] Error invoking setCallActive MethodChannel: $e',
+      );
     }
   }
 
@@ -399,4 +426,5 @@ class VideoCallController extends GetxController {
     closeOverlay();
     super.onClose();
   }
+
 }
