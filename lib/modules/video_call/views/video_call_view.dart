@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fixpair/data/models/transcript_message.dart';
 import '../controllers/video_call_controller.dart';
 
 class VideoCallView extends GetView<VideoCallController> {
@@ -39,6 +40,14 @@ class VideoCallView extends GetView<VideoCallController> {
             // 3. User Video (PiP Window)
             if (!isPipMode) _buildUserPiP(),
 
+            // Live Subtitles Overlay
+            if (!isPipMode)
+              Positioned(
+                bottom: 130.h,
+                left: 20.w,
+                right: 20.w,
+                child: _buildLiveSubtitles(),
+              ),
 
             // 4. Bottom Controls
             if (!isPipMode)
@@ -595,6 +604,12 @@ class VideoCallView extends GetView<VideoCallController> {
           icon: Icons.flip_camera_ios_rounded,
           onTap: () => controller.switchCamera(),
         ),
+
+        // Live Subtitles/Transcript Log
+        _buildStaticControlButton(
+          icon: Icons.subtitles_rounded,
+          onTap: () => controller.showTranscriptBottomSheet(),
+        ),
       ],
     );
   }
@@ -653,5 +668,82 @@ class VideoCallView extends GetView<VideoCallController> {
         child: Icon(icon, color: Colors.white, size: 24.sp),
       ),
     );
+  }
+
+  Widget _buildLiveSubtitles() {
+    return Obx(() {
+      final displayList = <TranscriptMessage>[];
+
+      // Add last 2 items from history
+      if (controller.transcriptHistory.isNotEmpty) {
+        final historySlice = controller.transcriptHistory.length > 2
+            ? controller.transcriptHistory.sublist(controller.transcriptHistory.length - 2)
+            : controller.transcriptHistory;
+        displayList.addAll(historySlice);
+      }
+
+      // Add active consultant and user subtitles
+      if (controller.activeConsultantSubtitle.value != null) {
+        displayList.add(controller.activeConsultantSubtitle.value!);
+      }
+      if (controller.activeUserSubtitle.value != null) {
+        displayList.add(controller.activeUserSubtitle.value!);
+      }
+
+      if (displayList.isEmpty) return const SizedBox.shrink();
+
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.65),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: Colors.white.withOpacity(0.12),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: displayList.map((msg) {
+            final isUser = msg.speakerRole == 'user';
+            return Padding(
+              padding: EdgeInsets.only(bottom: 6.h),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${msg.speakerName}: ',
+                    style: GoogleFonts.manrope(
+                      color: isUser ? const Color(0xFF3B82F6) : const Color(0xFF10B981),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      msg.text,
+                      style: GoogleFonts.manrope(
+                        color: Colors.white.withOpacity(0.95),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        height: 1.3,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    });
   }
 }

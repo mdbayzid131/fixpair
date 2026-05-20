@@ -26,17 +26,17 @@ class SearchView extends GetView<search_ctrl.SearchController> {
             color: const Color(0xFF1D293D),
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.filter_list_rounded,
-              color: const Color(0xFF64748B),
-              size: 24.sp,
-            ),
-          ),
-          SizedBox(width: 8.w),
-        ],
+        // actions: [
+        //   IconButton(
+        //     onPressed: () {},
+        //     icon: Icon(
+        //       Icons.filter_list_rounded,
+        //       color: const Color(0xFF64748B),
+        //       size: 24.sp,
+        //     ),
+        //   ),
+        //   SizedBox(width: 8.w),
+        // ],
       ),
       body: Column(
         children: [

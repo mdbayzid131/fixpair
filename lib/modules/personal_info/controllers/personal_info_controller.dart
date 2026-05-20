@@ -36,8 +36,11 @@ class PersonalInfoController extends GetxController {
         );
         user.value = profileResponse.data;
         if (user.value != null) {
-          firstNameController.text = user.value!.firstName ?? '';
-          lastNameController.text = user.value!.lastName ?? '';
+          final names = user.value!.name!.split(' ');
+          firstNameController.text = names.isNotEmpty ? names[0] : '';
+          lastNameController.text = names.length > 1
+              ? names.sublist(1).join(' ')
+              : '';
           emailController.text = user.value!.email ?? '';
         }
       } else {
@@ -76,8 +79,8 @@ class PersonalInfoController extends GetxController {
       isLoading.value = true;
       Helpers.showLoadingDialog();
 
-      final fullName =
-          '${firstNameController.text} ${lastNameController.text}'.trim();
+      final fullName = '${firstNameController.text} ${lastNameController.text}'
+          .trim();
 
       final Map<String, dynamic> body = {
         "name": fullName,
@@ -100,7 +103,7 @@ class PersonalInfoController extends GetxController {
         Helpers.showSuccess('Profile updated successfully');
         pickedImage.value = null; // Clear picked image after success
         await fetchProfile(); // Refresh local profile
-        
+
         // Refresh main profile screen if it's open
         if (Get.isRegistered<ProfileController>()) {
           Get.find<ProfileController>().fetchProfile();

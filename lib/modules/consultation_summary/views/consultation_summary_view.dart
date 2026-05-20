@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -45,6 +46,8 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
             _buildInvoiceDetails(),
             SizedBox(height: 24.h),
             _buildConsultantNotes(),
+            SizedBox(height: 24.h),
+            _buildDialogueTranscript(),
             SizedBox(height: 32.h),
             _buildRatingSection(),
             SizedBox(height: 32.h),
@@ -57,7 +60,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
   }
 
   Widget _buildCompletedCard() {
-    return Container(
+    return Obx(() => Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 20.w),
       decoration: BoxDecoration(
@@ -86,7 +89,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Your session with ${controller.consultantName}\nwas successful.',
+            'Your session with ${controller.consultantName.value}\nwas successful.',
             textAlign: TextAlign.center,
             style: GoogleFonts.manrope(
               fontSize: 15.sp,
@@ -97,11 +100,11 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildInvoiceDetails() {
-    return Container(
+    return Obx(() => Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -145,13 +148,13 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
             ],
           ),
           SizedBox(height: 24.h),
-          _buildDetailRow('Date', controller.date),
+          _buildDetailRow('Date', controller.date.value),
           SizedBox(height: 16.h),
-          _buildDetailRow('Duration', controller.duration),
+          _buildDetailRow('Duration', controller.duration.value),
           SizedBox(height: 16.h),
-          _buildDetailRow('Rate', controller.rate),
+          _buildDetailRow('Rate', controller.rate.value),
           SizedBox(height: 16.h),
-          _buildDetailRow('VAT (19%)', controller.vat),
+          _buildDetailRow('VAT (19%)', controller.vat.value),
           SizedBox(height: 20.h),
           Divider(color: Colors.grey.withOpacity(0.1), thickness: 1),
           SizedBox(height: 20.h),
@@ -167,7 +170,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
                 ),
               ),
               Text(
-                controller.totalCharged,
+                controller.totalCharged.value,
                 style: GoogleFonts.manrope(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.w800,
@@ -191,7 +194,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildDetailRow(String label, String value) {
@@ -417,5 +420,134 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
         ),
       ),
     );
+  }
+
+  Widget _buildDialogueTranscript() {
+    return Obx(() {
+      return Container(
+        padding: EdgeInsets.all(24.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Dialogue Transcript',
+                  style: GoogleFonts.manrope(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1D293D),
+                  ),
+                ),
+                if (controller.transcript.isNotEmpty)
+                  IconButton(
+                    icon: Icon(Icons.copy_rounded, color: const Color(0xFF0066FF), size: 20.sp),
+                    onPressed: () {
+                      final fullText = controller.transcript.map((msg) => '${msg.speakerName}: ${msg.text}').join('\n');
+                      Clipboard.setData(ClipboardData(text: fullText));
+                      Get.snackbar(
+                        'Success',
+                        'Transcript copied to clipboard',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    },
+                  ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              'Real-time text transcript generated during the video session.',
+              style: GoogleFonts.manrope(
+                fontSize: 13.sp,
+                color: const Color(0xFF94A3B8),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 20.h),
+            if (controller.transcript.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 24.h),
+                alignment: Alignment.center,
+                child: Text(
+                  'No transcripts recorded for this session.',
+                  style: GoogleFonts.manrope(
+                    color: const Color(0xFF64748B),
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              )
+            else
+              Container(
+                constraints: BoxConstraints(maxHeight: 250.h),
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: controller.transcript.length,
+                  itemBuilder: (context, index) {
+                    final msg = controller.transcript[index];
+                    final isUser = msg.speakerRole == 'user';
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                msg.speakerName,
+                                style: GoogleFonts.manrope(
+                                  color: isUser ? const Color(0xFF0066FF) : const Color(0xFF10B981),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13.sp,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                '${msg.timestamp.hour.toString().padLeft(2, '0')}:${msg.timestamp.minute.toString().padLeft(2, '0')}',
+                                style: GoogleFonts.manrope(
+                                  color: const Color(0xFF94A3B8),
+                                  fontSize: 10.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            msg.text,
+                            style: GoogleFonts.manrope(
+                              color: const Color(0xFF334155),
+                              fontSize: 13.sp,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      );
+    });
   }
 }

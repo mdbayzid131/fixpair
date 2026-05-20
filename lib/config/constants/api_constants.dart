@@ -45,6 +45,10 @@ class ApiConstants {
   static const String videoSession = '/video-session';
   static const String joinVideoSession = '/video-session/join';
   static const String endVideoSession = '/video-session/end';
+  static String startTranscription(String consultationId) =>
+      '/consultations/$consultationId/transcription/start';
+  static String stopTranscription(String consultationId) =>
+      '/consultations/$consultationId/transcription/stop';
 
   // Payment Endpoints
   static const String createCustomer = '/payment/create-customer';
