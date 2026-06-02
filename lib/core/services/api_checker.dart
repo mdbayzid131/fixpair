@@ -6,6 +6,7 @@ import 'package:fixpair/core/utils/logger.dart';
 /// Utility to inspect API responses and surface errors appropriately.
 /// - GET errors → debug log only (non-intrusive)
 /// - WRITE errors → user-facing snackbar
+
 class ApiChecker {
   ApiChecker._();
 
@@ -37,6 +38,6 @@ class ApiChecker {
     if (data is Map && data['message'] != null) {
       return data['message'].toString();
     }
-    return fallback;
+    return response.statusMessage ?? fallback;
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -86,6 +87,24 @@ class Helpers {
     return '$minutes:$secs';
   }
 
+  /// Format DateTime to "time ago" string (e.g., "5m ago")
+  static String timeAgo(DateTime dateTime) {
+    final difference = DateTime.now().difference(dateTime);
+    if (difference.inDays >= 365) {
+      return '${(difference.inDays / 365).floor()}y ago';
+    } else if (difference.inDays >= 30) {
+      return '${(difference.inDays / 30).floor()}mo ago';
+    } else if (difference.inDays >= 1) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inHours >= 1) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inMinutes >= 1) {
+      return '${difference.inMinutes}m ago';
+    } else {
+      return 'just now';
+    }
+  }
+
   /// Format seconds to "HH:mm:ss" (e.g., 3661 → "01:01:01")
   static String formatDuration(int seconds) {
     final hours = (seconds ~/ 3600).toString().padLeft(2, '0');
@@ -94,9 +113,43 @@ class Helpers {
     return '$hours:$mins:$secs';
   }
 
-  //show bebug log
+  // ──────────────────── LOGGING ────────────────────
+
+  /// General debug log (only in debug mode)
+  static void debug(String message) {
+    if (!kDebugMode) return;
+    debugPrint('');
+    debugPrint('🔍🔍🔍 DEBUG: $message');
+    debugPrint('');
+  }
+
+  /// Info-level log
+  static void info(String message) {
+    if (!kDebugMode) return;
+    debugPrint('');
+    debugPrint('ℹ️ℹ️ℹ️ℹ INFO: $message');
+    debugPrint('');
+  }
+
+  /// Warning-level log
+  static void warning(String message) {
+    if (!kDebugMode) return;
+    debugPrint('');
+    debugPrint('⚠️⚠️⚠️ WARNING: $message');
+    debugPrint('');
+  }
+
+  /// Error-level log
+  static void error(String message) {
+    if (!kDebugMode) return;
+    debugPrint('');
+    debugPrint('❌❌❌❌ ERROR: $message');
+    debugPrint('');
+  }
+
+  /// Backward compatible showDebugLog
   static void showDebugLog(String message) {
-    debugPrint("❌❌❌❌\n❌❌❌❌DEBUG LOG: $message\n❌❌❌❌");
+    debug(message);
   }
 
   // ──────────────────── LOADING DIALOG ────────────────────
@@ -137,97 +190,148 @@ class Helpers {
     }
   }
 
-  // ──────────────────── SNACKBAR (IPHONE BLUR + IMAGE STYLE) ────────────────────
+  // ──────────────────── SNACKBAR (DUAL MODE) ────────────────────
 
-  /// Show a premium blurred snackbar matching the image layout
+  /// Show a snackbar.
+  /// [useGetxSnackbar] = true (default) → uses Get.snackbar with type-specific colors.
+  /// [useGetxSnackbar] = false → uses the premium blurred iPhone-style snackbar.
   static void showCustomSnackBar(
     String message, {
     String? title,
     SnackBarType type = SnackBarType.info,
     Duration duration = const Duration(seconds: 3),
+    bool useGetxSnackbar = true,
   }) {
     final Map<String, dynamic> config = _getSnackBarConfig(type);
 
-    Get.rawSnackbar(
-      messageText: ClipRRect(
-        borderRadius: BorderRadius.circular(16.r),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // iPhone Blur
-          child: Container(
-            height: 64.h,
-            decoration: BoxDecoration(
-              color: (config['bg'] as Color).withOpacity(0.7), // Transparent BG
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.2),
-                width: 1,
+    if (useGetxSnackbar) {
+      // ── GetX Snackbar (default) ──────────────────────────────
+      Get.snackbar(
+        title ?? config['defaultTitle'] as String,
+        message,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: (config['bg'] as Color).withOpacity(0.92),
+        colorText: Colors.white,
+        icon: Icon(
+          config['icon'] as IconData,
+          color: Colors.white,
+          size: 26.sp,
+        ),
+        duration: duration,
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutCubic,
+        reverseAnimationCurve: Curves.easeInCubic,
+        animationDuration: const Duration(milliseconds: 450),
+        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        borderRadius: 14.r,
+        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
+        titleText: Text(
+          title ?? config['defaultTitle'] as String,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        messageText: Text(
+          message,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w400,
+            color: Colors.white.withOpacity(0.9),
+          ),
+        ),
+      );
+    } else {
+      // ── Custom Blur / Glassmorphism Snackbar ─────────────────
+      Get.rawSnackbar(
+        messageText: ClipRRect(
+          borderRadius: BorderRadius.circular(16.r),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              height: 64.h,
+              decoration: BoxDecoration(
+                color: (config['bg'] as Color).withOpacity(0.7),
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1,
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                // Left Icon Area
-                Container(
-                  width: 56.w,
-                  height: double.infinity,
-                  decoration: BoxDecoration(
-                    color: (config['iconBg'] as Color).withOpacity(0.8),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16.r),
-                      bottomLeft: Radius.circular(16.r),
+              child: Row(
+                children: [
+                  // Left Icon Area
+                  Container(
+                    width: 56.w,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                      color: (config['iconBg'] as Color).withOpacity(0.8),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16.r),
+                        bottomLeft: Radius.circular(16.r),
+                      ),
+                    ),
+                    child: Icon(
+                      config['icon'],
+                      color: Colors.white,
+                      size: 28.sp,
                     ),
                   ),
-                  child: Icon(config['icon'], color: Colors.white, size: 28.sp),
-                ),
-                SizedBox(width: 16.w),
-                // Text Content
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title ?? config['defaultTitle'],
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                  SizedBox(width: 16.w),
+                  // Text Content
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title ?? config['defaultTitle'],
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      Text(
-                        message,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white.withOpacity(0.9),
+                        Text(
+                          message,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white.withOpacity(0.9),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                // Close Button
-                IconButton(
-                  onPressed: () => Get.back(),
-                  icon: Icon(
-                    Icons.close_rounded,
-                    color: Colors.white.withOpacity(0.5),
-                    size: 20.sp,
+                  // Close Button
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: Colors.white.withOpacity(0.5),
+                      size: 20.sp,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      backgroundColor: Colors.transparent,
-      snackPosition: SnackPosition.TOP,
-      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      duration: duration,
-      isDismissible: true,
-      animationDuration: const Duration(milliseconds: 500),
-      snackStyle: SnackStyle.FLOATING,
-    );
+        backgroundColor: Colors.transparent,
+        snackPosition: SnackPosition.TOP,
+        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        duration: duration,
+        isDismissible: true,
+        animationDuration: const Duration(milliseconds: 500),
+        snackStyle: SnackStyle.FLOATING,
+      );
+    }
   }
 
   static Map<String, dynamic> _getSnackBarConfig(SnackBarType type) {
@@ -294,6 +398,8 @@ class Helpers {
 
   // ──────────────────── DEBOUNCE ────────────────────
 
+  static final Map<String, bool> _debounceTimers = {};
+
   /// Debounce a function call (useful for search inputs)
   static void debounce(
     String tag,
@@ -301,8 +407,14 @@ class Helpers {
     Duration duration = const Duration(milliseconds: 500),
   }) {
     if (GetUtils.isNull(tag)) return;
-    // Cancel previous timer if exists
-    Get.log('Debounce: $tag');
-    Future.delayed(duration, callback);
+
+    // If already waiting, skip
+    if (_debounceTimers[tag] == true) return;
+
+    _debounceTimers[tag] = true;
+    Future.delayed(duration, () {
+      _debounceTimers.remove(tag);
+      callback();
+    });
   }
 }
