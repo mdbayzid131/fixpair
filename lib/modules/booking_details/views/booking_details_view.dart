@@ -153,7 +153,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
       ),
       child: Row(
         children: [
-          Container(
+          SizedBox(
             width: 60.w,
             height: 60.w,
             child: ClipRRect(

@@ -2,7 +2,6 @@ import 'package:fixpair/core/services/api_checker.dart';
 import 'package:fixpair/core/utils/helpers.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
-import 'package:fixpair/modules/bottom_nab_bar/controllers/bottom_nab_bar.dart';
 import 'package:get/get.dart';
 
 class ConsultantBookingController extends GetxController {

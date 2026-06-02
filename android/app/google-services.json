@@ -1,32 +1,13 @@
 {
   "project_info": {
-    "project_number": "728061869511",
-    "project_id": "fixpair-ec6e3",
-    "storage_bucket": "fixpair-ec6e3.firebasestorage.app"
+    "project_number": "827439833710",
+    "project_id": "fixpair-606c8",
+    "storage_bucket": "fixpair-606c8.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:728061869511:android:6b96384f9598360f2b6de2",
-        "android_client_info": {
-          "package_name": "com.example.fixpair"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDeU3zvwYkIX1tr9RkqJNyi011yoJCGpS0"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:728061869511:android:248e507155ecd6bf2b6de2",
+        "mobilesdk_app_id": "1:827439833710:android:823381cb816ca011d3fc7f",
         "android_client_info": {
           "package_name": "com.fixpair.app"
         }
@@ -34,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDeU3zvwYkIX1tr9RkqJNyi011yoJCGpS0"
+          "current_key": "AIzaSyAEzXUKU3OBCndw3QXqsuqcQ6MYbXGvosw"
         }
       ],
       "services": {

@@ -1,5 +1,4 @@
 import 'package:fixpair/config/constants/image_paths.dart';
-import 'package:fixpair/config/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';

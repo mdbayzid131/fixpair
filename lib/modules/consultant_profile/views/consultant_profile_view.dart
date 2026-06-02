@@ -706,7 +706,6 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
   Widget _buildBottomAction(UserData expert) {
     final isOnline = expert.activeStatus ?? false;
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 32.h),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -717,104 +716,110 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 16.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    width: 12.w,
-                    height: 12.w,
-                    decoration: BoxDecoration(
-                      color: isOnline ? const Color(0xFF10B981) : Colors.grey,
-                      shape: BoxShape.circle,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        width: 12.w,
+                        height: 12.w,
+                        decoration: BoxDecoration(
+                          color: isOnline ? const Color(0xFF10B981) : Colors.grey,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        isOnline
+                            ? 'Available for instant call'
+                            : 'Currently Offline',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF475569),
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    isOnline
-                        ? 'Available for instant call'
-                        : 'Currently Offline',
-                    style: GoogleFonts.manrope(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF475569),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '${expert.perMinuteRate ?? 0}€',
+                          style: GoogleFonts.manrope(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF1D293D),
+                          ),
+                        ),
+                        TextSpan(
+                          text: '/min',
+                          style: GoogleFonts.manrope(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF94A3B8),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '${expert.perMinuteRate ?? 0}€',
-                      style: GoogleFonts.manrope(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFF1D293D),
-                      ),
-                    ),
-                    TextSpan(
-                      text: '/min',
-                      style: GoogleFonts.manrope(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF94A3B8),
-                      ),
-                    ),
-                  ],
+              SizedBox(height: 16.h),
+              Container(
+                width: double.infinity,
+                height: 56.h,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isOnline
+                        ? [const Color(0xFFFF6B00), const Color(0xFFFF8A00)]
+                        : [Colors.grey.shade400, Colors.grey.shade500],
+                  ),
+                  borderRadius: BorderRadius.circular(16.r),
+                  boxShadow: isOnline
+                      ? [
+                          BoxShadow(
+                            color: const Color(0xFFFF6B00).withValues(alpha: 0.3),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ]
+                      : [],
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          Container(
-            width: double.infinity,
-            height: 56.h,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: isOnline
-                    ? [const Color(0xFFFF6B00), const Color(0xFFFF8A00)]
-                    : [Colors.grey.shade400, Colors.grey.shade500],
-              ),
-              borderRadius: BorderRadius.circular(16.r),
-              boxShadow: isOnline
-                  ? [
-                      BoxShadow(
-                        color: const Color(0xFFFF6B00).withValues(alpha: 0.3),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: isOnline
+                        ? () => Get.toNamed(
+                            AppRoutes.CONSULTANT_BOOKING,
+                            arguments: expert,
+                          )
+                        : null,
+                    borderRadius: BorderRadius.circular(16.r),
+                    child: Center(
+                      child: Text(
+                        isOnline ? 'Book Consultation' : 'Unavailable',
+                        style: GoogleFonts.manrope(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
-                    ]
-                  : [],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: isOnline
-                    ? () => Get.toNamed(
-                        AppRoutes.CONSULTANT_BOOKING,
-                        arguments: expert,
-                      )
-                    : null,
-                borderRadius: BorderRadius.circular(16.r),
-                child: Center(
-                  child: Text(
-                    isOnline ? 'Book Consultation' : 'Unavailable',
-                    style: GoogleFonts.manrope(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

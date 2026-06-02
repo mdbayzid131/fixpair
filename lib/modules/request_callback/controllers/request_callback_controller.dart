@@ -4,7 +4,6 @@ import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../bottom_nab_bar/controllers/bottom_nab_bar.dart';
 
 class RequestCallbackController extends GetxController {
   final UserRepository _userRepository = Get.find();

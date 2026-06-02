@@ -408,7 +408,6 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
 
   Widget _buildBottomConfirmBar() {
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 32.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -423,141 +422,147 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 16.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'TOTAL PRICE (INKL. MWST)',
-                    style: GoogleFonts.manrope(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF94A3B8),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: controller.totalPrice.toStringAsFixed(2),
-                          style: GoogleFonts.manrope(
-                            fontSize: 28.sp,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF1D293D),
-                          ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'TOTAL PRICE (INKL. MWST)',
+                        style: GoogleFonts.manrope(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF94A3B8),
+                          letterSpacing: 0.5,
                         ),
-                        TextSpan(
-                          text: '€',
-                          style: GoogleFonts.manrope(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1D293D),
-                          ),
+                      ),
+                      SizedBox(height: 4.h),
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: controller.totalPrice.toStringAsFixed(2),
+                              style: GoogleFonts.manrope(
+                                fontSize: 28.sp,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF1D293D),
+                              ),
+                            ),
+                            TextSpan(
+                              text: '€',
+                              style: GoogleFonts.manrope(
+                                fontSize: 20.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF1D293D),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Obx(() {
+                    if (controller.dates.isEmpty) return const SizedBox.shrink();
+
+                    final selectedDate =
+                        controller.dates[controller.selectedDateIndex.value];
+                    final dateObj = DateTime.parse(selectedDate['fullDate']!);
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today_rounded,
+                              size: 16.sp,
+                              color: const Color(0xFF64748B),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              '${DateFormat('MMM').format(dateObj)} ${selectedDate['date']}, ${dateObj.year}',
+                              style: GoogleFonts.manrope(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF1D293D),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8.h),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.access_time_rounded,
+                              size: 16.sp,
+                              color: const Color(0xFF64748B),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              controller.selectedTimeIndex.value == -1
+                                  ? 'Select time'
+                                  : controller.times[controller
+                                        .selectedTimeIndex
+                                        .value],
+                              style: GoogleFonts.manrope(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF1D293D),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                  ),
+                    );
+                  }),
                 ],
               ),
-              Obx(() {
-                if (controller.dates.isEmpty) return const SizedBox.shrink();
-
-                final selectedDate =
-                    controller.dates[controller.selectedDateIndex.value];
-                final dateObj = DateTime.parse(selectedDate['fullDate']!);
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today_rounded,
-                          size: 16.sp,
-                          color: const Color(0xFF64748B),
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          '${DateFormat('MMM').format(dateObj)} ${selectedDate['date']}, ${dateObj.year}',
-                          style: GoogleFonts.manrope(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1D293D),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8.h),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.access_time_rounded,
-                          size: 16.sp,
-                          color: const Color(0xFF64748B),
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          controller.selectedTimeIndex.value == -1
-                              ? 'Select time'
-                              : controller.times[controller
-                                    .selectedTimeIndex
-                                    .value],
-                          style: GoogleFonts.manrope(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1D293D),
-                          ),
-                        ),
-                      ],
+              SizedBox(height: 24.h),
+              Container(
+                width: double.infinity,
+                height: 56.h,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFF6B00), Color(0xFFFF8A00)],
+                  ),
+                  borderRadius: BorderRadius.circular(16.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF6B00).withValues(alpha: 0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
                     ),
                   ],
-                );
-              }),
-            ],
-          ),
-          SizedBox(height: 24.h),
-          Container(
-            width: double.infinity,
-            height: 56.h,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFF6B00), Color(0xFFFF8A00)],
-              ),
-              borderRadius: BorderRadius.circular(16.r),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFFF6B00).withValues(alpha: 0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
                 ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => controller.bookScheduled(),
-                borderRadius: BorderRadius.circular(16.r),
-                child: Center(
-                  child: Text(
-                    'Confirm Booking',
-                    style: GoogleFonts.manrope(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => controller.bookScheduled(),
+                    borderRadius: BorderRadius.circular(16.r),
+                    child: Center(
+                      child: Text(
+                        'Confirm Booking',
+                        style: GoogleFonts.manrope(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

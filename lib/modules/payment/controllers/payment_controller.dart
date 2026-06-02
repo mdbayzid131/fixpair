@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../../../core/utils/helpers.dart';

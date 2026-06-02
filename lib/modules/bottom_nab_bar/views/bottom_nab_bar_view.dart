@@ -27,7 +27,6 @@ class BottomNavBarView extends GetView<BottomNavBarController> {
         ),
       ),
       bottomNavigationBar: Container(
-        height: 85.h,
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -38,39 +37,45 @@ class BottomNavBarView extends GetView<BottomNavBarController> {
             ),
           ],
         ),
-        child: Obx(
-          () => Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home_rounded,
-                label: 'Home',
-                index: 0,
-                currentIndex: controller.currentIndex.value,
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 68.h,
+            child: Obx(
+              () => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home_rounded,
+                    label: 'Home',
+                    index: 0,
+                    currentIndex: controller.currentIndex.value,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.search_rounded,
+                    activeIcon: Icons.search_rounded,
+                    label: 'Search',
+                    index: 1,
+                    currentIndex: controller.currentIndex.value,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.calendar_month_outlined,
+                    activeIcon: Icons.calendar_month_rounded,
+                    label: 'History',
+                    index: 2,
+                    currentIndex: controller.currentIndex.value,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.person_outline_rounded,
+                    activeIcon: Icons.person_rounded,
+                    label: 'Profile',
+                    index: 3,
+                    currentIndex: controller.currentIndex.value,
+                  ),
+                ],
               ),
-              _buildNavItem(
-                icon: Icons.search_rounded,
-                activeIcon: Icons.search_rounded,
-                label: 'Search',
-                index: 1,
-                currentIndex: controller.currentIndex.value,
-              ),
-              _buildNavItem(
-                icon: Icons.calendar_month_outlined,
-                activeIcon: Icons.calendar_month_rounded,
-                label: 'History',
-                index: 2,
-                currentIndex: controller.currentIndex.value,
-              ),
-              _buildNavItem(
-                icon: Icons.person_outline_rounded,
-                activeIcon: Icons.person_rounded,
-                label: 'Profile',
-                index: 3,
-                currentIndex: controller.currentIndex.value,
-              ),
-            ],
+            ),
           ),
         ),
       ),

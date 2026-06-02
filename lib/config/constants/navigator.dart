@@ -5,8 +5,8 @@ Future navigateTo(BuildContext context, Widget page) {
   return Navigator.push(
     context,
     PageRouteBuilder(
-      pageBuilder: (_, __, ___) => page,
-      transitionsBuilder: (_, animation, __, child) => SlideTransition(
+      pageBuilder: (_, _, _) => page,
+      transitionsBuilder: (_, animation, _, child) => SlideTransition(
         position: Tween<Offset>(
           begin: const Offset(1, 0), // right to left
           end: Offset.zero,

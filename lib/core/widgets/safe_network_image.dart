@@ -44,7 +44,7 @@ class SafeNetworkImage extends StatelessWidget {
         if (loadingProgress == null) return child;
         return placeholder ?? _buildLoadingIndicator(loadingProgress);
       },
-      errorBuilder: (_, __, ___) => errorWidget ?? _buildFallback(),
+      errorBuilder: (_, _, _) => errorWidget ?? _buildFallback(),
     );
 
     if (borderRadius != null) {
