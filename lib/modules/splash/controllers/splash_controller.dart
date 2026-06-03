@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/storage_service.dart';
+import '../../../config/constants/storage_constants.dart';
 
 class SplashController extends GetxController {
   final AuthService _authService = Get.find();
@@ -20,10 +22,15 @@ class SplashController extends GetxController {
     // Basic delay to ensure we don't skip too fast (3 seconds)
     await Future.delayed(const Duration(seconds: 3));
 
-    if (_authService.isLoggedIn.value) {
-      Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
+    final bool hasSeenOnboarding = await StorageService.getBool(StorageConstants.onboardingSeen) ?? false;
+    if (!hasSeenOnboarding) {
+      Get.offAllNamed(AppRoutes.ONBOARDING);
     } else {
-      Get.offAllNamed(AppRoutes.LOGIN);
+      if (_authService.isLoggedIn.value) {
+        Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
+      } else {
+        Get.offAllNamed(AppRoutes.LOGIN);
+      }
     }
   }
 }

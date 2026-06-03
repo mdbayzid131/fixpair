@@ -49,8 +49,11 @@ class UserRepository {
   }
 
   // Get available slots for a consultant
-  Future<Response> getAvailableSlots(String id) async {
-    return await _apiClient.getData(ApiConstants.availableSlots(id));
+  Future<Response> getAvailableSlots(String id, {String? date}) async {
+    return await _apiClient.getData(
+      ApiConstants.availableSlots(id),
+      query: date != null ? {'date': date} : null,
+    );
   }
 
   // Book a consultation
@@ -95,9 +98,16 @@ class UserRepository {
   }
 
   // Reschedule a booking
-  Future<Response> rescheduleBooking(String id, String newSlotId) async {
+  Future<Response> rescheduleBooking({
+    required String id,
+    required String date,
+    required String startTime,
+    required String endTime,
+  }) async {
     return await _apiClient.patchData(ApiConstants.rescheduleBooking(id), {
-      'newSlotId': newSlotId,
+      'date': date,
+      'startTime': startTime,
+      'endTime': endTime,
     });
   }
 

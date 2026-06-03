@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../../core/utils/helpers.dart';
 import '../controllers/schedule_booking_controller.dart';
 
 class ScheduleBookingView extends GetView<ScheduleBookingController> {
@@ -108,6 +109,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
               _buildSectionHeader('2. Select Time', 'Germany (CET)'),
               SizedBox(height: 16.h),
               _buildTimeGrid(),
+              _buildDurationSelector(),
               SizedBox(height: 40.h),
             ],
           ),
@@ -366,44 +368,233 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
         crossAxisCount: 3,
         crossAxisSpacing: 10.w,
         mainAxisSpacing: 10.h,
-        childAspectRatio: 2.6,
+        childAspectRatio: 2.3,
       ),
       itemCount: controller.times.length,
       itemBuilder: (context, index) {
         final time = controller.times[index];
         return Obx(() {
           final isSelected = controller.selectedTimeIndex.value == index;
+
+          final dateIndex = controller.selectedDateIndex.value;
+          final bool isBooked;
+          if (dateIndex >= 0 && dateIndex < controller.dates.length) {
+            final selectedDateKey = controller.dates[dateIndex]['fullDate'];
+            final slots = controller.slotsByDate[selectedDateKey] ?? [];
+            isBooked = index < slots.length && slots[index].isBooked == true;
+          } else {
+            isBooked = false;
+          }
+
           return GestureDetector(
-            onTap: () => controller.selectTime(index),
+            onTap: isBooked
+                ? () => Helpers.showWarning('This time slot is already booked.')
+                : () => controller.selectStartTime(index),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF0066FF) : Colors.white,
+                color: isBooked
+                    ? const Color(0xFFF1F5F9)
+                    : (isSelected ? const Color(0xFF0066FF) : Colors.white),
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
-                  color: isSelected
-                      ? const Color(0xFF0066FF)
-                      : const Color(0xFFE2E8F0),
+                  color: isBooked
+                      ? const Color(0xFFE2E8F0)
+                      : (isSelected
+                            ? const Color(0xFF0066FF)
+                            : const Color(0xFFE2E8F0)),
                   width: 1.5,
                 ),
               ),
               child: Center(
-                child: Text(
-                  time,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.manrope(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w700,
-                    color: isSelected ? Colors.white : const Color(0xFF334155),
-                  ),
-                ),
+                child: isBooked
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            time,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.manrope(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF94A3B8),
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                          SizedBox(height: 2.h),
+                          Text(
+                            'Booked',
+                            style: GoogleFonts.manrope(
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFFEF4444),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Text(
+                        time,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.manrope(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w700,
+                          color: isSelected
+                              ? Colors.white
+                              : const Color(0xFF334155),
+                        ),
+                      ),
               ),
             ),
           );
         });
       },
     );
+  }
+
+  Widget _buildDurationSelector() {
+    return Obx(() {
+      if (controller.selectedStartTime.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 32.h),
+          _buildSectionHeader('3. Select Duration', 'Based on availability'),
+          SizedBox(height: 16.h),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: controller.durationOptions.map((option) {
+                final int duration = option['duration'];
+                final String label = option['label'];
+                final bool isEnabled = option['isEnabled'];
+                final String endTime = option['endTime'];
+                final isSelected =
+                    controller.selectedDurationMinutes.value == duration;
+
+                // Calculate price for this duration
+                final rate = controller.expert.value?.perMinuteRate ?? 0;
+                final price = duration * rate;
+
+                return Padding(
+                  padding: EdgeInsets.only(right: 12.w),
+                  child: GestureDetector(
+                    onTap: isEnabled
+                        ? () {
+                            controller.selectedDurationMinutes.value = duration;
+                          }
+                        : () {
+                            Helpers.showWarning(
+                              'This duration is not available because it overlaps with a booked or unavailable slot.',
+                            );
+                          },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: 135.w,
+                      height: 100.h,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14.w,
+                        vertical: 12.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color(0xFF0066FF)
+                            : (isEnabled
+                                  ? Colors.white
+                                  : const Color(0xFFF8FAFC)),
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(
+                          color: isSelected
+                              ? const Color(0xFF0066FF)
+                              : (isEnabled
+                                    ? const Color(0xFFE2E8F0)
+                                    : const Color(0xFFE2E8F0)),
+                          width: 1.5,
+                        ),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFF0066FF,
+                                  ).withValues(alpha: 0.25),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ]
+                            : [],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                label,
+                                style: GoogleFonts.manrope(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : (isEnabled
+                                            ? const Color(0xFF1D293D)
+                                            : const Color(0xFF94A3B8)),
+                                  decoration: isEnabled
+                                      ? null
+                                      : TextDecoration.lineThrough,
+                                ),
+                              ),
+                              if (!isEnabled)
+                                Icon(
+                                  Icons.lock_outline_rounded,
+                                  size: 14.sp,
+                                  color: const Color(0xFF94A3B8),
+                                ),
+                            ],
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            'Ends at $endTime',
+                            style: GoogleFonts.manrope(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w600,
+                              color: isSelected
+                                  ? Colors.white.withValues(alpha: 0.8)
+                                  : (isEnabled
+                                        ? const Color(0xFF64748B)
+                                        : const Color(0xFF94A3B8)),
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '€${price.toStringAsFixed(2)}',
+                            style: GoogleFonts.manrope(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w800,
+                              color: isSelected
+                                  ? Colors.white
+                                  : (isEnabled
+                                        ? const Color(0xFFFF6B00)
+                                        : const Color(0xFF94A3B8)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildBottomConfirmBar() {
@@ -426,142 +617,156 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
         top: false,
         child: Padding(
           padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 16.h),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'TOTAL PRICE (INKL. MWST)',
-                        style: GoogleFonts.manrope(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF94A3B8),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: controller.totalPrice.toStringAsFixed(2),
-                              style: GoogleFonts.manrope(
-                                fontSize: 28.sp,
-                                fontWeight: FontWeight.w800,
-                                color: const Color(0xFF1D293D),
-                              ),
-                            ),
-                            TextSpan(
-                              text: '€',
-                              style: GoogleFonts.manrope(
-                                fontSize: 20.sp,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF1D293D),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  Obx(() {
-                    if (controller.dates.isEmpty) return const SizedBox.shrink();
+          child: Obx(() {
+            final hasSelectedTime = controller.selectedStartTime.isNotEmpty;
+            final selectedDate =
+                controller.dates.isNotEmpty &&
+                    controller.selectedDateIndex.value != -1
+                ? controller.dates[controller.selectedDateIndex.value]
+                : null;
+            final dateObj = selectedDate != null
+                ? DateTime.parse(selectedDate['fullDate']!)
+                : null;
 
-                    final selectedDate =
-                        controller.dates[controller.selectedDateIndex.value];
-                    final dateObj = DateTime.parse(selectedDate['fullDate']!);
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today_rounded,
-                              size: 16.sp,
-                              color: const Color(0xFF64748B),
-                            ),
-                            SizedBox(width: 8.w),
-                            Text(
-                              '${DateFormat('MMM').format(dateObj)} ${selectedDate['date']}, ${dateObj.year}',
-                              style: GoogleFonts.manrope(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF1D293D),
-                              ),
-                            ),
-                          ],
+                        Text(
+                          'TOTAL PRICE (INKL. MWST)',
+                          style: GoogleFonts.manrope(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF94A3B8),
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                        SizedBox(height: 8.h),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.access_time_rounded,
-                              size: 16.sp,
-                              color: const Color(0xFF64748B),
-                            ),
-                            SizedBox(width: 8.w),
-                            Text(
-                              controller.selectedTimeIndex.value == -1
-                                  ? 'Select time'
-                                  : controller.times[controller
-                                        .selectedTimeIndex
-                                        .value],
-                              style: GoogleFonts.manrope(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF1D293D),
+                        SizedBox(height: 4.h),
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: controller.totalPrice.toStringAsFixed(2),
+                                style: GoogleFonts.manrope(
+                                  fontSize: 28.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF1D293D),
+                                ),
                               ),
-                            ),
-                          ],
+                              TextSpan(
+                                text: '€',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1D293D),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
-                    );
-                  }),
-                ],
-              ),
-              SizedBox(height: 24.h),
-              Container(
-                width: double.infinity,
-                height: 56.h,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF6B00), Color(0xFFFF8A00)],
-                  ),
-                  borderRadius: BorderRadius.circular(16.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFF6B00).withValues(alpha: 0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
                     ),
+                    if (selectedDate != null && dateObj != null)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today_rounded,
+                                size: 16.sp,
+                                color: const Color(0xFF64748B),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                '${DateFormat('MMM').format(dateObj)} ${selectedDate['date']}, ${dateObj.year}',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1D293D),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8.h),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 16.sp,
+                                color: const Color(0xFF64748B),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                !hasSelectedTime
+                                    ? 'Select time'
+                                    : '${controller.selectedStartTime.value} - ${controller.addMinutesToTime(controller.selectedStartTime.value, controller.selectedDurationMinutes.value)}',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1D293D),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                   ],
                 ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => controller.bookScheduled(),
+                SizedBox(height: 24.h),
+                Container(
+                  width: double.infinity,
+                  height: 56.h,
+                  decoration: BoxDecoration(
+                    gradient: hasSelectedTime
+                        ? const LinearGradient(
+                            colors: [Color(0xFFFF6B00), Color(0xFFFF8A00)],
+                          )
+                        : null,
+                    color: hasSelectedTime ? null : const Color(0xFFE2E8F0),
                     borderRadius: BorderRadius.circular(16.r),
-                    child: Center(
-                      child: Text(
-                        'Confirm Booking',
-                        style: GoogleFonts.manrope(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                    boxShadow: hasSelectedTime
+                        ? [
+                            BoxShadow(
+                              color: const Color(
+                                0xFFFF6B00,
+                              ).withValues(alpha: 0.3),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                            ),
+                          ]
+                        : [],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: hasSelectedTime
+                          ? () => controller.bookScheduled()
+                          : null,
+                      borderRadius: BorderRadius.circular(16.r),
+                      child: Center(
+                        child: Text(
+                          'Confirm Booking',
+                          style: GoogleFonts.manrope(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: hasSelectedTime
+                                ? Colors.white
+                                : const Color(0xFF94A3B8),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            );
+          }),
         ),
       ),
     );

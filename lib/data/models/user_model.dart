@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
-
 class UserProfileResponseModel {
   final bool? success;
   final String? message;
@@ -184,7 +183,9 @@ class UserData {
         visitFee: int.tryParse(json['visitFee']?.toString() ?? '0') ?? 0,
         perMinuteRate:
             int.tryParse(json['perMinuteRate']?.toString() ?? '0') ?? 0,
-        activeStatus: json['activeStatus'] == true || json['activeStatus']?.toString() == 'true',
+        activeStatus:
+            json['activeStatus'] == true ||
+            json['activeStatus']?.toString() == 'true',
         stripeCustomerId: json['stripeCustomerId']?.toString(),
         paypalPayerId: json['paypalPayerId']?.toString(),
         paymentMethods: json['paymentMethods'] is List
@@ -247,7 +248,8 @@ class UserData {
   }
 
   double get ratingValue => rating ?? averageRating ?? stats?.avgRating ?? 0.0;
-  String get displayRating => ratingValue > 0 ? ratingValue.toStringAsFixed(1) : 'New';
+  String get displayRating =>
+      ratingValue > 0 ? ratingValue.toStringAsFixed(1) : 'New';
   String? get activeTag => (tag != null && tag!.isNotEmpty) ? tag : tags;
 }
 
@@ -421,6 +423,7 @@ class SlotModel {
   final String? startTime;
   final String? endTime;
   final bool? isBooked;
+  final bool? isUnavailable;
 
   SlotModel({
     this.id,
@@ -428,6 +431,7 @@ class SlotModel {
     this.startTime,
     this.endTime,
     this.isBooked,
+    this.isUnavailable,
   });
 
   factory SlotModel.fromJson(Map<String, dynamic> json) {
@@ -437,6 +441,7 @@ class SlotModel {
       startTime: json['startTime'],
       endTime: json['endTime'],
       isBooked: json['isBooked'],
+      isUnavailable: json['isUnavailable'],
     );
   }
 
@@ -447,6 +452,7 @@ class SlotModel {
       'startTime': startTime,
       'endTime': endTime,
       'isBooked': isBooked,
+      'isUnavailable': isUnavailable,
     };
   }
 }
@@ -490,7 +496,9 @@ class BookingModel {
     return BookingModel(
       id: json['_id'],
       user: json['user'] != null ? UserData.fromJson(json['user']) : null,
-      consultant: json['consultant'] != null ? UserData.fromJson(json['consultant']) : null,
+      consultant: json['consultant'] != null
+          ? UserData.fromJson(json['consultant'])
+          : null,
       bookingType: json['bookingType'],
       notes: json['notes'],
       perMinuteRate: json['perMinuteRate'],
@@ -498,7 +506,9 @@ class BookingModel {
       totalAmount: json['totalAmount'],
       status: json['status'],
       paymentStatus: json['paymentStatus'],
-      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'])
+          : null,
       date: json['date'] != null ? DateTime.tryParse(json['date']) : null,
       startTime: json['startTime'],
       endTime: json['endTime'],
@@ -546,4 +556,3 @@ class BookingModel {
     }
   }
 }
-

@@ -48,6 +48,8 @@ import '../../modules/notifications/views/notifications_view.dart';
 
 import '../../modules/splash/bindings/splash_binding.dart';
 import '../../modules/splash/views/splash_view.dart';
+import '../../modules/onboarding/bindings/onboarding_binding.dart';
+import '../../modules/onboarding/views/onboarding_view.dart';
 
 class AppRoutes {
   static const String SPLASH = '/splash';
@@ -236,6 +238,11 @@ final pages = [
     name: AppRoutes.PAYMENT_METHODS,
     page: () => const PaymentMethodsView(),
     binding: PaymentBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.ONBOARDING,
+    page: () => const OnboardingView(),
+    binding: OnboardingBinding(),
   ),
 ];
 

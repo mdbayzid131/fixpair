@@ -44,9 +44,7 @@ class LoginController extends GetxController {
           response.data['message'] == 'Verify account first') {
         try {
           await _authService.resendOtp(emailController.text.trim());
-          Helpers.showSuccess(
-            'Verification needed. OTP sent to your email.',
-          );
+          Helpers.showSuccess('Verification needed. OTP sent to your email.');
           Get.toNamed(
             AppRoutes.OTP_FORM_REGISTER,
             arguments: emailController.text.trim(),
