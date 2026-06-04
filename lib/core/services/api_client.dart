@@ -91,6 +91,7 @@ class ApiClient extends GetxService {
     // 2️⃣ Token expired → refresh & retry
     final publicPaths = [
       ApiConstants.login,
+      ApiConstants.socialLogin,
       ApiConstants.signup,
       ApiConstants.refreshToken,
       ApiConstants.forgotPassword,

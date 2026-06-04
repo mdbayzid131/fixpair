@@ -13,6 +13,7 @@ class ConsultantProfileController extends GetxController {
 
   final RxList<ReviewModel> consultantReviews = <ReviewModel>[].obs;
   final Rxn<ConsultantStats> stats = Rxn<ConsultantStats>();
+  final RxInt totalConsultations = 0.obs;
 
   @override
   void onInit() {
@@ -33,8 +34,12 @@ class ConsultantProfileController extends GetxController {
         expert.value = userData;
       }
 
-      // Fetch reviews and stats in parallel
-      await Future.wait([fetchReviews(id), fetchStats(id)]);
+      // Fetch reviews, stats, and total consultations in parallel
+      await Future.wait([
+        fetchReviews(id),
+        fetchStats(id),
+        fetchTotalConsultations(id),
+      ]);
     } catch (e) {
       AppLogger.warning('Error fetching consultant details: ${e.toString()}');
     } finally {
@@ -71,6 +76,18 @@ class ConsultantProfileController extends GetxController {
       }
     } catch (e) {
       AppLogger.warning('Error fetching consultant stats: ${e.toString()}');
+    }
+  }
+
+  Future<void> fetchTotalConsultations(String id) async {
+    try {
+      final response = await _userRepository.getConsultantTotalConsultations(id);
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        totalConsultations.value = data['totalConsultations'] ?? 0;
+      }
+    } catch (e) {
+      AppLogger.warning('Error fetching total consultations: ${e.toString()}');
     }
   }
 

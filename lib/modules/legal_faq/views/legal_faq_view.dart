@@ -51,16 +51,6 @@ class LegalFAQView extends GetView<LegalFAQController> {
               label: 'Contact Support',
               onTap: () {},
             ),
-            SizedBox(height: 16.h),
-            _buildActionCard(
-              icon: Icons.delete_outline_rounded,
-              label: 'Delete Account',
-              labelColor: const Color(0xFFEF4444),
-              iconBg: const Color(0xFFFEF2F2),
-              iconColor: const Color(0xFFEF4444),
-              onTap: () => _showDeleteConfirmation(context),
-
-            ),
             SizedBox(height: 24.h),
           ],
         ),
@@ -318,100 +308,4 @@ class LegalFAQView extends GetView<LegalFAQController> {
       ),
     );
   }
-  void _showDeleteConfirmation(BuildContext context) {
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        child: Padding(
-          padding: EdgeInsets.all(24.w),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: EdgeInsets.all(16.w),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFEF2F2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.delete_forever_rounded,
-                  color: const Color(0xFFEF4444),
-                  size: 32.sp,
-                ),
-              ),
-              SizedBox(height: 20.h),
-              Text(
-                'Delete Account?',
-                style: GoogleFonts.manrope(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1D293D),
-                ),
-              ),
-              SizedBox(height: 12.h),
-              Text(
-                'Are you sure you want to delete your account? This action is permanent and cannot be undone.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.manrope(
-                  fontSize: 14.sp,
-                  color: const Color(0xFF64748B),
-                  height: 1.5,
-                ),
-              ),
-              SizedBox(height: 24.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => Get.back(),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                      ),
-                      child: Text(
-                        'Cancel',
-                        style: GoogleFonts.manrope(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF64748B),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                        controller.deleteAccount();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEF4444),
-                        elevation: 0,
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                      ),
-                      child: Text(
-                        'Delete',
-                        style: GoogleFonts.manrope(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
-

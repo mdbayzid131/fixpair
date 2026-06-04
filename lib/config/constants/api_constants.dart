@@ -29,6 +29,8 @@ class ApiConstants {
   static const String profile = '/user/profile';
   static const String consultants = '/user/consultants';
   static String userById(String id) => '/user/$id';
+  static String totalConsultations(String id) =>
+      '/consultation/consultants/$id/total-consultations';
   static String availableSlots(String id) =>
       '/consultation/available-slots/$id';
   static const String bookConsultation = '/consultation/book';
@@ -66,5 +68,3 @@ class ApiConstants {
   static String markNotificationRead(String id) => '/notification/$id';
   static const String markAllNotificationsRead = '/notification/mark-all-read';
 }
-
-

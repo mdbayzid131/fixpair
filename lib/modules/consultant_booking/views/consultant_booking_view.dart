@@ -74,6 +74,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
             }),
             SizedBox(height: 24.h),
             _buildVATInfoBox(),
+            SizedBox(height: 50.h),
           ],
         ),
       ),

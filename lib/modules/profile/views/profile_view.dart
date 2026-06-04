@@ -50,7 +50,11 @@ class ProfileView extends GetView<ProfileController> {
             SizedBox(height: 24.h),
 
             // 3. Log Out Card
-            _buildLogoutCard(),
+            _buildLogoutCard(context),
+            SizedBox(height: 16.h),
+
+            // 4. Delete Account Card
+            _buildDeleteAccountCard(context),
           ],
         ),
       ),
@@ -215,7 +219,10 @@ class ProfileView extends GetView<ProfileController> {
             iconBg: const Color(0xFFEBE9FE),
             iconColor: const Color(0xFF7C3AED),
             label: 'App Guide & Tutorial',
-            onTap: () => Get.toNamed(AppRoutes.ONBOARDING, arguments: {'fromProfile': true}),
+            onTap: () => Get.toNamed(
+              AppRoutes.ONBOARDING,
+              arguments: {'fromProfile': true},
+            ),
             isLast: true,
           ),
         ],
@@ -270,7 +277,7 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildLogoutCard() {
+  Widget _buildLogoutCard(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -284,7 +291,7 @@ class ProfileView extends GetView<ProfileController> {
         ],
       ),
       child: InkWell(
-        onTap: () => controller.logout(),
+        onTap: () => _showLogoutConfirmation(context),
         borderRadius: BorderRadius.circular(24.r),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
@@ -293,12 +300,12 @@ class ProfileView extends GetView<ProfileController> {
               Container(
                 padding: EdgeInsets.all(10.w),
                 decoration: const BoxDecoration(
-                  color: Color(0xFFFEF2F2),
+                  color: Color(0xFFF1F5F9), // Slate 100
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.logout_rounded,
-                  color: const Color(0xFFEF4444),
+                  color: const Color(0xFF475569), // Slate 600
                   size: 22.sp,
                 ),
               ),
@@ -308,13 +315,285 @@ class ProfileView extends GetView<ProfileController> {
                 style: GoogleFonts.manrope(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFFEF4444),
+                  color: const Color(0xFF334155), // Slate 700
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDeleteAccountCard(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: InkWell(
+        onTap: () => _showDeleteConfirmation(context),
+        borderRadius: BorderRadius.circular(24.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(10.w),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFEF2F2), // Red 50
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.delete_forever_outlined,
+                  color: const Color(0xFFEF4444), // Red 500
+                  size: 22.sp,
+                ),
+              ),
+              SizedBox(width: 16.w),
+              Text(
+                'Delete Account',
+                style: GoogleFonts.manrope(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFFEF4444), // Red 500
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.white,
+        elevation: 10,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28.r),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(28.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(20.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0EFFF), // Soft blue bg
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFFE0EFFF).withOpacity(0.5),
+                    width: 4,
+                  ),
+                ),
+                child: Icon(
+                  Icons.logout_rounded,
+                  color: const Color(0xFF0066FF),
+                  size: 36.sp,
+                ),
+              ),
+              SizedBox(height: 24.h),
+              Text(
+                'Log Out',
+                style: GoogleFonts.manrope(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1D293D),
+                  letterSpacing: 0.2,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                'Are you sure you want to log out of your account?',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.manrope(
+                  fontSize: 15.sp,
+                  color: const Color(0xFF64748B),
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 28.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Get.back(),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.manrope(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                        controller.logout();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0066FF),
+                        elevation: 0,
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                      ),
+                      child: Text(
+                        'Log Out',
+                        style: GoogleFonts.manrope(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.white,
+        elevation: 10,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28.r),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(28.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(20.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF2F2), // Soft red bg
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFFFEF2F2).withOpacity(0.5),
+                    width: 4,
+                  ),
+                ),
+                child: Icon(
+                  Icons.delete_forever_rounded,
+                  color: const Color(0xFFEF4444),
+                  size: 36.sp,
+                ),
+              ),
+              SizedBox(height: 24.h),
+              Text(
+                'Delete Account?',
+                style: GoogleFonts.manrope(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1D293D),
+                  letterSpacing: 0.2,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                'Are you sure you want to delete your account? This action is permanent and cannot be undone.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.manrope(
+                  fontSize: 15.sp,
+                  color: const Color(0xFF64748B),
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 28.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Get.back(),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.manrope(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                        controller.deleteAccount();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEF4444),
+                        elevation: 0,
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                      ),
+                      child: Text(
+                        'Delete',
+                        style: GoogleFonts.manrope(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
     );
   }
 }

@@ -12,7 +12,20 @@
           "package_name": "com.fixpair.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "827439833710-81uv8i5077nq5kbs3st8glcfs799hbd7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fixpair.app",
+            "certificate_hash": "27064d1daee912f1fcba8cdea7579e98b8fade05"
+          }
+        },
+        {
+          "client_id": "827439833710-5u93rqf7vuq1qe99hmvbpul0t80t7uv3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAEzXUKU3OBCndw3QXqsuqcQ6MYbXGvosw"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "827439833710-5u93rqf7vuq1qe99hmvbpul0t80t7uv3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "827439833710-01cu8oed84nphjju12tcbgq0l7ml4frl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.fixpair.app"
+              }
+            }
+          ]
         }
       }
     }

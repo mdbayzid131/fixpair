@@ -214,6 +214,13 @@ class UserRepository {
     return await _apiClient.getData(ApiConstants.consultantStats(consultantId));
   }
 
+  // Get total consultations of a consultant
+  Future<Response> getConsultantTotalConsultations(String consultantId) async {
+    return await _apiClient.getData(
+      ApiConstants.totalConsultations(consultantId),
+    );
+  }
+
   // Save FCM device token for push notifications
   Future<Response> saveDeviceToken(String deviceToken) async {
     return await _apiClient.postData('/user/device-token', {

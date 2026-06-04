@@ -286,14 +286,10 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
           Container(height: 40.h, width: 1, color: const Color(0xFFF1F5F9)),
           Expanded(
             child: Obx(() {
-              final totalReviews =
-                  controller.stats.value?.totalReviews ??
-                  expert.stats?.totalReviews ??
-                  0;
               return _buildStatItem(
                 Icons.chat_bubble_outline_rounded,
                 'CONSULTATIONS',
-                '$totalReviews+',
+                '${controller.totalConsultations.value}',
                 const Color(0xFFF5F3FF),
                 const Color(0xFF7C3AED),
               );
@@ -704,7 +700,9 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                         width: 12.w,
                         height: 12.w,
                         decoration: BoxDecoration(
-                          color: isOnline ? const Color(0xFF10B981) : Colors.grey,
+                          color: isOnline
+                              ? const Color(0xFF10B981)
+                              : Colors.grey,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -759,7 +757,9 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                   boxShadow: isOnline
                       ? [
                           BoxShadow(
-                            color: const Color(0xFFFF6B00).withValues(alpha: 0.3),
+                            color: const Color(
+                              0xFFFF6B00,
+                            ).withValues(alpha: 0.3),
                             blurRadius: 15,
                             offset: const Offset(0, 8),
                           ),

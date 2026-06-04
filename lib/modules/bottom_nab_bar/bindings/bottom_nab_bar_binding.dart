@@ -8,10 +8,10 @@ import '../../profile/controllers/profile_controller.dart';
 class BottomNavBarBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put(BottomNavBarController(), permanent: true);
-    Get.put(HomeController(), permanent: true);
-    Get.put(search_ctrl.SearchController(), permanent: true);
-    Get.put(HistoryController(), permanent: true);
-    Get.put(ProfileController(), permanent: true);
+    Get.put(BottomNavBarController());
+    Get.put(HomeController());
+    Get.put(search_ctrl.SearchController());
+    Get.put(HistoryController());
+    Get.put(ProfileController());
   }
 }

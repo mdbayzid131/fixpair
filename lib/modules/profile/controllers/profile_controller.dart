@@ -24,11 +24,13 @@ class ProfileController extends GetxController {
       isLoading.value = true;
       final response = await _userRepository.getProfile();
       if (response.statusCode == 200) {
-        final profileResponse = UserProfileResponseModel.fromJson(response.data);
+        final profileResponse = UserProfileResponseModel.fromJson(
+          response.data,
+        );
         user.value = profileResponse.data;
       }
     } catch (e) {
-       AppLogger.debug('Error fetching profile: $e');
+      AppLogger.debug('Error fetching profile: $e');
     } finally {
       isLoading.value = false;
     }
@@ -44,6 +46,28 @@ class ProfileController extends GetxController {
     } catch (e) {
       Helpers.hideLoadingDialog();
       Helpers.showCustomSnackBar(e.toString());
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    Helpers.showLoadingDialog();
+    try {
+      final response = await _userRepository.deleteAccount();
+      if (response.statusCode == 200) {
+        await _authService.logout();
+        Helpers.hideLoadingDialog();
+        Helpers.showCustomSnackBar('Account deleted successfully');
+        Get.offAllNamed(AppRoutes.LOGIN);
+      } else {
+        Helpers.hideLoadingDialog();
+        Helpers.showCustomSnackBar(
+          response.data['message'] ?? 'Failed to delete account',
+        );
+      }
+    } catch (e) {
+      Helpers.hideLoadingDialog();
+      AppLogger.debug('Error deleting account: $e');
+      Helpers.showCustomSnackBar('Something went wrong');
     }
   }
 }
