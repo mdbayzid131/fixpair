@@ -1,8 +1,10 @@
 import 'package:fixpair/config/constants/image_paths.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:get/get.dart';
 import 'package:fixpair/core/widgets/custom_elevated_button.dart';
 import 'package:fixpair/core/widgets/custom_text_field.dart';
@@ -214,24 +216,32 @@ class RegisterView extends GetView<RegisterController> {
                                 fontSize: 13.sp,
                                 color: const Color(0xFF374151),
                               ),
-                              children: const [
-                                TextSpan(text: 'I agree to the '),
+                              children: [
+                                const TextSpan(text: 'I agree to the '),
                                 TextSpan(
                                   text: 'Terms & Conditions',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Color(0xFF0066FF),
                                     fontWeight: FontWeight.w700,
                                   ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      Get.toNamed(AppRoutes.TERMS_CONDITIONS);
+                                    },
                                 ),
-                                TextSpan(text: ' and '),
+                                const TextSpan(text: ' and '),
                                 TextSpan(
                                   text: 'Privacy Policy (GDPR)',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Color(0xFF0066FF),
                                     fontWeight: FontWeight.w700,
                                   ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      Get.toNamed(AppRoutes.PRIVACY_POLICY);
+                                    },
                                 ),
-                                TextSpan(text: '.'),
+                                const TextSpan(text: '.'),
                               ],
                             ),
                           ),

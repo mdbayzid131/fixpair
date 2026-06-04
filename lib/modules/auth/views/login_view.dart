@@ -99,7 +99,6 @@ class LoginView extends GetView<LoginController> {
                     SizedBox(height: 24.h),
 
                     CustomTextField(
-                      
                       controller: controller.emailController,
                       hintText: 'name@example.com',
                       keyboardType: TextInputType.emailAddress,
@@ -132,8 +131,8 @@ class LoginView extends GetView<LoginController> {
                           onTap: controller.togglePasswordVisibility,
                           child: Icon(
                             controller.isPasswordVisible.value
-                                ? Icons.visibility_rounded
-                                : Icons.visibility_off_rounded,
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
                             color: const Color(0xFF9CA3AF),
                             size: 20.sp,
                           ),
@@ -144,20 +143,8 @@ class LoginView extends GetView<LoginController> {
 
                     // 5. Options Row
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Remember me',
-                              style: GoogleFonts.manrope(
-                                fontSize: 13.sp,
-                                color: const Color(0xFF374151),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
                         TextButton(
                           onPressed: controller.goToForgotPassword,
                           child: Text(
