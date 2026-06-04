@@ -3,22 +3,48 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../config/routes/app_pages.dart';
 import '../../../data/models/user_model.dart';
+import '../../../data/models/notification_model.dart';
 import '../../../data/repositories/user_repository.dart';
+import '../../../data/repositories/notification_repository.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../config/constants/api_constants.dart';
 
 class HomeController extends GetxController {
   final UserRepository _userRepository = Get.find();
+  final NotificationRepo _notificationRepo = NotificationRepo(
+    apiClient: Get.find(),
+  );
 
   final RxList<BookingModel> confirmedBookings = <BookingModel>[].obs;
   final RxList<UserData> recommendedConsultants = <UserData>[].obs;
   final isLoading = false.obs;
+  final hasUnreadNotifications = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     fetchUpcomingBookings();
     fetchRecommendedConsultants();
+    checkUnreadNotifications();
+  }
+
+  Future<void> checkUnreadNotifications() async {
+    try {
+      final response = await _notificationRepo.getNotifications(
+        page: 1,
+        limit: 10,
+      );
+      if (response.statusCode == 200) {
+        final notificationResponse = NotificationResponseModel.fromJson(
+          response.data,
+        );
+        final unread =
+            notificationResponse.data?.any((element) => !element.read) ?? false;
+        hasUnreadNotifications.value = unread;
+      }
+    } catch (e) {
+      // Silently fail
+    }
   }
 
   Future<void> startVideoCall(BookingModel booking) async {
@@ -144,6 +170,10 @@ class HomeController extends GetxController {
   }
 
   Future<void> onRefresh() async {
-    await Future.wait([fetchUpcomingBookings(), fetchRecommendedConsultants()]);
+    await Future.wait([
+      fetchUpcomingBookings(),
+      fetchRecommendedConsultants(),
+      checkUnreadNotifications(),
+    ]);
   }
 }

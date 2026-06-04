@@ -22,7 +22,8 @@ class ApiClient extends GetxService {
   static String _bearerToken = '';
   static Future<bool>? _refreshFuture;
 
-  static const String _fallbackMessage = 'Something went wrong, please try again';
+  static const String _fallbackMessage =
+      'Something went wrong, please try again';
   static const int _timeoutSeconds = 30;
 
   /// Expose dio only for edge-case direct usage (avoid if possible).

@@ -60,6 +60,11 @@ class ApiConstants {
   static const String review = '/review';
   static String consultantReviews(String id) => '/review/consultant/$id';
   static String consultantStats(String id) => '/review/stats/$id';
+
+  // Notification Endpoints
+  static const String notifications = '/notification';
+  static String markNotificationRead(String id) => '/notification/$id';
+  static const String markAllNotificationsRead = '/notification/mark-all-read';
 }
 
 
