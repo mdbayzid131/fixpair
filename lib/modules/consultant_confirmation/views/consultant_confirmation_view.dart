@@ -34,17 +34,6 @@ class ConsultantConfirmationView
             color: const Color(0xFF1D293D),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.notifications_none_rounded,
-              color: const Color(0xFF1D293D),
-              size: 24.sp,
-            ),
-            onPressed: () {},
-          ),
-          SizedBox(width: 8.w),
-        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value &&

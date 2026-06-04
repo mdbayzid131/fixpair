@@ -37,34 +37,6 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
             color: const Color(0xFF1D293D),
           ),
         ),
-        actions: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: Icon(
-                  Icons.notifications_none_rounded,
-                  color: const Color(0xFF1D293D),
-                  size: 24.sp,
-                ),
-                onPressed: () {},
-              ),
-              Positioned(
-                top: 14.h,
-                right: 14.w,
-                child: Container(
-                  width: 8.w,
-                  height: 8.w,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFF6B00),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(width: 8.w),
-        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
