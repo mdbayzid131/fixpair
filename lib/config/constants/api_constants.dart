@@ -15,6 +15,7 @@ class ApiConstants {
 
   // Auth Endpoints
   static const String login = '/auth/login';
+  static const String socialLogin = '/auth/social-login';
   static const String signup = '/user';
   static const String logout = '/auth/logout';
   static const String refreshToken = '/auth/refresh';

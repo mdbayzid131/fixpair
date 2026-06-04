@@ -215,7 +215,7 @@ class LoginView extends GetView<LoginController> {
                           child: _buildSocialButton(
                             icon: ImagePaths.googleIcon,
                             label: 'Google',
-                            onTap: () {},
+                            onTap: controller.loginWithGoogle,
                           ),
                         ),
                         SizedBox(width: 16.w),
@@ -224,7 +224,7 @@ class LoginView extends GetView<LoginController> {
                             icon: Icons
                                 .apple, // Using Material Icon for Apple if image not available
                             label: 'Apple',
-                            onTap: () {},
+                            onTap: controller.loginWithApple,
                             isSvg: false,
                           ),
                         ),

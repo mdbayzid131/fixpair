@@ -64,6 +64,42 @@ class LoginController extends GetxController {
     }
   }
 
+  Future<void> loginWithGoogle() async {
+    try {
+      isLoading.value = true;
+      final response = await _authService.loginWithGoogle();
+      if (response.statusCode == 200) {
+        Helpers.showSuccess('Login successful');
+        Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
+      } else {
+        Helpers.showError(response.data['message'] ?? 'Google Login failed');
+      }
+    } catch (e) {
+      Helpers.showDebugLog(e.toString());
+      Helpers.showError(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> loginWithApple() async {
+    try {
+      isLoading.value = true;
+      final response = await _authService.loginWithApple();
+      if (response.statusCode == 200) {
+        Helpers.showSuccess('Login successful');
+        Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
+      } else {
+        Helpers.showError(response.data['message'] ?? 'Apple Login failed');
+      }
+    } catch (e) {
+      Helpers.showDebugLog(e.toString());
+      Helpers.showError(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   void goToRegister() {
     Get.toNamed(AppRoutes.REGISTER);
   }

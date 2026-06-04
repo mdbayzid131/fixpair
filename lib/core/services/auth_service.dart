@@ -5,6 +5,8 @@ import 'package:fixpair/core/services/api_client.dart';
 import 'package:fixpair/core/services/storage_service.dart';
 import 'package:fixpair/core/services/push_notification_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/auth_repository.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
@@ -83,6 +85,66 @@ class AuthService extends GetxService {
   }) async {
     try {
       final response = await _authRepo.login(email: email, password: password);
+      await handleAuthResponse(response);
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// ===================== GOOGLE LOGIN =====================
+  Future<Response> loginWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        throw Exception('Google Sign-In was cancelled.');
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithCredential(credential);
+
+      final String? idToken = await userCredential.user?.getIdToken();
+      if (idToken == null) {
+        throw Exception('Failed to retrieve Firebase ID Token.');
+      }
+
+      final Response response = await _authRepo.socialLogin(
+        idToken: idToken,
+        provider: 'google',
+      );
+
+      await handleAuthResponse(response);
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// ===================== APPLE LOGIN =====================
+  Future<Response> loginWithApple() async {
+    try {
+      // Native Apple Sign-In on iOS, Firebase Web Auth flow on Android
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithProvider(AppleAuthProvider());
+
+      final String? idToken = await userCredential.user?.getIdToken();
+      if (idToken == null) {
+        throw Exception('Failed to retrieve Firebase ID Token.');
+      }
+
+      final Response response = await _authRepo.socialLogin(
+        idToken: idToken,
+        provider: 'apple',
+      );
+
       await handleAuthResponse(response);
       return response;
     } catch (e) {

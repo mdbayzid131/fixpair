@@ -52,6 +52,17 @@ class AuthRepo {
     });
   }
 
+  /// ===================== SOCIAL LOGIN =====================
+  Future<Response> socialLogin({
+    required String idToken,
+    required String provider,
+  }) async {
+    return await apiClient.postData(ApiConstants.socialLogin, {
+      "idToken": idToken,
+      "provider": provider,
+    });
+  }
+
   /// ===================== FORGOT PASSWORD =====================
   Future<Response> forgotPassword({required String email}) async {
     return await apiClient.postData(ApiConstants.forgotPassword, {

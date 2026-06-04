@@ -293,7 +293,7 @@ class RegisterView extends GetView<RegisterController> {
                           child: _buildSocialButton(
                             icon: ImagePaths.googleIcon,
                             label: 'Google',
-                            onTap: () {},
+                            onTap: controller.loginWithGoogle,
                           ),
                         ),
                         SizedBox(width: 16.w),
@@ -301,7 +301,7 @@ class RegisterView extends GetView<RegisterController> {
                           child: _buildSocialButton(
                             icon: Icons.apple,
                             label: 'Apple',
-                            onTap: () {},
+                            onTap: controller.loginWithApple,
                             isSvg: false,
                           ),
                         ),
