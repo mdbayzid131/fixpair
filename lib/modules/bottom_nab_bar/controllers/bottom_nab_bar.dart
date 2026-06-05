@@ -29,9 +29,7 @@ class BottomNavBarController extends GetxController {
 
     await _authService.logout();
 
-    Helpers.hideLoadingDialog();
-    Helpers.showCustomSnackBar('Logged out successfully');
-
     Get.offAllNamed(AppRoutes.LOGIN);
+    Helpers.showCustomSnackBar('Logged out successfully');
   }
 }

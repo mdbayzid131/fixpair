@@ -16,6 +16,10 @@ class LegalFAQController extends GetxController {
   final faqItems = <FAQModel>[].obs;
   final isLoading = false.obs;
 
+  final supportEmail = ''.obs;
+  final supportPhone = ''.obs;
+  final isLoadingSupport = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -64,6 +68,28 @@ class LegalFAQController extends GetxController {
       Helpers.showError('Something went wrong');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchCustomerSupport() async {
+    try {
+      isLoadingSupport.value = true;
+      final response = await _legalRepo.getCustomerSupport();
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        supportEmail.value = data['email'] ?? 'support@fixpair.com';
+        supportPhone.value = data['phoneNumber'] ?? '+1234567890';
+      } else {
+        Helpers.showError(
+          response.data['message'] ?? 'Failed to load support information',
+        );
+      }
+    } catch (e) {
+      Helpers.showDebugLog('Error loading support: $e');
+      Helpers.showError('Something went wrong');
+    } finally {
+      isLoadingSupport.value = false;
     }
   }
 }

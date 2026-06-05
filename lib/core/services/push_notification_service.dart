@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fixpair/core/utils/logger.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+import 'package:flutter_callkit_incoming/entities/entities.dart';
 
 /// ===================== FIREBASE NOTIFICATION SERVICE =====================
 /// Handles Firebase Cloud Messaging (FCM) push notifications.
@@ -13,6 +15,50 @@ import 'package:fixpair/core/utils/logger.dart';
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   AppLogger.debug('Background Message: ${message.messageId}');
+
+  if (message.data['type'] == 'INCOMING_CALL') {
+    final sessionId = message.data['sessionId'];
+    final token = message.data['token'];
+    final channelName = message.data['channelName'] ?? sessionId;
+    final callerName = message.data['callerName'] ?? 'Consultant';
+    final callerAvatar = message.data['callerAvatar'] ?? '';
+    final bookingId = message.data['bookingId'] ?? '';
+
+    if (sessionId != null && token != null) {
+      final CallKitParams callKitParams = CallKitParams(
+        id: sessionId,
+        nameCaller: callerName,
+        appName: 'Fixpair',
+        avatar: callerAvatar,
+        handle: 'Incoming Video Consultation',
+        type: 1, // 0: audio, 1: video
+        duration: 30000,
+        extra: <String, dynamic>{
+          'sessionId': sessionId,
+          'token': token,
+          'channelName': channelName,
+          'callerName': callerName,
+          'callerAvatar': callerAvatar,
+          'bookingId': bookingId,
+        },
+        android: const AndroidParams(
+          isCustomNotification: true,
+          backgroundColor: '#0F172A',
+          incomingCallNotificationChannelName: "Incoming Call",
+          isShowLogo: true,
+          ringtonePath: 'system_ringtone_default',
+          textAccept: 'Accept',
+          textDecline: 'Decline',
+        ),
+        ios: const IOSParams(
+          handleType: 'generic',
+          supportsVideo: true,
+        ),
+      );
+
+      await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
+    }
+  }
 }
 
 class FirebaseNotificationService {

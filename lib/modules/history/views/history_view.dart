@@ -1,5 +1,6 @@
 import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
+import 'package:fixpair/core/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,8 +9,39 @@ import 'package:intl/intl.dart';
 import '../controllers/history_controller.dart';
 import 'package:fixpair/data/models/user_model.dart';
 
-class HistoryView extends GetView<HistoryController> {
+class HistoryView extends StatefulWidget {
   const HistoryView({super.key});
+
+  @override
+  State<HistoryView> createState() => _HistoryViewState();
+}
+
+class _HistoryViewState extends State<HistoryView> {
+  final HistoryController controller = Get.find<HistoryController>();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (controller.hasMore.value &&
+          !controller.isLoadingMore.value &&
+          !controller.isLoading.value) {
+        controller.fetchMyBookings(isLoadMore: true);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +138,7 @@ class HistoryView extends GetView<HistoryController> {
                 }
 
                 return ListView.separated(
-                  controller: controller.scrollController,
+                  controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: EdgeInsets.symmetric(
                     horizontal: 24.w,
@@ -450,10 +482,7 @@ class HistoryView extends GetView<HistoryController> {
             ],
           ),
           SizedBox(height: 12.h),
-          _buildPrimaryButton(
-            'Leave Review',
-            () => _showReviewDialog(booking),
-          ),
+          _buildPrimaryButton('Leave Review', () => _showReviewDialog(booking)),
         ],
       );
     }
@@ -463,6 +492,7 @@ class HistoryView extends GetView<HistoryController> {
   void _showReviewDialog(BookingModel booking) {
     double selectedRating = 5.0;
     final TextEditingController commentController = TextEditingController();
+    String? commentError;
 
     Get.dialog(
       StatefulBuilder(
@@ -499,7 +529,7 @@ class HistoryView extends GetView<HistoryController> {
                     ),
                   ),
                   SizedBox(height: 20.h),
-                  
+
                   // Stars selection
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -525,11 +555,18 @@ class HistoryView extends GetView<HistoryController> {
                     ),
                   ),
                   SizedBox(height: 24.h),
-                  
+
                   // Comment box
                   TextField(
                     controller: commentController,
                     maxLines: 4,
+                    onChanged: (value) {
+                      if (commentError != null) {
+                        setState(() {
+                          commentError = null;
+                        });
+                      }
+                    },
                     style: GoogleFonts.manrope(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
@@ -542,6 +579,7 @@ class HistoryView extends GetView<HistoryController> {
                         fontWeight: FontWeight.w400,
                         color: const Color(0xFF94A3B8),
                       ),
+                      errorText: commentError,
                       fillColor: const Color(0xFFF8FAFC),
                       filled: true,
                       contentPadding: EdgeInsets.all(16.w),
@@ -553,10 +591,21 @@ class HistoryView extends GetView<HistoryController> {
                         borderRadius: BorderRadius.circular(16.r),
                         borderSide: const BorderSide(color: Color(0xFF0066FF)),
                       ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                        borderSide: const BorderSide(color: Colors.red),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                        borderSide: const BorderSide(
+                          color: Colors.red,
+                          width: 1.5,
+                        ),
+                      ),
                     ),
                   ),
                   SizedBox(height: 24.h),
-                  
+
                   // Action buttons
                   Row(
                     children: [
@@ -584,13 +633,23 @@ class HistoryView extends GetView<HistoryController> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
+                            final commentText = commentController.text.trim();
+                            if (commentText.isEmpty) {
+                              setState(() {
+                                commentError = 'Please write a review comment';
+                              });
+                              return;
+                            }
                             final success = await controller.submitReview(
                               consultationId: booking.id!,
                               rating: selectedRating,
-                              comment: commentController.text.trim(),
+                              comment: commentText,
                             );
                             if (success) {
                               Get.back();
+                              Helpers.showSuccess(
+                                'Review submitted successfully!',
+                              );
                             }
                           },
                           style: ElevatedButton.styleFrom(

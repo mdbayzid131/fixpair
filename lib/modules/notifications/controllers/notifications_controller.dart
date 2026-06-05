@@ -7,8 +7,6 @@ import '../../home/controllers/home_controller.dart';
 
 class NotificationsController extends GetxController {
   final NotificationRepo _notificationRepo = Get.find();
-  final scrollController = ScrollController();
-
   final notifications = <NotificationModel>[].obs;
   final isLoading = false.obs;
   final isLoadingMore = false.obs;
@@ -17,20 +15,12 @@ class NotificationsController extends GetxController {
   bool _hasMore = true;
   final int _limit = 10;
 
+  bool get hasMore => _hasMore;
+
   @override
   void onInit() {
     super.onInit();
     fetchNotifications();
-
-    // Scroll listener for pagination (infinite scroll)
-    scrollController.addListener(() {
-      if (scrollController.position.pixels >=
-          scrollController.position.maxScrollExtent - 200) {
-        if (_hasMore && !isLoadingMore.value && !isLoading.value) {
-          fetchNotifications(isLoadMore: true);
-        }
-      }
-    });
   }
 
   Future<void> onRefresh() async {
@@ -154,7 +144,6 @@ class NotificationsController extends GetxController {
 
   @override
   void onClose() {
-    scrollController.dispose();
     super.onClose();
   }
 }

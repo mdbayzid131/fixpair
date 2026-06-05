@@ -43,11 +43,13 @@ class ApiConstants {
   static const String privacyPolicy = '/privacy';
   static const String termsConditions = '/terms';
   static const String faq = '/faq';
+  static const String customerSupport = '/customer-support';
 
   // Video Session Endpoints
   static const String videoSession = '/video-session';
   static const String joinVideoSession = '/video-session/join';
   static const String endVideoSession = '/video-session/end';
+  static const String actionVideoSession = '/video-session/action';
   static String startTranscription(String consultationId) =>
       '/consultations/$consultationId/transcription/start';
   static String stopTranscription(String consultationId) =>

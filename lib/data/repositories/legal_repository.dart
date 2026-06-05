@@ -17,4 +17,8 @@ class LegalRepo {
   Future<Response> getFAQs() async {
     return await apiClient.getData(ApiConstants.faq);
   }
+
+  Future<Response> getCustomerSupport() async {
+    return await apiClient.getData(ApiConstants.customerSupport);
+  }
 }

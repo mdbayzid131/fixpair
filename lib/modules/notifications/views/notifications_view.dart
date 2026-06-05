@@ -6,8 +6,39 @@ import 'package:intl/intl.dart';
 import '../../../data/models/notification_model.dart';
 import '../controllers/notifications_controller.dart';
 
-class NotificationsView extends GetView<NotificationsController> {
+class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
+
+  @override
+  State<NotificationsView> createState() => _NotificationsViewState();
+}
+
+class _NotificationsViewState extends State<NotificationsView> {
+  final NotificationsController controller = Get.find<NotificationsController>();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (controller.hasMore &&
+          !controller.isLoadingMore.value &&
+          !controller.isLoading.value) {
+        controller.fetchNotifications(isLoadMore: true);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +100,7 @@ class NotificationsView extends GetView<NotificationsController> {
         return RefreshIndicator(
           onRefresh: controller.onRefresh,
           child: ListView.separated(
-            controller: controller.scrollController,
+            controller: _scrollController,
             padding: EdgeInsets.all(20.w),
             itemCount: controller.notifications.length +
                 (controller.isLoadingMore.value ? 1 : 0),

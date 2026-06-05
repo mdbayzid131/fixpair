@@ -32,6 +32,7 @@ import '../../modules/personal_info/bindings/personal_info_binding.dart';
 import '../../modules/personal_info/views/personal_info_view.dart';
 import '../../modules/legal_faq/bindings/legal_faq_binding.dart';
 import '../../modules/legal_faq/views/legal_faq_view.dart';
+import '../../modules/legal_faq/views/contact_support_view.dart';
 import '../../modules/terms_conditions/bindings/terms_conditions_binding.dart';
 import '../../modules/terms_conditions/views/terms_conditions_view.dart';
 import '../../modules/privacy_policy/bindings/privacy_policy_binding.dart';
@@ -170,6 +171,11 @@ final pages = [
   GetPage(
     name: AppRoutes.LEGAL_FAQ,
     page: () => const LegalFAQView(),
+    binding: LegalFAQBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.CONTACT_SUPPORT,
+    page: () => const ContactSupportView(),
     binding: LegalFAQBinding(),
   ),
   GetPage(

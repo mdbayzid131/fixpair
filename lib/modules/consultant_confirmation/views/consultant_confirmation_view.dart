@@ -45,31 +45,33 @@ class ConsultantConfirmationView
           );
         }
 
-        return SingleChildScrollView(
-          padding: EdgeInsets.all(20.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildConsultantCard(),
-              SizedBox(height: 24.h),
-              _buildBillingSummary(),
-              SizedBox(height: 24.h),
-              Text(
-                'PAYMENT METHOD',
-                style: GoogleFonts.manrope(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF64748B),
-                  letterSpacing: 0.5,
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(20.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildConsultantCard(),
+                SizedBox(height: 24.h),
+                _buildBillingSummary(),
+                SizedBox(height: 24.h),
+                Text(
+                  'PAYMENT METHOD',
+                  style: GoogleFonts.manrope(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF64748B),
+                    letterSpacing: 0.5,
+                  ),
                 ),
-              ),
-              SizedBox(height: 12.h),
-              _buildPaymentMethod(),
-              SizedBox(height: 24.h),
-              _buildSecurePaymentInfo(),
-              SizedBox(height: 32.h),
-              _buildConfirmButton(),
-            ],
+                SizedBox(height: 12.h),
+                _buildPaymentMethod(),
+                SizedBox(height: 24.h),
+                _buildSecurePaymentInfo(),
+                SizedBox(height: 32.h),
+                _buildConfirmButton(),
+              ],
+            ),
           ),
         );
       }),

@@ -14,8 +14,6 @@ class HistoryController extends GetxController {
   final RxList<BookingModel> upcomingBookings = <BookingModel>[].obs;
   final RxList<BookingModel> pastBookings = <BookingModel>[].obs;
 
-  final scrollController = ScrollController();
-
   // Independent pagination states for each tab
   final upcomingPage = 1.obs;
   final pastPage = 1.obs;
@@ -33,21 +31,6 @@ class HistoryController extends GetxController {
   void onInit() {
     super.onInit();
     fetchMyBookings();
-
-    scrollController.addListener(() {
-      if (scrollController.position.pixels >=
-          scrollController.position.maxScrollExtent - 200) {
-        if (hasMore.value && !isLoadingMore.value && !isLoading.value) {
-          fetchMyBookings(isLoadMore: true);
-        }
-      }
-    });
-  }
-
-  @override
-  void onClose() {
-    scrollController.dispose();
-    super.onClose();
   }
 
   Future<void> fetchMyBookings({bool isLoadMore = false}) async {
@@ -78,8 +61,7 @@ class HistoryController extends GetxController {
           ? 'status=pending&status=accepted&status=confirmed'
           : 'status=completed&status=rejected&status=cancelled&status=expired';
 
-      final String 
-      uri =
+      final String uri =
           '${ApiConstants.myBookings}?$statusQuery&page=${pageVar.value}&limit=10';
 
       final response = await _userRepository.getBookingsWithUrl(uri);
@@ -149,6 +131,9 @@ class HistoryController extends GetxController {
     required double rating,
     required String comment,
   }) async {
+    if (comment.trim().isEmpty) {
+      return false;
+    }
     try {
       isLoading.value = true;
       final response = await _userRepository.postReview(
@@ -158,7 +143,6 @@ class HistoryController extends GetxController {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Helpers.showSuccess('Review submitted successfully!');
         fetchMyBookings(); // Refresh the list
         return true;
       } else {

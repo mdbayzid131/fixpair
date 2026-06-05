@@ -7,10 +7,13 @@ import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
 import 'package:get/get.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fixpair/core/services/socket_service.dart';
 import 'package:fixpair/data/models/transcript_message.dart';
+import 'package:fixpair/core/services/auth_service.dart';
 import '../../../core/utils/logger.dart';
 
 class VideoCallController extends GetxController {
@@ -49,6 +52,7 @@ class VideoCallController extends GetxController {
   OverlayEntry? _overlayEntry;
 
   Timer? _timer;
+  bool _isEndingCall = false;
   late BookingModel booking;
   late String sessionId;
   late String token;
@@ -112,6 +116,9 @@ class VideoCallController extends GetxController {
       ),
     );
 
+    // Set speakerphone enabled by default as requested by backend
+    await engine.setDefaultAudioRouteToSpeakerphone(true);
+
     // 3. Register Event Handlers
     engine.registerEventHandler(
       RtcEngineEventHandler(
@@ -160,10 +167,17 @@ class VideoCallController extends GetxController {
     await engine.enableVideo();
     await engine.startPreview();
 
+    // Determine UID according to backend guidelines: 1001 for user, 2001 for consultant
+    final authService = Get.find<AuthService>();
+    final isConsultant = authService.user.value?.role?.toLowerCase() == 'consultant';
+    final int myUid = isConsultant ? 2001 : 1001;
+
+    AppLogger.info('[Agora] Joining channel $channelName with UID $myUid');
+
     await engine.joinChannel(
       token: token,
       channelId: channelName,
-      uid: 0, // 0 means Agora will assign a UID
+      uid: myUid,
       options: const ChannelMediaOptions(
         publishCameraTrack: true,
         publishMicrophoneTrack: true,
@@ -396,7 +410,19 @@ class VideoCallController extends GetxController {
   }
 
   Future<void> endCall() async {
+    if (_isEndingCall) return;
+    _isEndingCall = true;
+    
     _setNativeCallActive(false);
+    
+    try {
+      await FlutterCallkitIncoming.endCall(sessionId);
+      await FlutterCallkitIncoming.endAllCalls();
+      final CallKitParams callKitParams = CallKitParams(id: sessionId);
+      await FlutterCallkitIncoming.hideCallkitIncoming(callKitParams);
+    } catch (e) {
+      AppLogger.warning('[CallKit] Error ending call session: $e');
+    }
 
     // Stop backend transcription and leave room
     if (booking.id != null) {
@@ -446,11 +472,27 @@ class VideoCallController extends GetxController {
 
   @override
   void onClose() {
+    if (_isEndingCall) {
+      super.onClose();
+      return;
+    }
+    _isEndingCall = true;
+    
     _setNativeCallActive(false);
     _timer?.cancel();
     engine.leaveChannel();
     engine.release();
     closeOverlay();
+    
+    try {
+      FlutterCallkitIncoming.endCall(sessionId);
+      FlutterCallkitIncoming.endAllCalls();
+      final CallKitParams callKitParams = CallKitParams(id: sessionId);
+      FlutterCallkitIncoming.hideCallkitIncoming(callKitParams);
+    } catch (e) {
+      AppLogger.warning('[CallKit] Error ending call on close: $e');
+    }
+    
     if (booking.id != null) {
       _socketService.leaveRoom(booking.id!);
     }

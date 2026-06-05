@@ -1,3 +1,4 @@
+import 'package:fixpair/core/services/auth_service.dart';
 import 'package:get/get.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/user_repository.dart';
@@ -149,6 +150,13 @@ class ConsultantConfirmationController extends GetxController {
               'token': joinData['token'],
               'channelName': joinData['channelName'] ?? sessionId,
             },
+          );
+        } else if (joinResponse.statusCode == 402) {
+          Get.find<AuthService>().showPaymentRequiredDialog();
+        } else {
+          Get.snackbar(
+            'Error',
+            joinResponse.statusMessage ?? 'Failed to join video call',
           );
         }
       }

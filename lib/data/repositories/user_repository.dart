@@ -140,6 +140,14 @@ class UserRepository {
     });
   }
 
+  // Reject/Action a video session (e.g., REJECT)
+  Future<Response> actionVideoSession(String sessionId, String action) async {
+    return await _apiClient.postData(ApiConstants.actionVideoSession, {
+      'sessionId': sessionId,
+      'action': action,
+    });
+  }
+
   // End a video session
   Future<Response> endVideoSession(String sessionId) async {
     return await _apiClient.postData(ApiConstants.endVideoSession, {

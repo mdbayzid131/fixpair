@@ -7,8 +7,39 @@ import 'package:fixpair/config/constants/api_constants.dart';
 import '../../../data/models/user_model.dart';
 import '../controllers/search_controller.dart' as search_ctrl;
 
-class SearchView extends GetView<search_ctrl.SearchController> {
+class SearchView extends StatefulWidget {
   const SearchView({super.key});
+
+  @override
+  State<SearchView> createState() => _SearchViewState();
+}
+
+class _SearchViewState extends State<SearchView> {
+  final search_ctrl.SearchController controller = Get.find<search_ctrl.SearchController>();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      if (controller.hasMore &&
+          !controller.isLoadingMore.value &&
+          !controller.isLoading.value) {
+        controller.fetchConsultants(isLoadMore: true);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +157,7 @@ class SearchView extends GetView<search_ctrl.SearchController> {
               }
 
               return ListView.separated(
-                controller: controller.scrollController,
+                controller: _scrollController,
                 padding: EdgeInsets.all(24.w),
                 itemCount:
                     controller.consultants.length +

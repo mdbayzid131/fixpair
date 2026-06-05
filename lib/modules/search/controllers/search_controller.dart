@@ -8,11 +8,12 @@ class SearchController extends GetxController {
   final UserRepository _userRepository = Get.find();
 
   final searchController = TextEditingController();
-  final scrollController = ScrollController();
 
   final selectedCategory = 'All'.obs;
   final categories = ['All', 'Lawyer', 'Advisor', 'Doctor'];
   final searchQuery = ''.obs;
+
+  bool get hasMore => _hasMore;
 
   final consultants = <UserData>[].obs;
   final isLoading = false.obs;
@@ -26,15 +27,6 @@ class SearchController extends GetxController {
   void onInit() {
     super.onInit();
     fetchConsultants();
-
-    scrollController.addListener(() {
-      if (scrollController.position.pixels >=
-          scrollController.position.maxScrollExtent - 200) {
-        if (_hasMore && !isLoadingMore.value && !isLoading.value) {
-          fetchConsultants(isLoadMore: true);
-        }
-      }
-    });
 
     searchController.addListener(_onSearchChanged);
   }
@@ -102,9 +94,15 @@ class SearchController extends GetxController {
   @override
   void onClose() {
     searchController.removeListener(_onSearchChanged);
-    searchController.dispose();
-    scrollController.dispose();
     _debounce?.cancel();
+    
+    // Safely dispose of UI controllers after widget unmount
+    Future.delayed(const Duration(milliseconds: 500), () {
+      try {
+        searchController.dispose();
+      } catch (_) {}
+    });
+    
     super.onClose();
   }
 }

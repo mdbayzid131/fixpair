@@ -40,9 +40,8 @@ class ProfileController extends GetxController {
     Helpers.showLoadingDialog();
     try {
       await _authService.logout();
-      Helpers.hideLoadingDialog();
-      Helpers.showCustomSnackBar('Logged out successfully');
       Get.offAllNamed(AppRoutes.LOGIN);
+      Helpers.showCustomSnackBar('Logged out successfully');
     } catch (e) {
       Helpers.hideLoadingDialog();
       Helpers.showCustomSnackBar(e.toString());
@@ -55,9 +54,8 @@ class ProfileController extends GetxController {
       final response = await _userRepository.deleteAccount();
       if (response.statusCode == 200) {
         await _authService.logout();
-        Helpers.hideLoadingDialog();
-        Helpers.showCustomSnackBar('Account deleted successfully');
         Get.offAllNamed(AppRoutes.LOGIN);
+        Helpers.showCustomSnackBar('Account deleted successfully');
       } else {
         Helpers.hideLoadingDialog();
         Helpers.showCustomSnackBar(

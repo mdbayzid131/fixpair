@@ -85,6 +85,10 @@ class HomeController extends GetxController {
               'channelName': joinData['channelName'] ?? sessionId,
             },
           );
+        } else if (joinResponse.statusCode == 402) {
+          Get.find<AuthService>().showPaymentRequiredDialog();
+        } else {
+          Get.snackbar('Error', joinResponse.statusMessage ?? 'Failed to join video call');
         }
       }
     } catch (e) {

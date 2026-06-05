@@ -36,34 +36,38 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
           ),
         ),
       ),
-      body: Obx(() {
-        final booking = controller.booking.value;
-        if (booking == null) {
-          return const Center(child: CircularProgressIndicator());
-        }
+      body: SafeArea(
+        top: false,
+        bottom: true,
+        child: Obx(() {
+          final booking = controller.booking.value;
+          if (booking == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        return SingleChildScrollView(
-          padding: EdgeInsets.all(20.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildStatusCard(booking),
-              SizedBox(height: 24.h),
-              _buildConsultantInfo(booking),
-              SizedBox(height: 24.h),
-              _buildBookingInfo(booking),
-              SizedBox(height: 24.h),
-              _buildPaymentInfo(booking),
-              if (booking.notes != null && booking.notes!.isNotEmpty) ...[
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(20.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildStatusCard(booking),
                 SizedBox(height: 24.h),
-                _buildNotesSection(booking),
+                _buildConsultantInfo(booking),
+                SizedBox(height: 24.h),
+                _buildBookingInfo(booking),
+                SizedBox(height: 24.h),
+                _buildPaymentInfo(booking),
+                if (booking.notes != null && booking.notes!.isNotEmpty) ...[
+                  SizedBox(height: 24.h),
+                  _buildNotesSection(booking),
+                ],
+                SizedBox(height: 40.h),
+                _buildActionButtons(booking),
               ],
-              SizedBox(height: 40.h),
-              _buildActionButtons(booking),
-            ],
-          ),
-        );
-      }),
+            ),
+          );
+        }),
+      ),
     );
   }
 
@@ -346,7 +350,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
         'Join Video Call',
         const Color(0xFF0066FF),
         Icons.videocam_rounded,
-        () {},
+        () => controller.startVideoCall(booking),
       );
     } else if (status == 'accepted') {
       return Row(
@@ -366,13 +370,15 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
           SizedBox(width: 16.w),
           Expanded(
             child: _buildDangerButton('Cancel Booking', () {
-              // Should call the same dialog logic
+              _showCancelDialog(booking.id!);
             }),
           ),
         ],
       );
     } else if (status == 'pending') {
-      return _buildDangerButton('Cancel Booking', () {});
+      return _buildDangerButton('Cancel Booking', () {
+        _showCancelDialog(booking.id!);
+      });
     } else if (status == 'completed') {
       return _buildFullWidthButton(
         'Book Again',
@@ -552,5 +558,99 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
       default:
         return Icons.info_rounded;
     }
+  }
+
+  void _showCancelDialog(String bookingId) {
+    String selectedReason = "Change of plans";
+    final reasons = [
+      "Change of plans",
+      "Consultant not available",
+      "Found another option",
+      "Technical issues",
+      "Others",
+    ];
+
+    Get.dialog(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24.r),
+            ),
+            title: Text(
+              "Reason for cancellation",
+              style: GoogleFonts.manrope(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1D293D),
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: reasons.map((reason) {
+                return RadioListTile<String>(
+                  title: Text(
+                    reason,
+                    style: GoogleFonts.manrope(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF475569),
+                    ),
+                  ),
+                  value: reason,
+                  groupValue: selectedReason,
+                  onChanged: (value) {
+                    setState(() => selectedReason = value!);
+                  },
+                  activeColor: const Color(0xFFFF6B00),
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                );
+              }).toList(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: Text(
+                  "Close",
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEF4444),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 12.h,
+                  ),
+                ),
+                onPressed: () {
+                  Get.back();
+                  String finalReason = selectedReason == "Others"
+                      ? "User cancelled the booking"
+                      : selectedReason;
+                  controller.cancelBooking(bookingId, reason: finalReason);
+                },
+                child: Text(
+                  "Confirm",
+                  style: GoogleFonts.manrope(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 }

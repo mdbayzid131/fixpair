@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../controllers/legal_faq_controller.dart';
 
 class LegalFAQView extends GetView<LegalFAQController> {
@@ -49,7 +50,7 @@ class LegalFAQView extends GetView<LegalFAQController> {
             _buildActionCard(
               icon: Icons.support_agent_rounded,
               label: 'Contact Support',
-              onTap: () {},
+              onTap: () => Get.toNamed(AppRoutes.CONTACT_SUPPORT),
             ),
             SizedBox(height: 24.h),
           ],
@@ -308,4 +309,5 @@ class LegalFAQView extends GetView<LegalFAQController> {
       ),
     );
   }
+
 }
