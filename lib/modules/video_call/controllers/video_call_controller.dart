@@ -14,7 +14,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fixpair/core/services/socket_service.dart';
 import 'package:fixpair/data/models/transcript_message.dart';
 import 'package:fixpair/core/services/auth_service.dart';
-import '../../../core/utils/logger.dart';
+import 'package:fixpair/core/utils/logger.dart';
+import 'package:fixpair/config/constants/api_constants.dart';
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
 class VideoCallController extends GetxController {
   final UserRepository _userRepository = Get.find();
@@ -23,7 +25,7 @@ class VideoCallController extends GetxController {
   static const _channel = MethodChannel('fixpair/pip');
 
   // Agora Config
-  static const String appId = "1ab0566716c44d22bc8afc15a6d62205";
+  static const String appId = ApiConstants.agoraAppId;
 
   late RtcEngine engine;
   final RxInt remoteUid = 0.obs;

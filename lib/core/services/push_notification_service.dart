@@ -10,11 +10,14 @@ import 'package:flutter_callkit_incoming/entities/entities.dart';
 /// Requires: firebase_core, firebase_messaging
 /// Also needs google-services.json (Android) and GoogleService-Info.plist (iOS).
 
+import 'package:fixpair/firebase_options.dart';
+
 /// 🔥 Background handler — must be a top-level function
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   AppLogger.debug('Background Message: ${message.messageId}');
+  AppLogger.debug('Background Data: ${message.data}');
 
   if (message.data['type'] == 'INCOMING_CALL') {
     final sessionId = message.data['sessionId'];
