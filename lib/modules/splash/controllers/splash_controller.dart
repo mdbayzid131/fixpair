@@ -12,7 +12,7 @@ import '../../../config/constants/storage_constants.dart';
 class SplashController extends GetxController {
   final AuthService _authService = Get.find();
   final Color bgColor = const Color(0xFF090E1A);
-  final String image = ImagePaths.appLogo;
+  final String image = ImagePaths.appLogoWithoutBg;
 
   @override
   void onInit() {

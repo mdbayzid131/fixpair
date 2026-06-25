@@ -41,7 +41,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                     child: Column(
                       children: [
                         SizedBox(height: 20.h),
-                        Image.asset(ImagePaths.appLogo, height: 80.h),
+                        Image.asset(ImagePaths.appLogoWithoutBg, height: 80.h),
                         SizedBox(height: 12.h),
                         Text(
                           'Fixpair',
