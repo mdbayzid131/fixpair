@@ -24,7 +24,7 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
 
   final List<ReviewModel> _reviewsList = [];
   ConsultantStats? _stats;
-  
+
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _hasMore = true;
@@ -54,7 +54,9 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
 
   Future<void> _fetchStats() async {
     try {
-      final response = await _userRepository.getConsultantStats(widget.consultantId);
+      final response = await _userRepository.getConsultantStats(
+        widget.consultantId,
+      );
       if (response.statusCode == 200) {
         setState(() {
           _stats = ConsultantStats.fromJson(response.data['data']);
@@ -87,12 +89,13 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
-        final List<ReviewModel> fetchedReviews =
-            data.map((e) => ReviewModel.fromJson(e)).toList();
+        final List<ReviewModel> fetchedReviews = data
+            .map((e) => ReviewModel.fromJson(e))
+            .toList();
 
         setState(() {
           _reviewsList.addAll(fetchedReviews);
-          
+
           if (response.data['pagination'] != null) {
             final pagination = response.data['pagination'];
             final totalPage = pagination['totalPage'] ?? 1;
@@ -121,7 +124,10 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1D293D)),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF1D293D),
+          ),
           onPressed: () => Get.back(),
         ),
         title: Text(
@@ -142,10 +148,8 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
           controller: _scrollController,
           slivers: [
             // Rating breakdown card header
-            SliverToBoxAdapter(
-              child: _buildBreakdownHeader(),
-            ),
-            
+            SliverToBoxAdapter(child: _buildBreakdownHeader()),
+
             // List of reviews
             if (_isLoading && _reviewsList.isEmpty)
               const SliverFillRemaining(
@@ -184,7 +188,9 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
                       if (index >= _reviewsList.length) {
                         return Padding(
                           padding: EdgeInsets.symmetric(vertical: 16.h),
-                          child: const Center(child: CircularProgressIndicator()),
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
                         );
                       }
                       final review = _reviewsList[index];
@@ -237,7 +243,9 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
                     5,
                     (index) => Icon(
                       Icons.star_rounded,
-                      color: index < avgRating.round() ? const Color(0xFFF59E0B) : const Color(0xFFE2E8F0),
+                      color: index < avgRating.round()
+                          ? const Color(0xFFF59E0B)
+                          : const Color(0xFFE2E8F0),
                       size: 18.sp,
                     ),
                   ),
@@ -264,9 +272,15 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
             flex: 6,
             child: Column(
               children: [
-                _buildRatingBar(5, avgRating >= 4.5 ? 1.0 : (avgRating >= 4.0 ? 0.8 : 0.2)),
+                _buildRatingBar(
+                  5,
+                  avgRating >= 4.5 ? 1.0 : (avgRating >= 4.0 ? 0.8 : 0.2),
+                ),
                 SizedBox(height: 4.h),
-                _buildRatingBar(4, avgRating >= 3.5 && avgRating < 4.5 ? 0.7 : 0.1),
+                _buildRatingBar(
+                  4,
+                  avgRating >= 3.5 && avgRating < 4.5 ? 0.7 : 0.1,
+                ),
                 SizedBox(height: 4.h),
                 _buildRatingBar(3, 0.05),
                 SizedBox(height: 4.h),
@@ -302,7 +316,9 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
               value: value,
               minHeight: 6.h,
               backgroundColor: const Color(0xFFE2E8F0),
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFF6B00)),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Color(0xFFFF6B00),
+              ),
             ),
           ),
         ),
@@ -342,8 +358,12 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
               CircleAvatar(
                 radius: 20.r,
                 backgroundColor: const Color(0xFFE2E8F0),
-                backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
-                child: imageUrl.isEmpty ? const Icon(Icons.person, color: Color(0xFF64748B)) : null,
+                backgroundImage: imageUrl.isNotEmpty
+                    ? NetworkImage(imageUrl)
+                    : null,
+                child: imageUrl.isEmpty
+                    ? const Icon(Icons.person, color: Color(0xFF64748B))
+                    : null,
               ),
               SizedBox(width: 12.w),
               Expanded(
@@ -374,7 +394,9 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
                   5,
                   (index) => Icon(
                     Icons.star_rounded,
-                    color: index < ratingCount ? const Color(0xFFF59E0B) : const Color(0xFFE2E8F0),
+                    color: index < ratingCount
+                        ? const Color(0xFFF59E0B)
+                        : const Color(0xFFE2E8F0),
                     size: 16.sp,
                   ),
                 ),

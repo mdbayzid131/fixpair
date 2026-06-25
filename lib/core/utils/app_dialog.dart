@@ -29,10 +29,7 @@ class AppDialog {
       transitionBuilder: (_, animationController, _, child) {
         switch (animation) {
           case DialogAnimation.fade:
-            return FadeTransition(
-              opacity: animationController,
-              child: child,
-            );
+            return FadeTransition(opacity: animationController, child: child);
 
           case DialogAnimation.scale:
             return ScaleTransition(
@@ -40,10 +37,7 @@ class AppDialog {
                 parent: animationController,
                 curve: Curves.easeOutBack,
               ),
-              child: FadeTransition(
-                opacity: animationController,
-                child: child,
-              ),
+              child: FadeTransition(opacity: animationController, child: child),
             );
 
           case DialogAnimation.slideLeft:
@@ -65,15 +59,12 @@ class AppDialog {
             );
 
           case DialogAnimation.slideUp:
-          return SlideTransition(
+            return SlideTransition(
               position: Tween<Offset>(
                 begin: const Offset(0, 1),
                 end: Offset.zero,
               ).animate(_curve(animationController)),
-              child: FadeTransition(
-                opacity: animationController,
-                child: child,
-              ),
+              child: FadeTransition(opacity: animationController, child: child),
             );
         }
       },
@@ -81,18 +72,9 @@ class AppDialog {
   }
 
   static CurvedAnimation _curve(Animation<double> animation) {
-    return CurvedAnimation(
-      parent: animation,
-      curve: Curves.easeOutCubic,
-    );
+    return CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
   }
 }
 
 /// ================= ANIMATION TYPES ================= ///
-enum DialogAnimation {
-  slideUp,
-  slideLeft,
-  slideRight,
-  fade,
-  scale,
-}
+enum DialogAnimation { slideUp, slideLeft, slideRight, fade, scale }

@@ -15,7 +15,8 @@ class SearchView extends StatefulWidget {
 }
 
 class _SearchViewState extends State<SearchView> {
-  final search_ctrl.SearchController controller = Get.find<search_ctrl.SearchController>();
+  final search_ctrl.SearchController controller =
+      Get.find<search_ctrl.SearchController>();
   final ScrollController _scrollController = ScrollController();
 
   @override

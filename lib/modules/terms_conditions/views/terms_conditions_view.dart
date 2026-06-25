@@ -15,7 +15,11 @@ class TermsConditionsView extends GetView<TermsConditionsController> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.chevron_left_rounded, color: const Color(0xFF1D293D), size: 28.sp),
+          icon: Icon(
+            Icons.chevron_left_rounded,
+            color: const Color(0xFF1D293D),
+            size: 28.sp,
+          ),
           onPressed: () => Get.back(),
         ),
         centerTitle: true,
@@ -61,10 +65,9 @@ class TermsConditionsView extends GetView<TermsConditionsController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ...controller.termsConditionsItems.map((item) => _buildSection(
-                      item.title ?? '',
-                      item.content ?? '',
-                    )),
+                ...controller.termsConditionsItems.map(
+                  (item) => _buildSection(item.title ?? '', item.content ?? ''),
+                ),
                 SizedBox(height: 8.h),
                 Text(
                   'Last updated: ${controller.termsConditionsItems.first.updatedAt != null ? controller.termsConditionsItems.first.updatedAt!.substring(0, 10) : 'April 1, 2026'}',

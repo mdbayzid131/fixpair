@@ -17,7 +17,11 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.chevron_left_rounded, color: const Color(0xFF1D293D), size: 28.sp),
+          icon: Icon(
+            Icons.chevron_left_rounded,
+            color: const Color(0xFF1D293D),
+            size: 28.sp,
+          ),
           onPressed: () => Get.back(),
         ),
         centerTitle: true,
@@ -53,141 +57,156 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
   }
 
   Widget _buildCompletedCard() {
-    return Obx(() => Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 20.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0FDF4),
-        borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: const Color(0xFFDCFCE7), width: 1.5),
+    return Obx(
+      () => Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 20.w),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0FDF4),
+          borderRadius: BorderRadius.circular(24.r),
+          border: Border.all(color: const Color(0xFFDCFCE7), width: 1.5),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: const BoxDecoration(
+                color: Color(0xFFBBF7D0),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.check_rounded,
+                color: const Color(0xFF16A34A),
+                size: 32.sp,
+              ),
+            ),
+            SizedBox(height: 20.h),
+            Text(
+              'Consultation Completed',
+              style: GoogleFonts.manrope(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF166534),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Your session with ${controller.consultantName.value}\nwas successful.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.manrope(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF166534).withOpacity(0.7),
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.all(12.w),
-            decoration: const BoxDecoration(
-              color: Color(0xFFBBF7D0),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.check_rounded, color: const Color(0xFF16A34A), size: 32.sp),
-          ),
-          SizedBox(height: 20.h),
-          Text(
-            'Consultation Completed',
-            style: GoogleFonts.manrope(
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF166534),
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Your session with ${controller.consultantName.value}\nwas successful.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.manrope(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF166534).withOpacity(0.7),
-              height: 1.5,
-            ),
-          ),
-        ],
-      ),
-    ));
+    );
   }
 
   Widget _buildInvoiceDetails() {
-    return Obx(() => Container(
-      padding: EdgeInsets.all(24.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Invoice Details',
-                style: GoogleFonts.manrope(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1D293D),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFDCFCE7),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Text(
-                  'Paid',
+    return Obx(
+      () => Container(
+        padding: EdgeInsets.all(24.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Invoice Details',
                   style: GoogleFonts.manrope(
-                    fontSize: 12.sp,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF16A34A),
+                    color: const Color(0xFF1D293D),
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 24.h),
-          _buildDetailRow('Date', controller.date.value),
-          SizedBox(height: 16.h),
-          _buildDetailRow('Duration', controller.duration.value),
-          SizedBox(height: 16.h),
-          _buildDetailRow('Rate', controller.rate.value),
-          SizedBox(height: 16.h),
-          _buildDetailRow('VAT (19%)', controller.vat.value),
-          SizedBox(height: 20.h),
-          Divider(color: Colors.grey.withOpacity(0.1), thickness: 1),
-          SizedBox(height: 20.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total Charged',
-                style: GoogleFonts.manrope(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1D293D),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 4.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDCFCE7),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Text(
+                    'Paid',
+                    style: GoogleFonts.manrope(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF16A34A),
+                    ),
+                  ),
                 ),
-              ),
-              Text(
-                controller.totalCharged.value,
-                style: GoogleFonts.manrope(
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFFFF6B00),
+              ],
+            ),
+            SizedBox(height: 24.h),
+            _buildDetailRow('Date', controller.date.value),
+            SizedBox(height: 16.h),
+            _buildDetailRow('Duration', controller.duration.value),
+            SizedBox(height: 16.h),
+            _buildDetailRow('Rate', controller.rate.value),
+            SizedBox(height: 16.h),
+            _buildDetailRow('VAT (19%)', controller.vat.value),
+            SizedBox(height: 20.h),
+            Divider(color: Colors.grey.withOpacity(0.1), thickness: 1),
+            SizedBox(height: 20.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total Charged',
+                  style: GoogleFonts.manrope(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1D293D),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 24.h),
-          TextButton.icon(
-            onPressed: () {},
-            icon: Icon(Icons.file_download_outlined, size: 20.sp, color: const Color(0xFF0066FF)),
-            label: Text(
-              'Download PDF Invoice',
-              style: GoogleFonts.manrope(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w700,
+                Text(
+                  controller.totalCharged.value,
+                  style: GoogleFonts.manrope(
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFFFF6B00),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 24.h),
+            TextButton.icon(
+              onPressed: () {},
+              icon: Icon(
+                Icons.file_download_outlined,
+                size: 20.sp,
                 color: const Color(0xFF0066FF),
               ),
+              label: Text(
+                'Download PDF Invoice',
+                style: GoogleFonts.manrope(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF0066FF),
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   Widget _buildDetailRow(String label, String value) {
@@ -256,7 +275,11 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.description_rounded, color: const Color(0xFF0066FF), size: 30.sp),
+                    Icon(
+                      Icons.description_rounded,
+                      color: const Color(0xFF0066FF),
+                      size: 30.sp,
+                    ),
                     SizedBox(width: 12.w),
                     Expanded(
                       child: Column(
@@ -281,7 +304,11 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
                         ],
                       ),
                     ),
-                    Icon(Icons.file_download_outlined, color: const Color(0xFF64748B), size: 24.sp),
+                    Icon(
+                      Icons.file_download_outlined,
+                      color: const Color(0xFF64748B),
+                      size: 24.sp,
+                    ),
                   ],
                 ),
               ),
@@ -290,7 +317,10 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
                 width: double.infinity,
                 height: 48.h,
                 decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFF0066FF).withOpacity(0.5), style: BorderStyle.solid),
+                  border: Border.all(
+                    color: const Color(0xFF0066FF).withOpacity(0.5),
+                    style: BorderStyle.solid,
+                  ),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Center(
@@ -326,14 +356,20 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(5, (index) {
-            return Obx(() => IconButton(
-                  onPressed: () => controller.setRating(index + 1),
-                  icon: Icon(
-                    index < controller.rating.value ? Icons.star_rounded : Icons.star_outline_rounded,
-                    color: index < controller.rating.value ? const Color(0xFFFFC107) : const Color(0xFFE2E8F0),
-                    size: 32.sp,
-                  ),
-                ));
+            return Obx(
+              () => IconButton(
+                onPressed: () => controller.setRating(index + 1),
+                icon: Icon(
+                  index < controller.rating.value
+                      ? Icons.star_rounded
+                      : Icons.star_outline_rounded,
+                  color: index < controller.rating.value
+                      ? const Color(0xFFFFC107)
+                      : const Color(0xFFE2E8F0),
+                  size: 32.sp,
+                ),
+              ),
+            );
           }),
         ),
         SizedBox(height: 24.h),
@@ -348,8 +384,12 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
             controller: controller.reviewController,
             maxLines: 4,
             decoration: InputDecoration(
-              hintText: 'What did you like or dislike about working with this consultation?',
-              hintStyle: GoogleFonts.manrope(fontSize: 13.sp, color: const Color(0xFF94A3B8)),
+              hintText:
+                  'What did you like or dislike about working with this consultation?',
+              hintStyle: GoogleFonts.manrope(
+                fontSize: 13.sp,
+                color: const Color(0xFF94A3B8),
+              ),
               border: InputBorder.none,
             ),
           ),
@@ -446,9 +486,15 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
                 ),
                 if (controller.transcript.isNotEmpty)
                   IconButton(
-                    icon: Icon(Icons.copy_rounded, color: const Color(0xFF0066FF), size: 20.sp),
+                    icon: Icon(
+                      Icons.copy_rounded,
+                      color: const Color(0xFF0066FF),
+                      size: 20.sp,
+                    ),
                     onPressed: () {
-                      final fullText = controller.transcript.map((msg) => '${msg.speakerName}: ${msg.text}').join('\n');
+                      final fullText = controller.transcript
+                          .map((msg) => '${msg.speakerName}: ${msg.text}')
+                          .join('\n');
                       Clipboard.setData(ClipboardData(text: fullText));
                       Get.snackbar(
                         'Success',
@@ -508,7 +554,9 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
                               Text(
                                 msg.speakerName,
                                 style: GoogleFonts.manrope(
-                                  color: isUser ? const Color(0xFF0066FF) : const Color(0xFF10B981),
+                                  color: isUser
+                                      ? const Color(0xFF0066FF)
+                                      : const Color(0xFF10B981),
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13.sp,
                                 ),

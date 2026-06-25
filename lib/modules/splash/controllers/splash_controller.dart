@@ -54,7 +54,8 @@ class SplashController extends GetxController {
     // Basic delay to ensure we don't skip too fast (3 seconds)
     await Future.delayed(const Duration(seconds: 3));
 
-    final bool hasSeenOnboarding = await StorageService.getBool(StorageConstants.onboardingSeen) ?? false;
+    final bool hasSeenOnboarding =
+        await StorageService.getBool(StorageConstants.onboardingSeen) ?? false;
     if (!hasSeenOnboarding) {
       Get.offAllNamed(AppRoutes.ONBOARDING);
     } else {

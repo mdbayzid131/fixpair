@@ -3,11 +3,7 @@ class CategoriesResponseModel {
   final String? message;
   final List<CategoryData>? data;
 
-  CategoriesResponseModel({
-    this.success,
-    this.message,
-    this.data,
-  });
+  CategoriesResponseModel({this.success, this.message, this.data});
 
   factory CategoriesResponseModel.fromJson(Map<String, dynamic> json) {
     return CategoriesResponseModel(

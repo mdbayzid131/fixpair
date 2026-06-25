@@ -309,5 +309,4 @@ class LegalFAQView extends GetView<LegalFAQController> {
       ),
     );
   }
-
 }

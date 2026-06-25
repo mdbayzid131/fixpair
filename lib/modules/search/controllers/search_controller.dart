@@ -95,14 +95,14 @@ class SearchController extends GetxController {
   void onClose() {
     searchController.removeListener(_onSearchChanged);
     _debounce?.cancel();
-    
+
     // Safely dispose of UI controllers after widget unmount
     Future.delayed(const Duration(milliseconds: 500), () {
       try {
         searchController.dispose();
       } catch (_) {}
     });
-    
+
     super.onClose();
   }
 }

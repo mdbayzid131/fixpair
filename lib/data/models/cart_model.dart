@@ -3,11 +3,7 @@ class CartResponseModel {
   final String? message;
   final CartData? data;
 
-  CartResponseModel({
-    this.success,
-    this.message,
-    this.data,
-  });
+  CartResponseModel({this.success, this.message, this.data});
 
   factory CartResponseModel.fromJson(Map<String, dynamic> json) {
     return CartResponseModel(
@@ -18,11 +14,7 @@ class CartResponseModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'success': success,
-      'message': message,
-      'data': data?.toJson(),
-    };
+    return {'success': success, 'message': message, 'data': data?.toJson()};
   }
 }
 
@@ -120,9 +112,7 @@ class CartItemModel {
           : null,
       selectedAddons: json['selectedAddons'] != null
           ? List<SelectedAddonModel>.from(
-              json['selectedAddons'].map(
-                (x) => SelectedAddonModel.fromJson(x),
-              ),
+              json['selectedAddons'].map((x) => SelectedAddonModel.fromJson(x)),
             )
           : [],
     );
@@ -260,11 +250,7 @@ class SelectedAddonModel {
   final String? addonId;
   final CartAddonModel? addon;
 
-  SelectedAddonModel({
-    this.cartItemId,
-    this.addonId,
-    this.addon,
-  });
+  SelectedAddonModel({this.cartItemId, this.addonId, this.addon});
 
   factory SelectedAddonModel.fromJson(Map<String, dynamic> json) {
     return SelectedAddonModel(

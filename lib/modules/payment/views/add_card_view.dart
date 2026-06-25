@@ -46,7 +46,7 @@ class AddCardView extends GetView<PaymentController> {
               ),
             ),
             SizedBox(height: 32.h),
-            
+
             // Stripe Card Field
             Container(
               padding: EdgeInsets.all(16.w),
@@ -66,67 +66,74 @@ class AddCardView extends GetView<PaymentController> {
                 onCardChanged: (card) {
                   // Handle card change if needed
                 },
-                decoration: InputDecoration(
-                  border: InputBorder.none,
+                decoration: InputDecoration(border: InputBorder.none),
+              ),
+            ),
+
+            SizedBox(height: 48.h),
+
+            Obx(
+              () => SizedBox(
+                width: double.infinity,
+                height: 56.h,
+                child: ElevatedButton(
+                  onPressed: controller.isLoading.value
+                      ? null
+                      : () async {
+                          try {
+                            controller.isLoading.value = true;
+                            final paymentMethod = await Stripe.instance
+                                .createPaymentMethod(
+                                  params: const PaymentMethodParams.card(
+                                    paymentMethodData: PaymentMethodData(),
+                                  ),
+                                );
+                            controller.handleAttachMethod(paymentMethod.id);
+                          } catch (e) {
+                            controller.isLoading.value = false;
+                            Helpers.showDebugLog('Stripe Error: $e');
+                            Get.snackbar(
+                              'Payment Error',
+                              e.toString().contains('canceled')
+                                  ? 'Card collection canceled'
+                                  : 'Please check your card details',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.red.withOpacity(0.8),
+                              colorText: Colors.white,
+                            );
+                          }
+                        },
+
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0066FF),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: controller.isLoading.value
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          'Save Card',
+                          style: GoogleFonts.manrope(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ),
-            
-            SizedBox(height: 48.h),
-            
-            Obx(() => SizedBox(
-              width: double.infinity,
-              height: 56.h,
-              child: ElevatedButton(
-                onPressed: controller.isLoading.value 
-                    ? null 
-                    : () async {
-                        try {
-                          controller.isLoading.value = true;
-                          final paymentMethod = await Stripe.instance.createPaymentMethod(
-                            params: const PaymentMethodParams.card(
-                              paymentMethodData: PaymentMethodData(),
-                            ),
-                          );
-                          controller.handleAttachMethod(paymentMethod.id);
-                        } catch (e) {
-                          controller.isLoading.value = false;
-                          Helpers.showDebugLog('Stripe Error: $e');
-                          Get.snackbar(
-                            'Payment Error', 
-                            e.toString().contains('canceled') ? 'Card collection canceled' : 'Please check your card details',
-                            snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: Colors.red.withOpacity(0.8),
-                            colorText: Colors.white,
-                          );
-                        }
-                      },
 
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0066FF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.r),
-                  ),
-                  elevation: 0,
-                ),
-                child: controller.isLoading.value
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        'Save Card',
-                        style: GoogleFonts.manrope(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-              ),
-            )),
-            
             SizedBox(height: 24.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.lock_outline_rounded, size: 16.sp, color: const Color(0xFF94A3B8)),
+                Icon(
+                  Icons.lock_outline_rounded,
+                  size: 16.sp,
+                  color: const Color(0xFF94A3B8),
+                ),
                 SizedBox(width: 8.w),
                 Text(
                   'Secured by Stripe',

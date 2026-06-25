@@ -36,6 +36,7 @@ class _CustomDatePickerFieldState extends State<CustomDatePickerField> {
       widget.controller.text = formattedDate;
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -77,7 +78,10 @@ class _CustomDatePickerFieldState extends State<CustomDatePickerField> {
               horizontal: 16.w,
             ),
 
-            suffixIcon: const Icon(Icons.calendar_today, color: Color(0xff9945FF)),
+            suffixIcon: const Icon(
+              Icons.calendar_today,
+              color: Color(0xff9945FF),
+            ),
 
             filled: true,
             fillColor: const Color(0xffF2F2F7),
@@ -86,7 +90,6 @@ class _CustomDatePickerFieldState extends State<CustomDatePickerField> {
               borderRadius: BorderRadius.circular(10.r),
               borderSide: BorderSide.none,
             ),
-
 
             errorStyle: TextStyle(fontSize: 11.sp, color: Colors.red),
           ),

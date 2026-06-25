@@ -4,7 +4,7 @@ import '../../../core/utils/helpers.dart';
 
 class PaymentController extends GetxController {
   final UserRepository _userRepository = Get.find();
-  
+
   final isLoading = false.obs;
   final paymentMethods = <dynamic>[].obs;
 
@@ -38,10 +38,13 @@ class PaymentController extends GetxController {
       // 2. Create Payment Method via Stripe SDK
       // Note: This requires CardField or PaymentSheet to be implemented in View
       // For simplicity in this controller, we assume the view handles the UI
-      
-      Get.snackbar('Processing', 'Adding your card...', 
-        showProgressIndicator: true, snackPosition: SnackPosition.BOTTOM);
-      
+
+      Get.snackbar(
+        'Processing',
+        'Adding your card...',
+        showProgressIndicator: true,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (e) {
       Helpers.showDebugLog('Error adding payment method: $e');
       Get.snackbar('Error', 'Failed to add card: $e');
@@ -53,8 +56,10 @@ class PaymentController extends GetxController {
   Future<void> handleAttachMethod(String paymentMethodId) async {
     try {
       isLoading.value = true;
-      final response = await _userRepository.attachPaymentMethod(paymentMethodId);
-      
+      final response = await _userRepository.attachPaymentMethod(
+        paymentMethodId,
+      );
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         Get.snackbar('Success', 'Card added successfully');
         fetchPaymentMethods();

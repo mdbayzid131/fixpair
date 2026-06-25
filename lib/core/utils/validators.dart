@@ -40,7 +40,7 @@ class Validators {
     if (value == null || value.trim().isEmpty) {
       return message ?? 'Password is required';
     }
-    
+
     final password = value.trim();
 
     if (password.length < minLength) {
@@ -63,7 +63,11 @@ class Validators {
   }
 
   /// Validates that the confirmation password matches the original password.
-  static String? confirmPassword(String? value, String password, {String? message}) {
+  static String? confirmPassword(
+    String? value,
+    String password, {
+    String? message,
+  }) {
     if (value == null || value.trim().isEmpty) {
       return message ?? 'Confirm password is required';
     }
@@ -165,9 +169,11 @@ class Validators {
     if (value == null || value.trim().isEmpty) {
       return message ?? 'Expiry date is required';
     }
-    
+
     // Pattern: MM/YY or MM/YYYY
-    if (!RegExp(r'^(0[1-9]|1[0-2])\/?([0-9]{2}|[0-9]{4})$').hasMatch(value.trim())) {
+    if (!RegExp(
+      r'^(0[1-9]|1[0-2])\/?([0-9]{2}|[0-9]{4})$',
+    ).hasMatch(value.trim())) {
       return 'Enter valid date (MM/YY)';
     }
 

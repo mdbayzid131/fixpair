@@ -7,9 +7,7 @@ class GradientParser {
   static Gradient parse(String? gradientString, {Gradient? fallback}) {
     if (gradientString == null || !gradientString.contains('linear-gradient')) {
       return fallback ??
-          const LinearGradient(
-            colors: [Color(0xFF1E40AF), Color(0xFF0891B2)],
-          );
+          const LinearGradient(colors: [Color(0xFF1E40AF), Color(0xFF0891B2)]);
     }
 
     try {
@@ -46,11 +44,7 @@ class GradientParser {
         end = Alignment.bottomRight;
       }
 
-      return LinearGradient(
-        colors: colors,
-        begin: begin,
-        end: end,
-      );
+      return LinearGradient(colors: colors, begin: begin, end: end);
     } catch (e) {
       return fallback ??
           const LinearGradient(colors: [Colors.blue, Colors.cyan]);

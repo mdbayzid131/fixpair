@@ -229,7 +229,7 @@ class ScheduleBookingController extends GetxController {
             b.endTime ?? '',
           ),
         );
- 
+
         daySlots.add(
           SlotModel(
             date: currentDate,

@@ -104,7 +104,9 @@ class BookingDetailsController extends GetxController {
           Get.find<AuthService>().showPaymentRequiredDialog();
         } else {
           Helpers.hideLoadingDialog();
-          Helpers.showError(joinResponse.statusMessage ?? 'Failed to join video call');
+          Helpers.showError(
+            joinResponse.statusMessage ?? 'Failed to join video call',
+          );
         }
       } else {
         Helpers.hideLoadingDialog();

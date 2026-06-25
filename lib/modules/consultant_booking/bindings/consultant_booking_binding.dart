@@ -6,6 +6,8 @@ class ConsultantBookingBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut(() => UserRepository());
-    Get.lazyPut<ConsultantBookingController>(() => ConsultantBookingController());
+    Get.lazyPut<ConsultantBookingController>(
+      () => ConsultantBookingController(),
+    );
   }
 }

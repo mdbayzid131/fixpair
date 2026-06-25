@@ -4,9 +4,6 @@ import '../controllers/video_call_controller.dart';
 class VideoCallBinding extends Bindings {
   @override
   void dependencies() {
-    Get.put<VideoCallController>(
-      VideoCallController(),
-      permanent: true,
-    );
+    Get.put<VideoCallController>(VideoCallController(), permanent: true);
   }
 }

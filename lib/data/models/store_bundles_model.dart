@@ -3,11 +3,7 @@ class StoreBundleResponseModel {
   final String? message;
   final List<StoreBundleData>? data;
 
-  StoreBundleResponseModel({
-    this.success,
-    this.message,
-    this.data,
-  });
+  StoreBundleResponseModel({this.success, this.message, this.data});
 
   factory StoreBundleResponseModel.fromJson(Map<String, dynamic> json) {
     return StoreBundleResponseModel(
@@ -60,8 +56,9 @@ class StoreBundleData {
       isActive: json['isActive'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
-      bundle:
-          json['bundle'] != null ? BundleModel.fromJson(json['bundle']) : null,
+      bundle: json['bundle'] != null
+          ? BundleModel.fromJson(json['bundle'])
+          : null,
       store: json['store'] != null ? StoreModel.fromJson(json['store']) : null,
     );
   }
@@ -179,12 +176,8 @@ class StoreModel {
       state: json['state'],
       city: json['city'],
       postalCode: json['postalCode'],
-      lat: json['lat'] != null
-          ? double.tryParse(json['lat'].toString())
-          : null,
-      lng: json['lng'] != null
-          ? double.tryParse(json['lng'].toString())
-          : null,
+      lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
+      lng: json['lng'] != null ? double.tryParse(json['lng'].toString()) : null,
       isActive: json['isActive'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],

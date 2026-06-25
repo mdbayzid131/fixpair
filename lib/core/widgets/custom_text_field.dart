@@ -116,10 +116,7 @@ class CustomTextField extends StatelessWidget {
         fontWeight: FontWeight.w400,
         color: const Color(0xff8E8E93),
       ),
-      contentPadding: EdgeInsets.symmetric(
-        vertical: 14.h,
-        horizontal: 16.w,
-      ),
+      contentPadding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
       filled: true,
@@ -130,10 +127,7 @@ class CustomTextField extends StatelessWidget {
       errorBorder: border,
       focusedErrorBorder: border,
       counterText: '',
-      errorStyle: GoogleFonts.arimo(
-        fontSize: 11.sp,
-        color: Colors.red,
-      ),
+      errorStyle: GoogleFonts.arimo(fontSize: 11.sp, color: Colors.red),
     );
   }
 }

@@ -6,8 +6,6 @@ class RequestCallbackBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut(() => UserRepository());
-    Get.lazyPut<RequestCallbackController>(
-      () => RequestCallbackController(),
-    );
+    Get.lazyPut<RequestCallbackController>(() => RequestCallbackController());
   }
 }

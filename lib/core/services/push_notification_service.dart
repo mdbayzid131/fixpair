@@ -53,10 +53,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
           textAccept: 'Accept',
           textDecline: 'Decline',
         ),
-        ios: const IOSParams(
-          handleType: 'generic',
-          supportsVideo: true,
-        ),
+        ios: const IOSParams(handleType: 'generic', supportsVideo: true),
       );
 
       await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);

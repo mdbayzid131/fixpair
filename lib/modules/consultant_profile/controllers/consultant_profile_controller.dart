@@ -81,7 +81,9 @@ class ConsultantProfileController extends GetxController {
 
   Future<void> fetchTotalConsultations(String id) async {
     try {
-      final response = await _userRepository.getConsultantTotalConsultations(id);
+      final response = await _userRepository.getConsultantTotalConsultations(
+        id,
+      );
       if (response.statusCode == 200) {
         final data = response.data['data'];
         totalConsultations.value = data['totalConsultations'] ?? 0;

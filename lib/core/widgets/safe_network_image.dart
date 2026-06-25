@@ -81,10 +81,7 @@ class SafeNetworkImage extends StatelessWidget {
       child: SizedBox(
         width: 20.sp,
         height: 20.sp,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          value: value,
-        ),
+        child: CircularProgressIndicator(strokeWidth: 2, value: value),
       ),
     );
   }

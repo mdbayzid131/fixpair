@@ -3,11 +3,7 @@ class BannerResponseModel {
   final String? message;
   final List<BannerData>? data;
 
-  BannerResponseModel({
-    this.success,
-    this.message,
-    this.data,
-  });
+  BannerResponseModel({this.success, this.message, this.data});
 
   factory BannerResponseModel.fromJson(Map<String, dynamic> json) {
     return BannerResponseModel(

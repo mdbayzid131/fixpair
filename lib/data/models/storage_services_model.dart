@@ -4,12 +4,7 @@ class StoreServiceResponseModel {
   final Meta? meta;
   final List<StoreServiceData>? data;
 
-  StoreServiceResponseModel({
-    this.success,
-    this.message,
-    this.meta,
-    this.data,
-  });
+  StoreServiceResponseModel({this.success, this.message, this.meta, this.data});
 
   factory StoreServiceResponseModel.fromJson(Map<String, dynamic> json) {
     return StoreServiceResponseModel(
@@ -30,18 +25,10 @@ class Meta {
   final int? page;
   final int? limit;
 
-  Meta({
-    this.total,
-    this.page,
-    this.limit,
-  });
+  Meta({this.total, this.page, this.limit});
 
   factory Meta.fromJson(Map<String, dynamic> json) {
-    return Meta(
-      total: json['total'],
-      page: json['page'],
-      limit: json['limit'],
-    );
+    return Meta(total: json['total'], page: json['page'], limit: json['limit']);
   }
 }
 
@@ -141,19 +128,14 @@ class Store {
       state: json['state'],
       city: json['city'],
       postalCode: json['postalCode'],
-      lat: json['lat'] != null
-          ? double.tryParse(json['lat'].toString())
-          : null,
-      lng: json['lng'] != null
-          ? double.tryParse(json['lng'].toString())
-          : null,
+      lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
+      lng: json['lng'] != null ? double.tryParse(json['lng'].toString()) : null,
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
       isActive: json['isActive'],
     );
   }
 }
-
 
 class Service {
   final String? id;

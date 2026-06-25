@@ -43,8 +43,11 @@ class Helpers {
                 color: Color(0xFFDCFCE7),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.check_rounded,
-                  color: const Color(0xFF10B981), size: 20.sp),
+              child: Icon(
+                Icons.check_rounded,
+                color: const Color(0xFF10B981),
+                size: 20.sp,
+              ),
             ),
             SizedBox(width: 12.w),
             Expanded(

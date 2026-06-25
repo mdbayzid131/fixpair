@@ -3,15 +3,9 @@ class StoreServiceDetailsResponseModel {
   final String? message;
   final StoreServiceDetailsData? data;
 
-  StoreServiceDetailsResponseModel({
-    this.success,
-    this.message,
-    this.data,
-  });
+  StoreServiceDetailsResponseModel({this.success, this.message, this.data});
 
-  factory StoreServiceDetailsResponseModel.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory StoreServiceDetailsResponseModel.fromJson(Map<String, dynamic> json) {
     return StoreServiceDetailsResponseModel(
       success: json['success'],
       message: json['message'],
@@ -22,11 +16,7 @@ class StoreServiceDetailsResponseModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'success': success,
-      'message': message,
-      'data': data?.toJson(),
-    };
+    return {'success': success, 'message': message, 'data': data?.toJson()};
   }
 }
 
@@ -244,8 +234,7 @@ class ServiceAddonModel {
       addonId: json['addonId'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
-      addon:
-          json['addon'] != null ? AddonModel.fromJson(json['addon']) : null,
+      addon: json['addon'] != null ? AddonModel.fromJson(json['addon']) : null,
     );
   }
 
@@ -460,20 +449,14 @@ class ReviewModel {
 class ReviewCountModel {
   final int? reviews;
 
-  ReviewCountModel({
-    this.reviews,
-  });
+  ReviewCountModel({this.reviews});
 
   factory ReviewCountModel.fromJson(Map<String, dynamic> json) {
-    return ReviewCountModel(
-      reviews: json['reviews'],
-    );
+    return ReviewCountModel(reviews: json['reviews']);
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'reviews': reviews,
-    };
+    return {'reviews': reviews};
   }
 }
 

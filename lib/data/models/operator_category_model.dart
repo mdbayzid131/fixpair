@@ -11,8 +11,7 @@ class OperatorCategoryResponseModel {
     this.data,
   });
 
-  factory OperatorCategoryResponseModel.fromJson(
-      Map<String, dynamic> json) {
+  factory OperatorCategoryResponseModel.fromJson(Map<String, dynamic> json) {
     return OperatorCategoryResponseModel(
       success: json['success'],
       message: json['message'],
@@ -43,12 +42,7 @@ class OperatorCategoryMeta {
   final int? page;
   final int? limit;
 
-  OperatorCategoryMeta({
-    this.total,
-    this.totalPage,
-    this.page,
-    this.limit,
-  });
+  OperatorCategoryMeta({this.total, this.totalPage, this.page, this.limit});
 
   factory OperatorCategoryMeta.fromJson(Map<String, dynamic> json) {
     return OperatorCategoryMeta(
@@ -154,4 +148,3 @@ class CategoryModel {
     };
   }
 }
-

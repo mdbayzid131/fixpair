@@ -1,4 +1,4 @@
-import 'package:fixpair/config/routes/app_pages.dart'; 
+import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/auth_service.dart';

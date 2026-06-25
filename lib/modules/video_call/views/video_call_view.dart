@@ -39,8 +39,6 @@ class VideoCallView extends GetView<VideoCallController> {
             // 3. User Video (PiP Window)
             if (!isPipMode) _buildUserPiP(),
 
-
-
             // 4. Bottom Controls
             if (!isPipMode)
               Positioned(
@@ -590,14 +588,11 @@ class VideoCallView extends GetView<VideoCallController> {
           ),
         ),
 
-
         // Switch Camera (Flip)
         _buildStaticControlButton(
           icon: Icons.flip_camera_ios_rounded,
           onTap: () => controller.switchCamera(),
         ),
-
-
       ],
     );
   }
@@ -657,6 +652,4 @@ class VideoCallView extends GetView<VideoCallController> {
       ),
     );
   }
-
-
 }

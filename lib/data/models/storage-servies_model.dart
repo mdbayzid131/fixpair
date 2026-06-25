@@ -3,11 +3,7 @@ class StoreServicesResponseModel {
   final String? message;
   final StoreServicesWrapper? data;
 
-  StoreServicesResponseModel({
-    this.success,
-    this.message,
-    this.data,
-  });
+  StoreServicesResponseModel({this.success, this.message, this.data});
 
   factory StoreServicesResponseModel.fromJson(Map<String, dynamic> json) {
     return StoreServicesResponseModel(
@@ -24,10 +20,7 @@ class StoreServicesWrapper {
   final Meta? meta;
   final List<StoreServiceItem>? data;
 
-  StoreServicesWrapper({
-    this.meta,
-    this.data,
-  });
+  StoreServicesWrapper({this.meta, this.data});
 
   factory StoreServicesWrapper.fromJson(Map<String, dynamic> json) {
     return StoreServicesWrapper(
@@ -47,12 +40,7 @@ class Meta {
   final int? page;
   final int? limit;
 
-  Meta({
-    this.total,
-    this.totalPage,
-    this.page,
-    this.limit,
-  });
+  Meta({this.total, this.totalPage, this.page, this.limit});
 
   factory Meta.fromJson(Map<String, dynamic> json) {
     return Meta(
@@ -101,13 +89,12 @@ class StoreServiceItem {
       isActive: json['isActive'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
-      service:
-          json['service'] != null ? Service.fromJson(json['service']) : null,
+      service: json['service'] != null
+          ? Service.fromJson(json['service'])
+          : null,
       store: json['store'] != null ? Store.fromJson(json['store']) : null,
       reviews: json['reviews'] != null
-          ? List<Review>.from(
-              json['reviews'].map((x) => Review.fromJson(x)),
-            )
+          ? List<Review>.from(json['reviews'].map((x) => Review.fromJson(x)))
           : [],
       avgRating: json['avgRating'] != null
           ? double.tryParse(json['avgRating'].toString())
@@ -167,16 +154,12 @@ class Service {
           : null,
       serviceAddons: json['serviceAddons'] != null
           ? List<ServiceAddon>.from(
-              json['serviceAddons'].map(
-                (x) => ServiceAddon.fromJson(x),
-              ),
+              json['serviceAddons'].map((x) => ServiceAddon.fromJson(x)),
             )
           : [],
       storeServices: json['storeServices'] != null
           ? List<StoreServiceLink>.from(
-              json['storeServices'].map(
-                (x) => StoreServiceLink.fromJson(x),
-              ),
+              json['storeServices'].map((x) => StoreServiceLink.fromJson(x)),
             )
           : [],
       operator: json['operator'] != null
@@ -357,12 +340,8 @@ class Store {
       state: json['state'],
       city: json['city'],
       postalCode: json['postalCode'],
-      lat: json['lat'] != null
-          ? double.tryParse(json['lat'].toString())
-          : null,
-      lng: json['lng'] != null
-          ? double.tryParse(json['lng'].toString())
-          : null,
+      lat: json['lat'] != null ? double.tryParse(json['lat'].toString()) : null,
+      lng: json['lng'] != null ? double.tryParse(json['lng'].toString()) : null,
       isActive: json['isActive'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
@@ -376,12 +355,7 @@ class Review {
   final String? comment;
   final String? createdAt;
 
-  Review({
-    this.id,
-    this.rating,
-    this.comment,
-    this.createdAt,
-  });
+  Review({this.id, this.rating, this.comment, this.createdAt});
 
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(

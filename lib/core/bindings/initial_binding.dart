@@ -1,5 +1,3 @@
-
-
 import 'package:fixpair/core/controllers/internet_controller.dart';
 import 'package:fixpair/core/services/api_client.dart';
 import 'package:fixpair/core/services/auth_service.dart';

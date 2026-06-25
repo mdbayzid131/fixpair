@@ -14,7 +14,8 @@ class NotificationsView extends StatefulWidget {
 }
 
 class _NotificationsViewState extends State<NotificationsView> {
-  final NotificationsController controller = Get.find<NotificationsController>();
+  final NotificationsController controller =
+      Get.find<NotificationsController>();
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -48,7 +49,11 @@ class _NotificationsViewState extends State<NotificationsView> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.chevron_left_rounded, color: const Color(0xFF1D293D), size: 28.sp),
+          icon: Icon(
+            Icons.chevron_left_rounded,
+            color: const Color(0xFF1D293D),
+            size: 28.sp,
+          ),
           onPressed: () => Get.back(),
         ),
         centerTitle: true,
@@ -102,7 +107,8 @@ class _NotificationsViewState extends State<NotificationsView> {
           child: ListView.separated(
             controller: _scrollController,
             padding: EdgeInsets.all(20.w),
-            itemCount: controller.notifications.length +
+            itemCount:
+                controller.notifications.length +
                 (controller.isLoadingMore.value ? 1 : 0),
             separatorBuilder: (context, index) => SizedBox(height: 16.h),
             itemBuilder: (context, index) {
@@ -111,7 +117,9 @@ class _NotificationsViewState extends State<NotificationsView> {
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF6B00)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFFFF6B00),
+                      ),
                     ),
                   ),
                 );

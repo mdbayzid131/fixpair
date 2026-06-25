@@ -62,5 +62,3 @@ class StorageService extends GetxService {
     return preferences.containsKey(key);
   }
 }
-
-

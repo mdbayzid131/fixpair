@@ -10,10 +10,7 @@ Future navigateTo(BuildContext context, Widget page) {
         position: Tween<Offset>(
           begin: const Offset(1, 0), // right to left
           end: Offset.zero,
-        ).animate(CurvedAnimation(
-          parent: animation,
-          curve: Curves.ease,
-        )),
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.ease)),
         child: child,
       ),
     ),

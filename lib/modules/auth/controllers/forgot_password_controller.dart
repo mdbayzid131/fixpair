@@ -24,17 +24,17 @@ class ForgotPasswordController extends GetxController {
     try {
       isLoading.value = true;
 
-      var response = await _authService.forgotPassword(emailController.text.trim());
+      var response = await _authService.forgotPassword(
+        emailController.text.trim(),
+      );
 
       if (response.statusCode == 200) {
-        Helpers.showSuccess(
-          'Reset link sent to your email',
-        );
+        Helpers.showSuccess('Reset link sent to your email');
         Get.toNamed(
           AppRoutes.OTP,
           arguments: {
             'email': emailController.text.trim(),
-            'isForgotPassword': true
+            'isForgotPassword': true,
           },
         );
       } else {

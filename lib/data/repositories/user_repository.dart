@@ -155,7 +155,6 @@ class UserRepository {
     });
   }
 
-
   // --- Payment Methods ---
 
   // Create Stripe customer

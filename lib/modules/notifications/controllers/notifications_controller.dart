@@ -57,14 +57,16 @@ class NotificationsController extends GetxController {
         }
 
         if (notificationResponse.pagination != null) {
-          _hasMore = _currentPage <
-              (notificationResponse.pagination!.totalPage ?? 1);
+          _hasMore =
+              _currentPage < (notificationResponse.pagination!.totalPage ?? 1);
         } else {
           _hasMore = false;
         }
         _updateHomeUnreadStatus();
       } else {
-        Helpers.showError(response.statusMessage ?? 'Failed to load notifications');
+        Helpers.showError(
+          response.statusMessage ?? 'Failed to load notifications',
+        );
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());

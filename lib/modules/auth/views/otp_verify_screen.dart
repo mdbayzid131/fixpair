@@ -143,7 +143,10 @@ class OtpVerifyScreen extends GetView<OtpController> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: const Color(0xFFFF6B00), width: 1.5),
+                        border: Border.all(
+                          color: const Color(0xFFFF6B00),
+                          width: 1.5,
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0xFFFF6B00).withOpacity(0.1),
@@ -208,12 +211,14 @@ class OtpVerifyScreen extends GetView<OtpController> {
                                 ),
                               ),
                               Obx(() {
-                                final minutes = (controller.remainingSeconds.value ~/ 60)
-                                    .toString()
-                                    .padLeft(2, '0');
-                                final seconds = (controller.remainingSeconds.value % 60)
-                                    .toString()
-                                    .padLeft(2, '0');
+                                final minutes =
+                                    (controller.remainingSeconds.value ~/ 60)
+                                        .toString()
+                                        .padLeft(2, '0');
+                                final seconds =
+                                    (controller.remainingSeconds.value % 60)
+                                        .toString()
+                                        .padLeft(2, '0');
                                 return Text(
                                   '$minutes:$seconds',
                                   style: GoogleFonts.manrope(

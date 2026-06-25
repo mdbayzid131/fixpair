@@ -42,14 +42,16 @@ class PaymentMethodsView extends GetView<PaymentController> {
                 ),
               ),
               SizedBox(height: 16.h),
-              
+
               if (controller.paymentMethods.isEmpty)
                 _buildEmptyState()
               else
-                ...controller.paymentMethods.map((method) => _buildCardItem(method)),
-              
+                ...controller.paymentMethods.map(
+                  (method) => _buildCardItem(method),
+                ),
+
               SizedBox(height: 32.h),
-              
+
               _buildAddCardButton(),
             ],
           ),
@@ -134,7 +136,11 @@ class PaymentMethodsView extends GetView<PaymentController> {
       alignment: Alignment.center,
       child: Column(
         children: [
-          Icon(Icons.credit_card_off_rounded, size: 64.sp, color: const Color(0xFFCBD5E1)),
+          Icon(
+            Icons.credit_card_off_rounded,
+            size: 64.sp,
+            color: const Color(0xFFCBD5E1),
+          ),
           SizedBox(height: 16.h),
           Text(
             'No cards added yet',
@@ -157,7 +163,10 @@ class PaymentMethodsView extends GetView<PaymentController> {
         decoration: BoxDecoration(
           color: const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: const Color(0xFFE2E8F0), style: BorderStyle.none),
+          border: Border.all(
+            color: const Color(0xFFE2E8F0),
+            style: BorderStyle.none,
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

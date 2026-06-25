@@ -15,7 +15,11 @@ class PrivacyPolicyView extends GetView<PrivacyPolicyController> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.chevron_left_rounded, color: const Color(0xFF1D293D), size: 28.sp),
+          icon: Icon(
+            Icons.chevron_left_rounded,
+            color: const Color(0xFF1D293D),
+            size: 28.sp,
+          ),
           onPressed: () => Get.back(),
         ),
         centerTitle: true,
@@ -61,10 +65,9 @@ class PrivacyPolicyView extends GetView<PrivacyPolicyController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ...controller.privacyPolicyItems.map((item) => _buildSection(
-                      item.title ?? '',
-                      item.content ?? '',
-                    )),
+                ...controller.privacyPolicyItems.map(
+                  (item) => _buildSection(item.title ?? '', item.content ?? ''),
+                ),
                 SizedBox(height: 8.h),
                 Text(
                   'Last updated: ${controller.privacyPolicyItems.first.updatedAt != null ? controller.privacyPolicyItems.first.updatedAt!.substring(0, 10) : 'April 1, 2026'}',

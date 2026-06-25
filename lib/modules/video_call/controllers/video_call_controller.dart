@@ -32,8 +32,6 @@ class VideoCallController extends GetxController {
   final isMicOn = true.obs;
   final isCameraOn = true.obs;
 
-
-
   // Drag coordinates for local PiP window & floating overlay
   final RxDouble pipTop = 0.0.obs;
   final RxDouble pipLeft = 0.0.obs;
@@ -66,8 +64,6 @@ class VideoCallController extends GetxController {
       token = args['token'] ?? "";
       channelName = args['channelName'] ?? "test_channel";
     }
-
-
 
     initAgora();
   }
@@ -161,7 +157,8 @@ class VideoCallController extends GetxController {
 
     // Determine UID according to backend guidelines: 1001 for user, 2001 for consultant
     final authService = Get.find<AuthService>();
-    final isConsultant = authService.user.value?.role?.toLowerCase() == 'consultant';
+    final isConsultant =
+        authService.user.value?.role?.toLowerCase() == 'consultant';
     final int myUid = isConsultant ? 2001 : 1001;
 
     AppLogger.info('[Agora] Joining channel $channelName with UID $myUid');
@@ -404,9 +401,9 @@ class VideoCallController extends GetxController {
   Future<void> endCall() async {
     if (_isEndingCall) return;
     _isEndingCall = true;
-    
+
     _setNativeCallActive(false);
-    
+
     try {
       await FlutterCallkitIncoming.endCall(sessionId);
       await FlutterCallkitIncoming.endAllCalls();
@@ -415,8 +412,6 @@ class VideoCallController extends GetxController {
     } catch (e) {
       AppLogger.warning('[CallKit] Error ending call session: $e');
     }
-
-
 
     try {
       await _userRepository.endVideoSession(sessionId);
@@ -459,13 +454,13 @@ class VideoCallController extends GetxController {
       return;
     }
     _isEndingCall = true;
-    
+
     _setNativeCallActive(false);
     _timer?.cancel();
     engine.leaveChannel();
     engine.release();
     closeOverlay();
-    
+
     try {
       FlutterCallkitIncoming.endCall(sessionId);
       FlutterCallkitIncoming.endAllCalls();
@@ -474,9 +469,7 @@ class VideoCallController extends GetxController {
     } catch (e) {
       AppLogger.warning('[CallKit] Error ending call on close: $e');
     }
-    
+
     super.onClose();
   }
-
-
 }

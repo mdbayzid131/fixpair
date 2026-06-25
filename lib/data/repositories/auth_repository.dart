@@ -1,16 +1,10 @@
-
-
 import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/core/services/api_client.dart';
 import 'package:dio/dio.dart';
 
-
-
 class AuthRepo {
   final ApiClient apiClient;
   AuthRepo({required this.apiClient});
-
-
 
   // Future<String> getDeviceId() async {
   //   final deviceInfo = DeviceInfoPlugin();
@@ -25,8 +19,6 @@ class AuthRepo {
   //     return "unsupported";
   //   }
   // }
-
-
 
   /// ===================== SIGNUP =====================
   Future<Response> signup({
@@ -72,16 +64,11 @@ class AuthRepo {
 
   /// ===================== RESEND OTP =====================
   Future<Response> resentOtp({required String email}) async {
-    return await apiClient.postData(ApiConstants.resendOtp, {
-      "email": email,
-    });
+    return await apiClient.postData(ApiConstants.resendOtp, {"email": email});
   }
 
   /// ===================== OTP VERIFY =====================
-  Future<Response> otpVerify({
-    required String email,
-    required int otp,
-  }) async {
+  Future<Response> otpVerify({required String email, required int otp}) async {
     return await apiClient.postData(ApiConstants.verifyUser, {
       "email": email,
       "oneTimeCode": otp,
@@ -95,13 +82,8 @@ class AuthRepo {
   }) async {
     return await apiClient.postData(
       ApiConstants.resetPassword,
-      {
-        "newPassword": password,
-        "confirmPassword": password
-      },
-      extraHeaders: {
-        "Authorization": "Bearer $resetToken",
-      },
+      {"newPassword": password, "confirmPassword": password},
+      extraHeaders: {"Authorization": "Bearer $resetToken"},
     );
   }
 
@@ -128,6 +110,4 @@ class AuthRepo {
       "confirmPassword": newPassword,
     });
   }
-
-
 }

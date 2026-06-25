@@ -7,7 +7,7 @@ import 'package:fixpair/data/models/transcript_message.dart';
 class ConsultationSummaryController extends GetxController {
   final rating = 0.obs;
   final reviewController = TextEditingController();
-  
+
   BookingModel? booking;
   final consultantName = ''.obs;
   final date = ''.obs;
@@ -29,7 +29,7 @@ class ConsultationSummaryController extends GetxController {
         date.value = booking?.date != null
             ? DateFormat('dd.MM.yyyy').format(booking!.date!)
             : DateFormat('dd.MM.yyyy').format(DateTime.now());
-        
+
         final double rateVal = booking?.perMinuteRate?.toDouble() ?? 4.0;
         rate.value = '${rateVal.toStringAsFixed(2)}€ / min';
       }
@@ -37,7 +37,9 @@ class ConsultationSummaryController extends GetxController {
       final int durationSecs = args['duration'] ?? 0;
       int minutes = durationSecs ~/ 60;
       int seconds = durationSecs % 60;
-      duration.value = minutes > 0 ? '$minutes min $seconds sec' : '$seconds sec';
+      duration.value = minutes > 0
+          ? '$minutes min $seconds sec'
+          : '$seconds sec';
 
       final double costVal = args['cost'] ?? 0.0;
       totalCharged.value = '${costVal.toStringAsFixed(2)}€';

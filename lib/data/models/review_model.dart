@@ -25,10 +25,16 @@ class ReviewModel {
       user: json['user'] != null ? ReviewUser.fromJson(json['user']) : null,
       consultant: json['consultant']?.toString(),
       consultation: json['consultation']?.toString(),
-      rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) : 0.0,
+      rating: json['rating'] != null
+          ? double.tryParse(json['rating'].toString())
+          : 0.0,
       comment: json['comment']?.toString(),
-      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'].toString()) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt'].toString()) : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'].toString())
+          : null,
     );
   }
 
@@ -64,11 +70,6 @@ class ReviewUser {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      '_id': id,
-      'name': name,
-      'image': image,
-      'avatar': avatar,
-    };
+    return {'_id': id, 'name': name, 'image': image, 'avatar': avatar};
   }
 }

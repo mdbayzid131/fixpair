@@ -134,9 +134,6 @@ extension NumExtension on num {
 
   /// Format as currency: 1234.56.toCurrency() → "$1,234.56"
   String toCurrency({String symbol = '\$', int decimals = 2}) {
-    return '$symbol${toStringAsFixed(decimals).replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]},',
-    )}';
+    return '$symbol${toStringAsFixed(decimals).replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}';
   }
 }

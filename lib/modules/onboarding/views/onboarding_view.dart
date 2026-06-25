@@ -93,7 +93,10 @@ class OnboardingView extends GetView<OnboardingController> {
                   Obx(
                     () => Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(5, (index) => _buildIndicator(index)),
+                      children: List.generate(
+                        5,
+                        (index) => _buildIndicator(index),
+                      ),
                     ),
                   ),
                   SizedBox(height: 32.h),
@@ -115,7 +118,9 @@ class OnboardingView extends GetView<OnboardingController> {
                         ),
                         child: Text(
                           controller.isLastPage
-                              ? (controller.fromProfile ? 'Close Tutorial' : 'Get Started')
+                              ? (controller.fromProfile
+                                    ? 'Close Tutorial'
+                                    : 'Get Started')
                               : 'Next',
                           style: GoogleFonts.manrope(
                             fontSize: 16.sp,
@@ -152,7 +157,8 @@ class OnboardingView extends GetView<OnboardingController> {
   Widget _buildSlideWelcome() {
     return _buildSlideContainer(
       title: 'Welcome to Fixpair',
-      description: 'Your premium gateway to professional consulting across Germany. Connect instantly with legal, medical, and advisory experts.',
+      description:
+          'Your premium gateway to professional consulting across Germany. Connect instantly with legal, medical, and advisory experts.',
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -255,7 +261,8 @@ class OnboardingView extends GetView<OnboardingController> {
   Widget _buildSlideNavigation() {
     return _buildSlideContainer(
       title: 'Easy Navigation',
-      description: 'Explore the core features of the app through a simple, responsive bottom navigation bar.',
+      description:
+          'Explore the core features of the app through a simple, responsive bottom navigation bar.',
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -279,28 +286,32 @@ class OnboardingView extends GetView<OnboardingController> {
                 _buildNavigationFeatureItem(
                   icon: Icons.home_rounded,
                   title: 'Home Dashboard',
-                  desc: 'Discover recommended experts, browse categories, and join upcoming sessions.',
+                  desc:
+                      'Discover recommended experts, browse categories, and join upcoming sessions.',
                   isActive: true,
                 ),
                 const Divider(height: 24, color: Color(0xFFF1F5F9)),
                 _buildNavigationFeatureItem(
                   icon: Icons.search_rounded,
                   title: 'Search Directory',
-                  desc: 'Search, filter, and discover experts by expertise or category.',
+                  desc:
+                      'Search, filter, and discover experts by expertise or category.',
                   isActive: false,
                 ),
                 const Divider(height: 24, color: Color(0xFFF1F5F9)),
                 _buildNavigationFeatureItem(
                   icon: Icons.calendar_month_rounded,
                   title: 'Consultation History',
-                  desc: 'Manage your completed and scheduled appointments easily.',
+                  desc:
+                      'Manage your completed and scheduled appointments easily.',
                   isActive: false,
                 ),
                 const Divider(height: 24, color: Color(0xFFF1F5F9)),
                 _buildNavigationFeatureItem(
                   icon: Icons.person_rounded,
                   title: 'Profile Settings',
-                  desc: 'Update personal details, payment cards, and access legal/support.',
+                  desc:
+                      'Update personal details, payment cards, and access legal/support.',
                   isActive: false,
                 ),
               ],
@@ -342,7 +353,9 @@ class OnboardingView extends GetView<OnboardingController> {
                 style: GoogleFonts.manrope(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
-                  color: isActive ? const Color(0xFF0066FF) : const Color(0xFF1D293D),
+                  color: isActive
+                      ? const Color(0xFF0066FF)
+                      : const Color(0xFF1D293D),
                 ),
               ),
               SizedBox(height: 2.h),
@@ -365,7 +378,8 @@ class OnboardingView extends GetView<OnboardingController> {
   Widget _buildSlideBooking() {
     return _buildSlideContainer(
       title: 'Find & Book Experts',
-      description: 'Filter professionals by category, check rating scores, see active statuses, and book a video session.',
+      description:
+          'Filter professionals by category, check rating scores, see active statuses, and book a video session.',
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -409,7 +423,11 @@ class OnboardingView extends GetView<OnboardingController> {
                         color: const Color(0xFFE2E8F0),
                         borderRadius: BorderRadius.circular(12.r),
                       ),
-                      child: Icon(Icons.person, color: const Color(0xFF94A3B8), size: 36.sp),
+                      child: Icon(
+                        Icons.person,
+                        color: const Color(0xFF94A3B8),
+                        size: 36.sp,
+                      ),
                     ),
                     Positioned(
                       top: 2,
@@ -436,7 +454,10 @@ class OnboardingView extends GetView<OnboardingController> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 2.h,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFE0EFFF),
                               borderRadius: BorderRadius.circular(4.r),
@@ -452,7 +473,11 @@ class OnboardingView extends GetView<OnboardingController> {
                           ),
                           Row(
                             children: [
-                              Icon(Icons.star_rounded, color: const Color(0xFFFF6B00), size: 14.sp),
+                              Icon(
+                                Icons.star_rounded,
+                                color: const Color(0xFFFF6B00),
+                                size: 14.sp,
+                              ),
                               SizedBox(width: 2.w),
                               Text(
                                 '5.0',
@@ -496,7 +521,10 @@ class OnboardingView extends GetView<OnboardingController> {
                             ),
                           ),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 4.h,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFF0066FF),
                               borderRadius: BorderRadius.circular(6.r),
@@ -529,7 +557,9 @@ class OnboardingView extends GetView<OnboardingController> {
       decoration: BoxDecoration(
         color: isSelected ? const Color(0xFF0066FF) : Colors.white,
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: isSelected ? const Color(0xFF0066FF) : const Color(0xFFCBD5E1)),
+        border: Border.all(
+          color: isSelected ? const Color(0xFF0066FF) : const Color(0xFFCBD5E1),
+        ),
       ),
       child: Text(
         text,
@@ -546,7 +576,8 @@ class OnboardingView extends GetView<OnboardingController> {
   Widget _buildSlideVideoCall() {
     return _buildSlideContainer(
       title: 'Instant Video Calls',
-      description: 'Experience crisp HD video sessions directly inside the app, powered by Agora RTC. Answer calls instantly in-app or via tap notifications.',
+      description:
+          'Experience crisp HD video sessions directly inside the app, powered by Agora RTC. Answer calls instantly in-app or via tap notifications.',
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -590,7 +621,11 @@ class OnboardingView extends GetView<OnboardingController> {
                     CircleAvatar(
                       radius: 34.r,
                       backgroundColor: const Color(0xFF1E293B),
-                      child: Icon(Icons.person, color: const Color(0xFF22C55E), size: 36.sp),
+                      child: Icon(
+                        Icons.person,
+                        color: const Color(0xFF22C55E),
+                        size: 36.sp,
+                      ),
                     ),
                   ],
                 ),
@@ -679,7 +714,8 @@ class OnboardingView extends GetView<OnboardingController> {
   Widget _buildSlidePayment() {
     return _buildSlideContainer(
       title: 'Safe & Fast Payments',
-      description: 'Payments are processed securely via Stripe. Add your credit card and only get charged for the minutes you interact with the consultant.',
+      description:
+          'Payments are processed securely via Stripe. Add your credit card and only get charged for the minutes you interact with the consultant.',
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -726,7 +762,11 @@ class OnboardingView extends GetView<OnboardingController> {
                         color: Colors.white.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4.r),
                       ),
-                      child: Icon(Icons.credit_card, color: Colors.white.withOpacity(0.7), size: 16.sp),
+                      child: Icon(
+                        Icons.credit_card,
+                        color: Colors.white.withOpacity(0.7),
+                        size: 16.sp,
+                      ),
                     ),
                   ],
                 ),
@@ -796,7 +836,11 @@ class OnboardingView extends GetView<OnboardingController> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.lock_rounded, color: const Color(0xFF64748B), size: 14.sp),
+              Icon(
+                Icons.lock_rounded,
+                color: const Color(0xFF64748B),
+                size: 14.sp,
+              ),
               SizedBox(width: 6.w),
               Text(
                 'Secured by Stripe Payments',

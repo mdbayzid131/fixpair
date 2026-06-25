@@ -22,7 +22,9 @@ class TermsConditionsController extends GetxController {
       final response = await _legalRepo.getTermsConditions();
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
-        termsConditionsItems.value = data.map((json) => LegalContentModel.fromJson(json)).toList();
+        termsConditionsItems.value = data
+            .map((json) => LegalContentModel.fromJson(json))
+            .toList();
       }
     } catch (e) {
       Helpers.showError('Failed to load Terms & Conditions');

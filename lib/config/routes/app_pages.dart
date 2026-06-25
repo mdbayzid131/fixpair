@@ -107,9 +107,6 @@ class AppRoutes {
   static const String PAYMENT_METHODS = '/payment-methods';
 }
 
-
-
-
 final pages = [
   GetPage(
     name: AppRoutes.SPLASH,
@@ -251,4 +248,3 @@ final pages = [
     binding: OnboardingBinding(),
   ),
 ];
-

@@ -63,7 +63,8 @@ class SetNewPassController extends GetxController {
   }
 
   Future<void> submitNewPassword() async {
-    if (newPasswordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
+    if (newPasswordController.text.isEmpty ||
+        confirmPasswordController.text.isEmpty) {
       Helpers.showError('Please fill in both fields');
       return;
     }
@@ -88,7 +89,7 @@ class SetNewPassController extends GetxController {
           response.data['message'] ?? 'Failed to reset password',
         );
       }
-      } catch (e) {
+    } catch (e) {
       Helpers.showError(e.toString());
     } finally {
       isLoading.value = false;

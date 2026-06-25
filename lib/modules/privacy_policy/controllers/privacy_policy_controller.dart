@@ -22,7 +22,9 @@ class PrivacyPolicyController extends GetxController {
       final response = await _legalRepo.getPrivacyPolicy();
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
-        privacyPolicyItems.value = data.map((json) => LegalContentModel.fromJson(json)).toList();
+        privacyPolicyItems.value = data
+            .map((json) => LegalContentModel.fromJson(json))
+            .toList();
       }
     } catch (e) {
       Helpers.showError('Failed to load Privacy Policy');
