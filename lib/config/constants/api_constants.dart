@@ -50,10 +50,6 @@ class ApiConstants {
   static const String joinVideoSession = '/video-session/join';
   static const String endVideoSession = '/video-session/end';
   static const String actionVideoSession = '/video-session/action';
-  static String startTranscription(String consultationId) =>
-      '/consultations/$consultationId/transcription/start';
-  static String stopTranscription(String consultationId) =>
-      '/consultations/$consultationId/transcription/stop';
 
   // Payment Endpoints
   static const String createCustomer = '/payment/create-customer';
@@ -71,5 +67,5 @@ class ApiConstants {
   static const String markAllNotificationsRead = '/notification/mark-all-read';
 
   // Agora Config
-  static const String agoraAppId = '1ab0566716c44d22bc8afc15a6d62205';
+  static const String agoraAppId = 'af25d4c8759847daace4a7fe5462f361';
 }

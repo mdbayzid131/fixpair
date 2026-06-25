@@ -155,21 +155,6 @@ class UserRepository {
     });
   }
 
-  // Start real-time transcription agent
-  Future<Response> startTranscription(String consultationId) async {
-    return await _apiClient.postData(
-      ApiConstants.startTranscription(consultationId),
-      {},
-    );
-  }
-
-  // Stop real-time transcription agent
-  Future<Response> stopTranscription(String consultationId) async {
-    return await _apiClient.postData(
-      ApiConstants.stopTranscription(consultationId),
-      {},
-    );
-  }
 
   // --- Payment Methods ---
 

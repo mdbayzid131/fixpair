@@ -10,17 +10,12 @@ import 'package:get/get.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:fixpair/core/services/socket_service.dart';
-import 'package:fixpair/data/models/transcript_message.dart';
 import 'package:fixpair/core/services/auth_service.dart';
 import 'package:fixpair/core/utils/logger.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
 class VideoCallController extends GetxController {
   final UserRepository _userRepository = Get.find();
-  final SocketService _socketService = Get.find();
 
   static const _channel = MethodChannel('fixpair/pip');
 
@@ -37,10 +32,7 @@ class VideoCallController extends GetxController {
   final isMicOn = true.obs;
   final isCameraOn = true.obs;
 
-  // Real-time transcription / transcript lists
-  final RxList<TranscriptMessage> transcriptHistory = <TranscriptMessage>[].obs;
-  final Rxn<TranscriptMessage> activeUserSubtitle = Rxn<TranscriptMessage>();
-  final Rxn<TranscriptMessage> activeConsultantSubtitle = Rxn<TranscriptMessage>();
+
 
   // Drag coordinates for local PiP window & floating overlay
   final RxDouble pipTop = 0.0.obs;
@@ -75,8 +67,7 @@ class VideoCallController extends GetxController {
       channelName = args['channelName'] ?? "test_channel";
     }
 
-    // Initialize socket connection and listen for transcripts
-    _initSocketTranscription();
+
 
     initAgora();
   }
@@ -124,13 +115,12 @@ class VideoCallController extends GetxController {
     // 3. Register Event Handlers
     engine.registerEventHandler(
       RtcEngineEventHandler(
-        onJoinChannelSuccess: (RtcConnection connection, int elapsed) async {
+        onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
           isJoined.value = true;
           _setNativeCallActive(true);
           AppLogger.info(
             '[Agora] Channel joined successfully! elapsed: $elapsed',
           );
-          _startBackendTranscription();
         },
         onUserJoined: (RtcConnection connection, int uid, int elapsed) {
           remoteUid.value = uid;
@@ -426,16 +416,7 @@ class VideoCallController extends GetxController {
       AppLogger.warning('[CallKit] Error ending call session: $e');
     }
 
-    // Stop backend transcription and leave room
-    if (booking.id != null) {
-      try {
-        AppLogger.info('[Agora STT] Requesting stop transcription for booking: ${booking.id}');
-        await _userRepository.stopTranscription(booking.id!);
-      } catch (e) {
-        AppLogger.warning('[Agora STT] Error stopping backend transcription: $e');
-      }
-      _socketService.leaveRoom(booking.id!);
-    }
+
 
     try {
       await _userRepository.endVideoSession(sessionId);
@@ -454,7 +435,6 @@ class VideoCallController extends GetxController {
         'booking': booking,
         'duration': callDuration.value,
         'cost': currentCost.value,
-        'transcript': transcriptHistory.toList(),
       },
     );
 
@@ -495,163 +475,8 @@ class VideoCallController extends GetxController {
       AppLogger.warning('[CallKit] Error ending call on close: $e');
     }
     
-    if (booking.id != null) {
-      _socketService.leaveRoom(booking.id!);
-    }
     super.onClose();
   }
 
-  void _initSocketTranscription() {
-    _socketService.connect();
-
-    if (booking.id != null) {
-      _socketService.joinRoom(booking.id!);
-      AppLogger.info('[Agora STT] Joined socket room: ${booking.id}');
-    }
-
-    _socketService.on('transcript:new', (data) {
-      if (data == null) return;
-      try {
-        AppLogger.info('[Agora STT] Received transcript event: $data');
-        final message = TranscriptMessage.fromJson(
-          Map<String, dynamic>.from(data),
-          'You',
-          booking.consultant?.name ?? 'Consultant',
-        );
-
-        // Check if this belongs to this consultation
-        if (data['consultationId'] != booking.id) {
-          return;
-        }
-
-        if (message.isFinal) {
-          transcriptHistory.add(message);
-          // Clear active subtitle for this role
-          if (message.speakerRole == 'user') {
-            activeUserSubtitle.value = null;
-          } else if (message.speakerRole == 'consultant') {
-            activeConsultantSubtitle.value = null;
-          }
-        } else {
-          // Update active subtitle
-          if (message.speakerRole == 'user') {
-            activeUserSubtitle.value = message;
-          } else if (message.speakerRole == 'consultant') {
-            activeConsultantSubtitle.value = message;
-          }
-        }
-      } catch (e) {
-        AppLogger.warning('[Agora STT] Error parsing socket transcript: $e');
-      }
-    });
-  }
-
-  Future<void> _startBackendTranscription() async {
-    if (booking.id == null) return;
-    try {
-      AppLogger.info('[Agora STT] Requesting start transcription for booking: ${booking.id}');
-      await _userRepository.startTranscription(booking.id!);
-      AppLogger.info('[Agora STT] Start transcription request successful.');
-    } catch (e) {
-      AppLogger.warning('[Agora STT] Error starting backend transcription: $e');
-    }
-  }
-
-  void showTranscriptBottomSheet() {
-    Get.bottomSheet(
-      Container(
-        height: Get.height * 0.6,
-        decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Live Transcript Log',
-                  style: GoogleFonts.manrope(
-                    color: Colors.white,
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white70),
-                  onPressed: () => Get.back(),
-                ),
-              ],
-            ),
-            SizedBox(height: 16.h),
-            Expanded(
-              child: Obx(() {
-                if (transcriptHistory.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No conversations recorded yet.',
-                      style: GoogleFonts.manrope(
-                        color: Colors.white54,
-                        fontSize: 14.sp,
-                      ),
-                    ),
-                  );
-                }
-                return ListView.builder(
-                  itemCount: transcriptHistory.length,
-                  itemBuilder: (context, index) {
-                    final msg = transcriptHistory[index];
-                    final isUser = msg.speakerRole == 'user';
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: 12.h),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                msg.speakerName,
-                                style: GoogleFonts.manrope(
-                                  color: isUser ? const Color(0xFF3B82F6) : const Color(0xFF10B981),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13.sp,
-                                ),
-                              ),
-                              Text(
-                                '${msg.timestamp.hour.toString().padLeft(2, '0')}:${msg.timestamp.minute.toString().padLeft(2, '0')}',
-                                style: GoogleFonts.manrope(
-                                  color: Colors.white30,
-                                  fontSize: 11.sp,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            msg.text,
-                            style: GoogleFonts.manrope(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 14.sp,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              }),
-            ),
-          ],
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
 
 }
