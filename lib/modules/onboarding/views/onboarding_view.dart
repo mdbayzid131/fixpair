@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fixpair/config/constants/image_paths.dart';
 import '../controllers/onboarding_controller.dart';
 
 class OnboardingView extends GetView<OnboardingController> {
@@ -26,14 +27,21 @@ class OnboardingView extends GetView<OnboardingController> {
                       Container(
                         width: 32.w,
                         height: 32.w,
+                        padding: EdgeInsets.all(4.w),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0066FF),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: const Icon(
-                          Icons.handyman_rounded,
                           color: Colors.white,
-                          size: 18,
+                          borderRadius: BorderRadius.circular(10.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Image.asset(
+                          ImagePaths.appLogoWithoutBg,
+                          fit: BoxFit.contain,
                         ),
                       ),
                       SizedBox(width: 8.w),
@@ -177,10 +185,13 @@ class OnboardingView extends GetView<OnboardingController> {
                 ),
               ],
             ),
-            child: Icon(
-              Icons.handyman_rounded,
-              color: const Color(0xFF0066FF),
-              size: 64.sp,
+            child: Center(
+              child: Image.asset(
+                ImagePaths.appLogoWithoutBg,
+                width: 72.w,
+                height: 72.w,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
           SizedBox(height: 40.h),

@@ -345,7 +345,7 @@ class RegisterView extends GetView<RegisterController> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 32.h),
+                    SizedBox(height: 80.h),
                   ],
                 ),
               ),

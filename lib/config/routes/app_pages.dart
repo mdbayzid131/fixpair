@@ -28,6 +28,9 @@ import '../../modules/history/bindings/history_binding.dart';
 import '../../modules/history/views/history_view.dart';
 import '../../modules/profile/bindings/profile_binding.dart';
 import '../../modules/profile/views/profile_view.dart';
+import '../../modules/profile/views/settings_view.dart';
+import '../../modules/profile/views/change_password_view.dart';
+import '../../modules/profile/bindings/change_password_binding.dart';
 import '../../modules/personal_info/bindings/personal_info_binding.dart';
 import '../../modules/personal_info/views/personal_info_view.dart';
 import '../../modules/legal_faq/bindings/legal_faq_binding.dart';
@@ -105,6 +108,7 @@ class AppRoutes {
   static const String BOOKING_DETAILS = '/booking-details';
   static const String ADD_CARD = '/add-card';
   static const String PAYMENT_METHODS = '/payment-methods';
+  static const String SETTINGS = '/settings';
 }
 
 final pages = [
@@ -246,5 +250,15 @@ final pages = [
     name: AppRoutes.ONBOARDING,
     page: () => const OnboardingView(),
     binding: OnboardingBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.SETTINGS,
+    page: () => const SettingsView(),
+    binding: ProfileBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.CHANGE_PASSWORD,
+    page: () => const ChangePasswordView(),
+    binding: ChangePasswordBinding(),
   ),
 ];

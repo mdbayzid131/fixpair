@@ -105,8 +105,8 @@ class AuthRepo {
     required String newPassword,
   }) async {
     return await apiClient.postData(ApiConstants.changePassword, {
-      "oldPassword": oldPassword,
-      "newPassWord": newPassword,
+      "currentPassword": oldPassword,
+      "newPassword": newPassword,
       "confirmPassword": newPassword,
     });
   }

@@ -26,8 +26,7 @@ class ImagePaths {
   static const String onboardingImage3 = '$_images/onbordingImage3.png';
 
   // ─── Logos ───
-  static const String appLogoWithoutBg =
-      '$_logos/app_logo_without_bg.png';
+  static const String appLogoWithoutBg = '$_logos/app_logo_without_bg.png';
   static const String appLogoWithBg = '$_logos/app_logo_with_bg.png';
 
   // ─── Dummy / Placeholders ───
