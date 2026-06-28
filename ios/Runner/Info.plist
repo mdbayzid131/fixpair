@@ -70,12 +70,21 @@
 	<array>
 		<string>voip</string>
 		<string>remote-notification</string>
-		<string>processing</string>
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>mailto</string>
 		<string>tel</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires access to your camera to take photos for updating your profile picture and uploading verification documents.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to your photo library to select photos for updating your profile picture and uploading verification documents.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires access to your microphone to enable audio calls and voice communication.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app requires access to your location to show nearby services and match you with providers in your area.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app requires continuous access to your location to keep track of provider locations and provide real-time updates.</string>
 </dict>
 </plist>
