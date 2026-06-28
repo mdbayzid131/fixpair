@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:fixpair/modules/home/controllers/home_controller.dart';
 import 'package:fixpair/core/services/auth_service.dart';
@@ -161,23 +162,33 @@ class LaundryHomeScreen extends GetView<HomeController> {
                       return Container(
                         width: 48.w,
                         height: 48.w,
-                        decoration: BoxDecoration(
-                          color: const Color(0x4DFFFFFF),
+                        decoration: const BoxDecoration(
+                          color: Color(0x4DFFFFFF),
                           shape: BoxShape.circle,
-                          image: imageUrl.isNotEmpty
-                              ? DecorationImage(
-                                  image: NetworkImage(imageUrl),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
                         ),
-                        child: imageUrl.isEmpty
-                            ? Icon(
-                                Icons.person,
-                                color: Colors.white,
-                                size: 28.sp,
-                              )
-                            : null,
+                        child: ClipOval(
+                          child: imageUrl.isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: imageUrl,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => const Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) => Icon(
+                                    Icons.person,
+                                    color: Colors.white,
+                                    size: 28.sp,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.person,
+                                  color: Colors.white,
+                                  size: 28.sp,
+                                ),
+                        ),
                       );
                     }),
                     SizedBox(width: 12.w),
@@ -370,15 +381,29 @@ Widget _buildUpcomingBooking(BookingModel booking) {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 24.r,
-                  backgroundColor: const Color(0x33FFFFFF),
-                  backgroundImage: imageUrl.isNotEmpty
-                      ? NetworkImage(imageUrl)
-                      : null,
-                  child: imageUrl.isEmpty
-                      ? const Icon(Icons.person, color: Colors.white)
-                      : null,
+                Container(
+                  width: 48.w,
+                  height: 48.w,
+                  decoration: const BoxDecoration(
+                    color: Color(0x33FFFFFF),
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            ),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.person, color: Colors.white),
+                          )
+                        : const Icon(Icons.person, color: Colors.white),
+                  ),
                 ),
                 SizedBox(width: 12.w),
                 Column(
@@ -512,15 +537,38 @@ Widget _buildExpertCard(UserData consultant) {
         children: [
           Stack(
             children: [
-              Container(
-                width: 70.w,
-                height: 70.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16.r),
-                  image: DecorationImage(
-                    image: NetworkImage(image),
-                    fit: BoxFit.cover,
-                  ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16.r),
+                child: SizedBox(
+                  width: 70.w,
+                  height: 70.w,
+                  child: image.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: image,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: const Color(0xFFF1F5F9),
+                            child: const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: const Color(0xFFF1F5F9),
+                            child: Icon(
+                              Icons.person,
+                              size: 30.sp,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        )
+                      : Container(
+                          color: const Color(0xFFF1F5F9),
+                          child: Icon(
+                            Icons.person,
+                            size: 30.sp,
+                            color: Colors.grey,
+                          ),
+                        ),
                 ),
               ),
               Positioned(

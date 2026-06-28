@@ -64,68 +64,74 @@ class PaymentMethodsView extends GetView<PaymentController> {
     final String last4 = method['last4'] ?? '****';
     final String brand = (method['brand'] ?? 'card').toString().toUpperCase();
     final bool isDefault = method['isDefault'] ?? false;
+    final String id = method['id'] ?? '';
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(
-          color: isDefault ? const Color(0xFF0066FF) : const Color(0xFFE2E8F0),
-          width: isDefault ? 2 : 1,
+    return GestureDetector(
+      onTap: isDefault ? null : () => controller.setDefaultCard(id),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 16.h),
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isDefault
+                ? const Color(0xFF0066FF)
+                : const Color(0xFFE2E8F0),
+            width: isDefault ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50.w,
-            height: 50.w,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(12.r),
+        child: Row(
+          children: [
+            Container(
+              width: 50.w,
+              height: 50.w,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Icon(
+                Icons.credit_card_rounded,
+                color: const Color(0xFF1D293D),
+                size: 24.sp,
+              ),
             ),
-            child: Icon(
-              Icons.credit_card_rounded,
-              color: const Color(0xFF1D293D),
-              size: 24.sp,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$brand **** $last4',
-                  style: GoogleFonts.manrope(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1D293D),
-                  ),
-                ),
-                if (isDefault)
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'Default Payment Method',
+                    '$brand **** $last4',
                     style: GoogleFonts.manrope(
-                      fontSize: 12.sp,
-                      color: const Color(0xFF0066FF),
-                      fontWeight: FontWeight.w600,
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1D293D),
                     ),
                   ),
-              ],
+                  if (isDefault)
+                    Text(
+                      'Default Payment Method',
+                      style: GoogleFonts.manrope(
+                        fontSize: 12.sp,
+                        color: const Color(0xFF0066FF),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-          if (isDefault)
-            const Icon(Icons.check_circle_rounded, color: Color(0xFF0066FF)),
-        ],
+            if (isDefault)
+              const Icon(Icons.check_circle_rounded, color: Color(0xFF0066FF)),
+          ],
+        ),
       ),
     );
   }

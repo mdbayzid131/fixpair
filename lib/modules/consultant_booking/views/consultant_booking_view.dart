@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../controllers/consultant_booking_controller.dart';
 
 class ConsultantBookingView extends GetView<ConsultantBookingController> {
@@ -99,22 +100,39 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
       ),
       child: Row(
         children: [
-          Container(
-            width: 60.w,
-            height: 60.w,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(16.r),
-              image: imageUrl.isNotEmpty
-                  ? DecorationImage(
-                      image: NetworkImage(imageUrl),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16.r),
+            child: SizedBox(
+              width: 60.w,
+              height: 60.w,
+              child: imageUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl,
                       fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: const Color(0xFFF1F5F9),
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: const Color(0xFFF1F5F9),
+                        child: Icon(
+                          Icons.person,
+                          size: 24.sp,
+                          color: Colors.grey,
+                        ),
+                      ),
                     )
-                  : null,
+                  : Container(
+                      color: const Color(0xFFF1F5F9),
+                      child: Icon(
+                        Icons.person,
+                        size: 24.sp,
+                        color: Colors.grey,
+                      ),
+                    ),
             ),
-            child: imageUrl.isEmpty
-                ? Icon(Icons.person, size: 24.sp, color: Colors.grey)
-                : null,
           ),
           SizedBox(width: 16.w),
           Expanded(

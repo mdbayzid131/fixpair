@@ -350,7 +350,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
         'Join Video Call',
         const Color(0xFF0066FF),
         Icons.videocam_rounded,
-        () => controller.startVideoCall(booking),
+        () => Get.toNamed(AppRoutes.CONSULTANT_CONFIRMATION, arguments: booking),
       );
     } else if (status == 'accepted') {
       return Row(

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fixpair/config/constants/api_constants.dart';
 import '../controllers/video_call_controller.dart';
 
 class VideoCallView extends GetView<VideoCallController> {
@@ -229,29 +231,53 @@ class VideoCallView extends GetView<VideoCallController> {
                   ),
                 ),
               ),
-              CircleAvatar(
-                radius: 54.r,
-                backgroundColor: const Color(0xFF1E293B),
-                backgroundImage:
-                    controller.booking.consultant?.avatar != null &&
-                        controller.booking.consultant!.avatar!.isNotEmpty
-                    ? NetworkImage(controller.booking.consultant!.avatar!)
-                    : null,
-                child:
-                    controller.booking.consultant?.avatar == null ||
-                        controller.booking.consultant!.avatar!.isEmpty
-                    ? Text(
-                        controller.booking.consultant?.name
-                                ?.substring(0, 1)
-                                .toUpperCase() ??
-                            'C',
-                        style: GoogleFonts.manrope(
-                          fontSize: 36.sp,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF94A3B8),
+              Container(
+                width: 108.w,
+                height: 108.w,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF1E293B),
+                  shape: BoxShape.circle,
+                ),
+                child: ClipOval(
+                  child:
+                      controller.booking.consultant?.avatar != null &&
+                          controller.booking.consultant!.avatar!.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: ApiConstants.getImageUrl(
+                            controller.booking.consultant!.avatar,
+                          ),
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          errorWidget: (context, url, error) => Center(
+                            child: Text(
+                              controller.booking.consultant?.name
+                                      ?.substring(0, 1)
+                                      .toUpperCase() ??
+                                  'C',
+                              style: GoogleFonts.manrope(
+                                fontSize: 36.sp,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF94A3B8),
+                              ),
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            controller.booking.consultant?.name
+                                    ?.substring(0, 1)
+                                    .toUpperCase() ??
+                                'C',
+                            style: GoogleFonts.manrope(
+                              fontSize: 36.sp,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF94A3B8),
+                            ),
+                          ),
                         ),
-                      )
-                    : null,
+                ),
               ),
               Positioned(
                 bottom: 2,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../config/routes/app_pages.dart';
 import '../../../config/constants/api_constants.dart';
 import '../controllers/profile_controller.dart';
@@ -105,20 +106,27 @@ class ProfileView extends GetView<ProfileController> {
                 color: const Color(0xFFF1F5F9),
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 4),
-                image: imageUrl.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage(imageUrl),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
               ),
-              child: imageUrl.isEmpty
-                  ? Icon(
-                      Icons.person,
-                      size: 40.sp,
-                      color: const Color(0xFF94A3B8),
-                    )
-                  : null,
+              child: ClipOval(
+                child: imageUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        errorWidget: (context, url, error) => Icon(
+                          Icons.person,
+                          size: 40.sp,
+                          color: const Color(0xFF94A3B8),
+                        ),
+                      )
+                    : Icon(
+                        Icons.person,
+                        size: 40.sp,
+                        color: const Color(0xFF94A3B8),
+                      ),
+              ),
             ),
             SizedBox(width: 20.w),
             Expanded(

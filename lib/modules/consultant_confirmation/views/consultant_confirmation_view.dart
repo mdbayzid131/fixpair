@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../controllers/consultant_confirmation_controller.dart';
 
 class ConsultantConfirmationView
@@ -97,21 +98,37 @@ class ConsultantConfirmationView
       ),
       child: Row(
         children: [
-          Container(
-            width: 56.w,
-            height: 56.w,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.r),
-              image: imageUrl.isNotEmpty
-                  ? DecorationImage(
-                      image: NetworkImage(imageUrl),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16.r),
+            child: SizedBox(
+              width: 56.w,
+              height: 56.w,
+              child: imageUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl,
                       fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: const Color(0xFFF1F5F9),
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: const Color(0xFFF1F5F9),
+                        child: const Icon(
+                          Icons.person,
+                          color: Color(0xFF94A3B8),
+                        ),
+                      ),
                     )
-                  : null,
+                  : Container(
+                      color: const Color(0xFFF1F5F9),
+                      child: const Icon(
+                        Icons.person,
+                        color: Color(0xFF94A3B8),
+                      ),
+                    ),
             ),
-            child: imageUrl.isEmpty
-                ? const Icon(Icons.person, color: Color(0xFF94A3B8))
-                : null,
           ),
           SizedBox(width: 16.w),
           Expanded(

@@ -72,4 +72,22 @@ class PaymentController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> setDefaultCard(String paymentMethodId) async {
+    try {
+      isLoading.value = true;
+      final response = await _userRepository.setDefaultPaymentMethod(
+        paymentMethodId,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Get.snackbar('Success', 'Default payment method updated');
+        fetchPaymentMethods();
+      }
+    } catch (e) {
+      Helpers.showDebugLog('Error setting default card: $e');
+      Get.snackbar('Error', 'Failed to update default card');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

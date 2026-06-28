@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
 import '../../../data/models/user_model.dart';
 import '../controllers/search_controller.dart' as search_ctrl;
@@ -246,24 +247,41 @@ class _SearchViewState extends State<SearchView> {
               // Left: Image
               Stack(
                 children: [
-                  Container(
-                    width: 110.w,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(24.r),
-                        bottomLeft: Radius.circular(24.r),
-                      ),
-                      image: imageUrl.isNotEmpty
-                          ? DecorationImage(
-                              image: NetworkImage(imageUrl),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(24.r),
+                      bottomLeft: Radius.circular(24.r),
                     ),
-                    child: imageUrl.isEmpty
-                        ? Icon(Icons.person, size: 40.sp, color: Colors.grey)
-                        : null,
+                    child: SizedBox(
+                      width: 110.w,
+                      child: imageUrl.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: imageUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: const Color(0xFFF1F5F9),
+                                child: const Center(
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: const Color(0xFFF1F5F9),
+                                child: Icon(
+                                  Icons.person,
+                                  size: 40.sp,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              color: const Color(0xFFF1F5F9),
+                              child: Icon(
+                                Icons.person,
+                                size: 40.sp,
+                                color: Colors.grey,
+                              ),
+                            ),
+                    ),
                   ),
                   Positioned(
                     top: 10.h,

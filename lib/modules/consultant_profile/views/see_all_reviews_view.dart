@@ -6,6 +6,7 @@ import 'package:fixpair/core/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -355,15 +356,28 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 20.r,
-                backgroundColor: const Color(0xFFE2E8F0),
-                backgroundImage: imageUrl.isNotEmpty
-                    ? NetworkImage(imageUrl)
-                    : null,
-                child: imageUrl.isEmpty
-                    ? const Icon(Icons.person, color: Color(0xFF64748B))
-                    : null,
+              Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE2E8F0),
+                  shape: BoxShape.circle,
+                ),
+                child: ClipOval(
+                  child: imageUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.person,
+                            color: Color(0xFF64748B),
+                          ),
+                        )
+                      : const Icon(Icons.person, color: Color(0xFF64748B)),
+                ),
               ),
               SizedBox(width: 12.w),
               Expanded(

@@ -3,6 +3,7 @@ import 'package:fixpair/core/widgets/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
 
@@ -113,17 +114,6 @@ class PersonalInfoView extends GetView<PersonalInfoController> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: const Color(0xFFF1F5F9),
-                  image: pickedFile != null
-                      ? DecorationImage(
-                          image: FileImage(pickedFile),
-                          fit: BoxFit.cover,
-                        )
-                      : imageUrl.isNotEmpty
-                      ? DecorationImage(
-                          image: NetworkImage(imageUrl),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
                   border: Border.all(color: Colors.white, width: 3.w),
                   boxShadow: [
                     BoxShadow(
@@ -133,9 +123,28 @@ class PersonalInfoView extends GetView<PersonalInfoController> {
                     ),
                   ],
                 ),
-                child: (imageUrl.isEmpty && pickedFile == null)
-                    ? Icon(Icons.person, size: 50.sp, color: _labelColor)
-                    : null,
+                child: ClipOval(
+                  child: pickedFile != null
+                      ? Image.file(pickedFile, fit: BoxFit.cover)
+                      : imageUrl.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: imageUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => const Center(
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                              errorWidget: (context, url, error) => Icon(
+                                Icons.person,
+                                size: 50.sp,
+                                color: _labelColor,
+                              ),
+                            )
+                          : Icon(
+                              Icons.person,
+                              size: 50.sp,
+                              color: _labelColor,
+                            ),
+                ),
               );
             }),
             Positioned(

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../controllers/consultant_profile_controller.dart';
 import 'see_all_reviews_view.dart';
@@ -95,12 +96,6 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24.r),
                   color: const Color(0xFFF1F5F9),
-                  image: imageUrl.isNotEmpty
-                      ? DecorationImage(
-                          image: NetworkImage(imageUrl),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.08),
@@ -109,9 +104,23 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                     ),
                   ],
                 ),
-                child: imageUrl.isEmpty
-                    ? Icon(Icons.person, size: 40.sp, color: Colors.grey)
-                    : null,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24.r),
+                  child: imageUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          errorWidget: (context, url, error) => Icon(
+                            Icons.person,
+                            size: 40.sp,
+                            color: Colors.grey,
+                          ),
+                        )
+                      : Icon(Icons.person, size: 40.sp, color: Colors.grey),
+                ),
               ),
               Positioned(
                 bottom: 4.h,
@@ -608,15 +617,28 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 20.r,
-                backgroundColor: const Color(0xFFE2E8F0),
-                backgroundImage: imageUrl.isNotEmpty
-                    ? NetworkImage(imageUrl)
-                    : null,
-                child: imageUrl.isEmpty
-                    ? const Icon(Icons.person, color: Color(0xFF64748B))
-                    : null,
+              Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE2E8F0),
+                  shape: BoxShape.circle,
+                ),
+                child: ClipOval(
+                  child: imageUrl.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.person,
+                            color: Color(0xFF64748B),
+                          ),
+                        )
+                      : const Icon(Icons.person, color: Color(0xFF64748B)),
+                ),
               ),
               SizedBox(width: 12.w),
               Expanded(

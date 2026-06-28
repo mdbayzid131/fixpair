@@ -57,6 +57,8 @@ class ApiConstants {
   static const String createCustomer = '/payment/create-customer';
   static const String attachPaymentMethod = '/payment/attach-method';
   static const String paymentMethods = '/payment/methods';
+  static const String setDefaultPaymentMethod = '/payment/set-default';
+  static String getInvoice(String consultationId) => '/payment/invoice/$consultationId';
 
   // Review Endpoints
   static const String review = '/review';

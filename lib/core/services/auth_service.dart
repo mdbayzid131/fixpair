@@ -18,6 +18,8 @@ import 'package:fixpair/data/repositories/auth_repository.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fixpair/config/constants/api_constants.dart';
 
 class AuthService extends GetxService {
   late AuthRepo _authRepo;
@@ -591,29 +593,52 @@ class AuthService extends GetxService {
                       ),
                     ),
                   ),
-                  CircleAvatar(
-                    radius: 48,
-                    backgroundColor: const Color(0xFF1E293B),
-                    backgroundImage:
-                        booking.consultant?.avatar != null &&
-                            booking.consultant!.avatar!.isNotEmpty
-                        ? NetworkImage(booking.consultant!.avatar!)
-                        : null,
-                    child:
-                        booking.consultant?.avatar == null ||
-                            booking.consultant!.avatar!.isEmpty
-                        ? Text(
-                            booking.consultant?.name
-                                    ?.substring(0, 1)
-                                    .toUpperCase() ??
-                                'C',
-                            style: const TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF22C55E),
+                  Container(
+                    width: 96,
+                    height: 96,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF1E293B),
+                      shape: BoxShape.circle,
+                    ),
+                    child: ClipOval(
+                      child: booking.consultant?.avatar != null &&
+                              booking.consultant!.avatar!.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: ApiConstants.getImageUrl(
+                                booking.consultant!.avatar,
+                              ),
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => const Center(
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                              errorWidget: (context, url, error) => Center(
+                                child: Text(
+                                  booking.consultant?.name
+                                          ?.substring(0, 1)
+                                          .toUpperCase() ??
+                                      'C',
+                                  style: const TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF22C55E),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Center(
+                              child: Text(
+                                booking.consultant?.name
+                                        ?.substring(0, 1)
+                                        .toUpperCase() ??
+                                    'C',
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF22C55E),
+                                ),
+                              ),
                             ),
-                          )
-                        : null,
+                    ),
                   ),
                 ],
               ),

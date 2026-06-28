@@ -163,26 +163,49 @@ class Helpers {
       PopScope(
         canPop: false,
         child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(),
-              if (message != null) ...[
-                SizedBox(height: 16.h),
-                Material(
-                  color: Colors.transparent,
-                  child: Text(
-                    message,
-                    style: TextStyle(color: Colors.white, fontSize: 14.sp),
-                  ),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 24.h),
+            margin: EdgeInsets.symmetric(horizontal: 40.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
                 ),
               ],
-            ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0066FF)),
+                  strokeWidth: 3.5,
+                ),
+                if (message != null) ...[
+                  SizedBox(height: 20.h),
+                  Material(
+                    color: Colors.transparent,
+                    child: Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.manrope(
+                        color: const Color(0xFF1D293D),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       ),
       barrierDismissible: false,
-      barrierColor: Colors.black54,
+      barrierColor: Colors.black.withValues(alpha: 0.35),
     );
   }
 

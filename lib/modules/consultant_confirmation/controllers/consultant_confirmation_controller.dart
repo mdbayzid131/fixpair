@@ -61,8 +61,12 @@ class ConsultantConfirmationController extends GetxController {
           consultant.expertise ?? consultant.consultancyType ?? 'Expert';
       consultantImageRx.value = consultant.image ?? '';
 
-      final rate = consultant.perMinuteRate ?? 4;
-      consultantRateRx.value = '€${rate.toStringAsFixed(2)} / min';
+      final rate = (booking.perMinuteRate != null && booking.perMinuteRate != 0)
+          ? booking.perMinuteRate!
+          : (consultant.perMinuteRate != null && consultant.perMinuteRate != 0)
+          ? consultant.perMinuteRate!
+          : 4;
+      consultantRateRx.value = '€${rate.toDouble().toStringAsFixed(2)} / min';
 
       // Calculate billing details (e.g. assume a standard 30 min hold structure)
       final rateNum = rate.toDouble();

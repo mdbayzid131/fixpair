@@ -174,6 +174,18 @@ class UserRepository {
     return await _apiClient.getData(ApiConstants.paymentMethods);
   }
 
+  // Set default payment method
+  Future<Response> setDefaultPaymentMethod(String paymentMethodId) async {
+    return await _apiClient.postData(ApiConstants.setDefaultPaymentMethod, {
+      'paymentMethodId': paymentMethodId,
+    });
+  }
+
+  // Get invoice details
+  Future<Response> getInvoice(String consultationId) async {
+    return await _apiClient.getData(ApiConstants.getInvoice(consultationId));
+  }
+
   // --- Reviews ---
 
   // Post a review for a consultation
