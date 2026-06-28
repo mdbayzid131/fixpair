@@ -1,7 +1,9 @@
 class ApiConstants {
   // Base URLs
-  static const String baseUrl = 'http://10.10.26.189:5000/api/v1';
-  static const String serverUrl = 'http://10.10.26.189:5000';
+  // static const String baseUrl = 'http://10.10.26.189:5000/api/v1';
+  // static const String serverUrl = 'http://10.10.26.189:5000';
+  static const String baseUrl = 'https://fixpair-live-consultancy.onrender.com/api/v1';
+  static const String serverUrl = 'https://fixpair-live-consultancy.onrender.com';
 
   static String getImageUrl(String? url) {
     const String placeholder = 'https://i.ibb.co/z5YHLV9/profile.png';
