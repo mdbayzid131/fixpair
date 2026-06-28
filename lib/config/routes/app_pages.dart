@@ -9,6 +9,7 @@ import 'package:fixpair/modules/video_call/bindings/video_call_binding.dart';
 import 'package:fixpair/modules/video_call/views/video_call_view.dart';
 import '../../modules/consultation_summary/bindings/consultation_summary_binding.dart';
 import '../../modules/consultation_summary/views/consultation_summary_view.dart';
+import '../../modules/consultation_report/views/consultation_report_view.dart';
 import '../../modules/booking_details/views/booking_details_view.dart';
 import '../../modules/payment/bindings/payment_binding.dart';
 import '../../modules/payment/views/add_card_view.dart';
@@ -109,6 +110,7 @@ class AppRoutes {
   static const String ADD_CARD = '/add-card';
   static const String PAYMENT_METHODS = '/payment-methods';
   static const String SETTINGS = '/settings';
+  static const String CONSULTATION_REPORT = '/consultation-report';
 }
 
 final pages = [
@@ -260,5 +262,10 @@ final pages = [
     name: AppRoutes.CHANGE_PASSWORD,
     page: () => const ChangePasswordView(),
     binding: ChangePasswordBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.CONSULTATION_REPORT,
+    page: () => const ConsultationReportView(),
+    binding: ConsultationSummaryBinding(),
   ),
 ];

@@ -342,7 +342,9 @@ Widget _buildUpcomingBooking(BookingModel booking) {
 
   // Format date and time
   String timeStr = 'N/A';
-  if (booking.date != null && booking.startTime != null) {
+  if (booking.bookingType?.toLowerCase() == 'instant') {
+    timeStr = 'Instant';
+  } else if (booking.date != null && booking.startTime != null) {
     final now = DateTime.now();
     final date = booking.date!;
     final isToday =

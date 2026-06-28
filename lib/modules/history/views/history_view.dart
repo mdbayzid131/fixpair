@@ -478,7 +478,15 @@ class _HistoryViewState extends State<HistoryView> {
                 ),
               ),
               SizedBox(width: 12.w),
-              Expanded(child: _buildLightButton('View Report', () {})),
+              Expanded(
+                child: _buildLightButton(
+                  'View Report',
+                  () => Get.toNamed(
+                    AppRoutes.CONSULTATION_REPORT,
+                    arguments: {'booking': booking},
+                  ),
+                ),
+              ),
             ],
           ),
           SizedBox(height: 12.h),
