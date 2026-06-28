@@ -19,7 +19,7 @@ class ProfileView extends GetView<ProfileController> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Profile',
+          'Profile'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -182,7 +182,7 @@ class ProfileView extends GetView<ProfileController> {
             icon: Icons.person_outline_rounded,
             iconBg: const Color(0xFFE0EFFF),
             iconColor: const Color(0xFF0066FF),
-            label: 'Personal Information',
+            label: 'Personal Information'.tr,
             onTap: () => Get.toNamed(AppRoutes.PERSONAL_INFO),
           ),
           const Divider(
@@ -195,7 +195,7 @@ class ProfileView extends GetView<ProfileController> {
             icon: Icons.credit_card_outlined,
             iconBg: const Color(0xFFDCFCE7),
             iconColor: const Color(0xFF10B981),
-            label: 'Payment Methods',
+            label: 'Payment Methods'.tr,
             onTap: () => Get.toNamed(AppRoutes.PAYMENT_METHODS),
           ),
 
@@ -209,7 +209,7 @@ class ProfileView extends GetView<ProfileController> {
             icon: Icons.help_outline_rounded,
             iconBg: const Color(0xFFFFF7ED),
             iconColor: const Color(0xFFF59E0B),
-            label: 'Legal & FAQ',
+            label: 'Legal & FAQ'.tr,
             onTap: () => Get.toNamed(AppRoutes.LEGAL_FAQ),
           ),
           const Divider(
@@ -222,7 +222,7 @@ class ProfileView extends GetView<ProfileController> {
             icon: Icons.settings_outlined,
             iconBg: const Color(0xFFEBE9FE),
             iconColor: const Color(0xFF7C3AED),
-            label: 'Settings',
+            label: 'Settings'.tr,
             onTap: () => Get.toNamed(AppRoutes.SETTINGS),
             isLast: true,
           ),
@@ -312,7 +312,7 @@ class ProfileView extends GetView<ProfileController> {
               ),
               SizedBox(width: 16.w),
               Text(
-                'Log Out',
+                'Log Out'.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700,
@@ -361,7 +361,7 @@ class ProfileView extends GetView<ProfileController> {
               ),
               SizedBox(height: 24.h),
               Text(
-                'Log Out',
+                'Log Out'.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w800,
@@ -371,7 +371,7 @@ class ProfileView extends GetView<ProfileController> {
               ),
               SizedBox(height: 12.h),
               Text(
-                'Are you sure you want to log out of your account?',
+                'Are you sure you want to log out of your account?'.tr,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.manrope(
                   fontSize: 15.sp,
@@ -394,7 +394,7 @@ class ProfileView extends GetView<ProfileController> {
                         ),
                       ),
                       child: Text(
-                        'Cancel',
+                        'Cancel'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
@@ -419,7 +419,7 @@ class ProfileView extends GetView<ProfileController> {
                         ),
                       ),
                       child: Text(
-                        'Log Out',
+                        'Log Out'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w700,

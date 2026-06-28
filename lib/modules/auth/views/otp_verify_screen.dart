@@ -50,7 +50,7 @@ class OtpVerifyScreen extends GetView<OtpController> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'OTP Verification',
+                        'OTP Verification'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w500,
@@ -93,7 +93,7 @@ class OtpVerifyScreen extends GetView<OtpController> {
 
                   // 2. Title Section
                   Text(
-                    'Verify OTP',
+                    'Verify OTP'.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 24.sp,
                       fontWeight: FontWeight.w700,
@@ -102,7 +102,7 @@ class OtpVerifyScreen extends GetView<OtpController> {
                   ),
                   SizedBox(height: 12.h),
                   Text(
-                    "Enter the 6-digit code sent to your\n${controller.email}",
+                    "Enter the 6-digit code sent to your\n".tr + controller.email,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.manrope(
                       fontSize: 14.sp,
@@ -162,7 +162,7 @@ class OtpVerifyScreen extends GetView<OtpController> {
                   // 4. Verify Button
                   Obx(
                     () => CustomElevatedButton(
-                      label: 'Verify',
+                      label: 'Verify'.tr,
                       onPressed: () => controller.verifyOtp(),
                       isLoading: controller.isLoading.value,
                       style: ElevatedButton.styleFrom(
@@ -180,7 +180,7 @@ class OtpVerifyScreen extends GetView<OtpController> {
 
                   // 5. Timer & Resend
                   Text(
-                    "Didn't receive the code?",
+                    "Didn't receive the code?".tr,
                     style: GoogleFonts.manrope(
                       fontSize: 14.sp,
                       color: const Color(0xFF6B7280),
@@ -192,7 +192,7 @@ class OtpVerifyScreen extends GetView<OtpController> {
                         ? GestureDetector(
                             onTap: () => controller.resendOtp(),
                             child: Text(
-                              'Resend Code',
+                              'Resend Code'.tr,
                               style: GoogleFonts.manrope(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,
@@ -204,7 +204,7 @@ class OtpVerifyScreen extends GetView<OtpController> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Resend in ',
+                                'Resend in '.tr,
                                 style: GoogleFonts.manrope(
                                   fontSize: 14.sp,
                                   color: const Color(0xFF9CA3AF),

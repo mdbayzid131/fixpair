@@ -24,7 +24,7 @@ class TermsConditionsView extends GetView<TermsConditionsController> {
         ),
         centerTitle: true,
         title: Text(
-          'Terms & Conditions',
+          'Terms & Conditions'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -39,7 +39,7 @@ class TermsConditionsView extends GetView<TermsConditionsController> {
         if (controller.termsConditionsItems.isEmpty) {
           return Center(
             child: Text(
-              'No Terms & Conditions available',
+              'No Terms & Conditions available'.tr,
               style: GoogleFonts.manrope(
                 fontSize: 14.sp,
                 color: const Color(0xFF64748B),
@@ -70,7 +70,7 @@ class TermsConditionsView extends GetView<TermsConditionsController> {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  'Last updated: ${controller.termsConditionsItems.first.updatedAt != null ? controller.termsConditionsItems.first.updatedAt!.substring(0, 10) : 'April 1, 2026'}',
+                  'Last updated: '.tr + '${controller.termsConditionsItems.first.updatedAt != null ? controller.termsConditionsItems.first.updatedAt!.substring(0, 10) : 'April 1, 2026'}',
                   style: GoogleFonts.manrope(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w500,

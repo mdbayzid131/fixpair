@@ -119,7 +119,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Booking Status',
+                'Booking Status'.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
@@ -231,19 +231,19 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
       ),
       child: Column(
         children: [
-          _buildInfoRow(Icons.calendar_month_rounded, 'Date', dateStr),
+          _buildInfoRow(Icons.calendar_month_rounded, 'Date'.tr, dateStr),
           Divider(height: 24.h, color: const Color(0xFFF1F5F9)),
           _buildInfoRow(
             Icons.access_time_rounded,
-            'Time',
+            'Time'.tr,
             booking.startTime ?? 'N/A',
           ),
           Divider(height: 24.h, color: const Color(0xFFF1F5F9)),
-          _buildInfoRow(Icons.timer_outlined, 'Duration', booking.durationText),
+          _buildInfoRow(Icons.timer_outlined, 'Duration'.tr, booking.durationText),
           Divider(height: 24.h, color: const Color(0xFFF1F5F9)),
           _buildInfoRow(
             Icons.videocam_outlined,
-            'Type',
+            'Type'.tr,
             booking.bookingType?.capitalizeFirst ?? 'Scheduled',
           ),
         ],
@@ -269,7 +269,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Payment Summary',
+            'Payment Summary'.tr,
             style: GoogleFonts.manrope(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -277,9 +277,9 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
             ),
           ),
           SizedBox(height: 16.h),
-          _buildAmountRow('Consultation Fee', booking.totalAmount ?? 0),
+          _buildAmountRow('Consultation Fee'.tr, booking.totalAmount ?? 0),
           SizedBox(height: 12.h),
-          _buildAmountRow('Platform Fee', 5.0), // Placeholder if not in model
+          _buildAmountRow('Platform Fee'.tr, 5.0), // Placeholder if not in model
           SizedBox(height: 12.h),
           const Divider(color: Color(0xFFF1F5F9)),
           SizedBox(height: 12.h),
@@ -287,7 +287,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Total Amount',
+                'Total Amount'.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w800,
@@ -314,7 +314,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Booking Notes',
+          'Booking Notes'.tr,
           style: GoogleFonts.manrope(
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
@@ -347,7 +347,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
 
     if (status == 'confirmed') {
       return _buildFullWidthButton(
-        'Join Video Call',
+        'Join Video Call'.tr,
         const Color(0xFF0066FF),
         Icons.videocam_rounded,
         () => Get.toNamed(AppRoutes.CONSULTANT_CONFIRMATION, arguments: booking),
@@ -356,7 +356,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
       return Row(
         children: [
           Expanded(
-            child: _buildSecondaryButton('Reschedule', () {
+            child: _buildSecondaryButton('Reschedule'.tr, () {
               Get.toNamed(
                 AppRoutes.SCHEDULE_BOOKING,
                 arguments: {
@@ -369,19 +369,19 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
           ),
           SizedBox(width: 16.w),
           Expanded(
-            child: _buildDangerButton('Cancel Booking', () {
+            child: _buildDangerButton('Cancel Booking'.tr, () {
               _showCancelDialog(booking.id!);
             }),
           ),
         ],
       );
     } else if (status == 'pending') {
-      return _buildDangerButton('Cancel Booking', () {
+      return _buildDangerButton('Cancel Booking'.tr, () {
         _showCancelDialog(booking.id!);
       });
     } else if (status == 'completed') {
       return _buildFullWidthButton(
-        'Book Again',
+        'Book Again'.tr,
         const Color(0xFF0066FF),
         Icons.refresh_rounded,
         () {
@@ -579,7 +579,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
               borderRadius: BorderRadius.circular(24.r),
             ),
             title: Text(
-              "Reason for cancellation",
+              "Reason for cancellation".tr,
               style: GoogleFonts.manrope(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
@@ -591,7 +591,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
               children: reasons.map((reason) {
                 return RadioListTile<String>(
                   title: Text(
-                    reason,
+                    reason.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
@@ -613,7 +613,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
               TextButton(
                 onPressed: () => Get.back(),
                 child: Text(
-                  "Close",
+                  "Close".tr,
                   style: GoogleFonts.manrope(
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF64748B),
@@ -640,7 +640,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
                   controller.cancelBooking(bookingId, reason: finalReason);
                 },
                 child: Text(
-                  "Confirm",
+                  "Confirm".tr,
                   style: GoogleFonts.manrope(
                     fontWeight: FontWeight.w700,
                     color: Colors.white,

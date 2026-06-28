@@ -26,7 +26,7 @@ class LegalFAQView extends GetView<LegalFAQController> {
         ),
         centerTitle: true,
         title: Text(
-          'Legal & FAQ',
+          'Legal & FAQ'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -39,17 +39,17 @@ class LegalFAQView extends GetView<LegalFAQController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionHeader('FREQUENTLY ASKED QUESTIONS'),
+            _buildSectionHeader('FREQUENTLY ASKED QUESTIONS'.tr),
             SizedBox(height: 16.h),
             _buildFAQCard(),
             SizedBox(height: 32.h),
-            _buildSectionHeader('LEGAL'),
+            _buildSectionHeader('LEGAL'.tr),
             SizedBox(height: 16.h),
             _buildLegalCard(),
             SizedBox(height: 24.h),
             _buildActionCard(
               icon: Icons.support_agent_rounded,
-              label: 'Contact Support',
+              label: 'Contact Support'.tr,
               onTap: () => Get.toNamed(AppRoutes.CONTACT_SUPPORT),
             ),
             SizedBox(height: 24.h),
@@ -81,7 +81,7 @@ class LegalFAQView extends GetView<LegalFAQController> {
           child: Padding(
             padding: EdgeInsets.all(20.w),
             child: Text(
-              'No FAQs available',
+              'No FAQs available'.tr,
               style: GoogleFonts.manrope(
                 fontSize: 14.sp,
                 color: const Color(0xFF64748B),
@@ -187,7 +187,7 @@ class LegalFAQView extends GetView<LegalFAQController> {
         children: [
           _buildLegalItem(
             icon: Icons.description_outlined,
-            label: 'Terms and Conditions',
+            label: 'Terms & Conditions'.tr,
             onTap: () => Get.toNamed(AppRoutes.TERMS_CONDITIONS),
           ),
           const Divider(
@@ -198,7 +198,7 @@ class LegalFAQView extends GetView<LegalFAQController> {
           ),
           _buildLegalItem(
             icon: Icons.description_outlined,
-            label: 'Privacy Policy (GDPR)',
+            label: 'Privacy Policy (GDPR)'.tr,
             onTap: () => Get.toNamed(AppRoutes.PRIVACY_POLICY),
             isLast: true,
           ),

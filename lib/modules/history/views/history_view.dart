@@ -52,7 +52,7 @@ class _HistoryViewState extends State<HistoryView> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Consultations',
+          'Bookings'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -82,8 +82,8 @@ class _HistoryViewState extends State<HistoryView> {
                 child: Obx(
                   () => Row(
                     children: [
-                      _buildTabItem('Upcoming', 0),
-                      _buildTabItem('Past History', 1),
+                      _buildTabItem('Upcoming'.tr, 0),
+                      _buildTabItem('Past History'.tr, 1),
                     ],
                   ),
                 ),
@@ -122,8 +122,8 @@ class _HistoryViewState extends State<HistoryView> {
                           SizedBox(height: 16.h),
                           Text(
                             controller.selectedTab.value == 0
-                                ? 'No upcoming bookings found'
-                                : 'No past bookings found',
+                                ? 'No upcoming bookings found'.tr
+                                : 'No past bookings found'.tr,
                             style: GoogleFonts.manrope(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
@@ -433,7 +433,7 @@ class _HistoryViewState extends State<HistoryView> {
 
   Widget _renderActionButtons(BookingModel booking) {
     if (booking.status?.toLowerCase() == 'confirmed') {
-      return _buildPrimaryButton('Join', () {
+      return _buildPrimaryButton('Join'.tr, () {
         Get.toNamed(AppRoutes.CONSULTANT_CONFIRMATION, arguments: booking);
       });
     } else if (booking.status?.toLowerCase() == 'accepted') {
@@ -441,7 +441,7 @@ class _HistoryViewState extends State<HistoryView> {
         children: [
           Expanded(
             child: _buildLightButton(
-              'Reschedule',
+              'Reschedule'.tr,
               () => Get.toNamed(
                 AppRoutes.SCHEDULE_BOOKING,
                 arguments: {
@@ -455,14 +455,14 @@ class _HistoryViewState extends State<HistoryView> {
           SizedBox(width: 12.w),
           Expanded(
             child: _buildDangerButton(
-              'Cancel',
+              'Cancel'.tr,
               () => _showCancelDialog(booking.id!),
             ),
           ),
         ],
       );
     } else if (booking.status?.toLowerCase() == 'pending') {
-      return _buildDangerButton('Cancel', () => _showCancelDialog(booking.id!));
+      return _buildDangerButton('Cancel'.tr, () => _showCancelDialog(booking.id!));
     } else if (booking.status?.toLowerCase() == 'completed') {
       return Column(
         children: [
@@ -470,7 +470,7 @@ class _HistoryViewState extends State<HistoryView> {
             children: [
               Expanded(
                 child: _buildSecondaryButton(
-                  'Book Again',
+                  'Book Again'.tr,
                   () => Get.toNamed(
                     AppRoutes.CONSULTANT_PROFILE,
                     arguments: booking.consultant,
@@ -480,7 +480,7 @@ class _HistoryViewState extends State<HistoryView> {
               SizedBox(width: 12.w),
               Expanded(
                 child: _buildLightButton(
-                  'View Report',
+                  'View Report'.tr,
                   () => Get.toNamed(
                     AppRoutes.CONSULTATION_REPORT,
                     arguments: {'booking': booking},
@@ -490,7 +490,7 @@ class _HistoryViewState extends State<HistoryView> {
             ],
           ),
           SizedBox(height: 12.h),
-          _buildPrimaryButton('Leave Review', () => _showReviewDialog(booking)),
+          _buildPrimaryButton('Leave Review'.tr, () => _showReviewDialog(booking)),
         ],
       );
     }
@@ -519,7 +519,7 @@ class _HistoryViewState extends State<HistoryView> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Leave a Review',
+                    'Leave Review'.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
@@ -528,7 +528,7 @@ class _HistoryViewState extends State<HistoryView> {
                   ),
                   SizedBox(height: 8.h),
                   Text(
-                    'Rate your consultation with ${booking.consultant?.name ?? "your expert"}',
+                    'Rate your consultation with '.tr + '${booking.consultant?.name ?? "your expert".tr}',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.manrope(
                       fontSize: 13.sp,
@@ -581,13 +581,13 @@ class _HistoryViewState extends State<HistoryView> {
                       color: const Color(0xFF1D293D),
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Share your experience with this consultant...',
+                      hintText: 'Share your experience with this consultant...'.tr,
                       hintStyle: GoogleFonts.manrope(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w400,
                         color: const Color(0xFF94A3B8),
                       ),
-                      errorText: commentError,
+                      errorText: commentError != null ? commentError!.tr : null,
                       fillColor: const Color(0xFFF8FAFC),
                       filled: true,
                       contentPadding: EdgeInsets.all(16.w),
@@ -628,7 +628,7 @@ class _HistoryViewState extends State<HistoryView> {
                             side: const BorderSide(color: Color(0xFFE2E8F0)),
                           ),
                           child: Text(
-                            'Cancel',
+                            'Cancel'.tr,
                             style: GoogleFonts.manrope(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
@@ -669,7 +669,7 @@ class _HistoryViewState extends State<HistoryView> {
                             elevation: 0,
                           ),
                           child: Text(
-                            'Submit',
+                            'Submit Review'.tr,
                             style: GoogleFonts.manrope(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
@@ -828,7 +828,7 @@ class _HistoryViewState extends State<HistoryView> {
               borderRadius: BorderRadius.circular(24.r),
             ),
             title: Text(
-              "Reason for cancellation",
+              "Reason for cancellation".tr,
               style: GoogleFonts.manrope(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
@@ -840,7 +840,7 @@ class _HistoryViewState extends State<HistoryView> {
               children: reasons.map((reason) {
                 return RadioListTile<String>(
                   title: Text(
-                    reason,
+                    reason.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
@@ -864,7 +864,7 @@ class _HistoryViewState extends State<HistoryView> {
               TextButton(
                 onPressed: () => Get.back(),
                 child: Text(
-                  "Close",
+                  "Close".tr,
                   style: GoogleFonts.manrope(
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF64748B),
@@ -891,7 +891,7 @@ class _HistoryViewState extends State<HistoryView> {
                   controller.cancelBooking(bookingId, reason: finalReason);
                 },
                 child: Text(
-                  "Confirm",
+                  "Confirm".tr,
                   style: GoogleFonts.manrope(
                     fontWeight: FontWeight.w700,
                     color: Colors.white,

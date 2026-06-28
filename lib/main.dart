@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:fixpair/core/services/storage_service.dart';
+import 'package:fixpair/config/constants/storage_constants.dart';
 
 import 'app.dart';
 
@@ -22,9 +24,18 @@ void main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   //   await GetStorage.init();
 
+  // Load saved language
+  final savedLang = await StorageService.getString(StorageConstants.language);
+  Locale initialLocale;
+  if (savedLang == 'de') {
+    initialLocale = const Locale('de', 'DE');
+  } else {
+    initialLocale = const Locale('en', 'US');
+  }
+
   // Get.put<AppLockService>(AppLockService(), permanent: true);
   // Initialize services here
   // await initServices();
 
-  runApp(const MyApp());
+  runApp(MyApp(initialLocale: initialLocale));
 }

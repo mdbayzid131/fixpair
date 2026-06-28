@@ -53,7 +53,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                         ),
                         SizedBox(height: 8.h),
                         Text(
-                          'Password Recovery',
+                          'Password Recovery'.tr,
                           style: GoogleFonts.manrope(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w500,
@@ -96,7 +96,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
 
                     // 2. Title Section
                     Text(
-                      'Forgot password?',
+                      'Forgot password?'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.w700,
@@ -105,7 +105,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Enter your email address to get a reset link.',
+                      'Enter your email address to get a reset link.'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w400,
@@ -136,7 +136,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                     // 5. Send Button
                     Obx(
                       () => CustomElevatedButton(
-                        label: 'Send Reset Link',
+                        label: 'Send Reset Link'.tr,
                         onPressed: controller.sendResetLink,
                         isLoading: controller.isLoading.value,
                         style: ElevatedButton.styleFrom(
@@ -158,7 +158,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Remember your password? ",
+                            "Remember your password? ".tr,
                             style: GoogleFonts.manrope(
                               fontSize: 14.sp,
                               color: const Color(0xFF4B5563),
@@ -167,7 +167,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                           GestureDetector(
                             onTap: () => Get.back(),
                             child: Text(
-                              'Log in',
+                              'Log in'.tr,
                               style: GoogleFonts.manrope(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,

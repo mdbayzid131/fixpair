@@ -54,7 +54,7 @@ class LoginView extends GetView<LoginController> {
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 40.w),
                       child: Text(
-                        'Expert advice across Germany.\nWhenever you need it.',
+                        'Expert advice across Germany.\nWhenever you need it.'.tr,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.manrope(
                           fontSize: 15.sp,
@@ -78,7 +78,7 @@ class LoginView extends GetView<LoginController> {
 
                     // 2. Welcome Section
                     Text(
-                      'Welcome back',
+                      'Welcome back'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.w700,
@@ -87,7 +87,7 @@ class LoginView extends GetView<LoginController> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Log in to continue your consultations.',
+                      'Log in to continue your consultations.'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w400,
@@ -117,7 +117,7 @@ class LoginView extends GetView<LoginController> {
                     Obx(
                       () => CustomTextField(
                         controller: controller.passwordController,
-                        hintText: 'Password',
+                        hintText: 'Password'.tr,
                         obscureText: !controller.isPasswordVisible.value,
                         label: '',
                         isLabelVisible: false,
@@ -148,7 +148,7 @@ class LoginView extends GetView<LoginController> {
                         TextButton(
                           onPressed: controller.goToForgotPassword,
                           child: Text(
-                            'Forgot password?',
+                            'Forgot password?'.tr,
                             style: GoogleFonts.manrope(
                               fontSize: 13.sp,
                               color: const Color(0xFF0066FF),
@@ -163,7 +163,7 @@ class LoginView extends GetView<LoginController> {
                     // 6. Log In Button
                     Obx(
                       () => CustomElevatedButton(
-                        label: 'Log In',
+                        label: 'Log In'.tr,
                         onPressed: controller.login,
                         isLoading: controller.isLoading.value,
                       ),
@@ -179,7 +179,7 @@ class LoginView extends GetView<LoginController> {
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12.w),
                           child: Text(
-                            'OR CONTINUE WITH',
+                            'OR CONTINUE WITH'.tr,
                             style: GoogleFonts.manrope(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w700,
@@ -225,7 +225,7 @@ class LoginView extends GetView<LoginController> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Don't have an account? ",
+                            "Don't have an account? ".tr,
                             style: GoogleFonts.manrope(
                               fontSize: 14.sp,
                               color: const Color(0xFF4B5563),
@@ -234,7 +234,7 @@ class LoginView extends GetView<LoginController> {
                           GestureDetector(
                             onTap: controller.goToRegister,
                             child: Text(
-                              'Sign up',
+                              'Sign up'.tr,
                               style: GoogleFonts.manrope(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,

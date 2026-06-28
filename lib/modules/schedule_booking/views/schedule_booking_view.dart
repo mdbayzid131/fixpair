@@ -26,7 +26,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
         ),
         centerTitle: true,
         title: Text(
-          'Schedule Booking',
+          'Schedule Booking'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -51,7 +51,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                 ),
                 SizedBox(height: 16.h),
                 Text(
-                  'No available slots found',
+                  'No available slots found'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -70,7 +70,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
             children: [
               _buildDateHeader(
                 context,
-                '1. Select Date',
+                '1. Select Date'.tr,
                 DateFormat('MMMM yyyy').format(controller.focusedDate.value),
                 onPrev: controller.previousMonth,
                 onNext: controller.nextMonth,
@@ -78,7 +78,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
               SizedBox(height: 16.h),
               _buildMonthCalendar(),
               SizedBox(height: 32.h),
-              _buildSectionHeader('2. Select Time', 'Germany (CET)'),
+              _buildSectionHeader('2. Select Time'.tr, 'Germany (CET)'.tr),
               SizedBox(height: 16.h),
               _buildTimeGrid(),
               _buildDurationSelector(),
@@ -360,7 +360,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
 
           return GestureDetector(
             onTap: isBooked
-                ? () => Helpers.showWarning('This time slot is already booked.')
+                ? () => Helpers.showWarning('This time slot is already booked.'.tr)
                 : () => controller.selectStartTime(index),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
@@ -396,7 +396,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                           ),
                           SizedBox(height: 2.h),
                           Text(
-                            'Booked',
+                            'Booked'.tr,
                             style: GoogleFonts.manrope(
                               fontSize: 9.sp,
                               fontWeight: FontWeight.w800,
@@ -435,7 +435,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 32.h),
-          _buildSectionHeader('3. Select Duration', 'Based on availability'),
+          _buildSectionHeader('3. Select Duration'.tr, 'Based on availability'.tr),
           SizedBox(height: 16.h),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -462,7 +462,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                           }
                         : () {
                             Helpers.showWarning(
-                              'This duration is not available because it overlaps with a booked or unavailable slot.',
+                              'This duration is not available because it overlaps with a booked or unavailable slot.'.tr,
                             );
                           },
                     child: AnimatedContainer(
@@ -532,7 +532,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                           ),
                           SizedBox(height: 4.h),
                           Text(
-                            'Ends at $endTime',
+                            'Ends at '.tr + '$endTime',
                             style: GoogleFonts.manrope(
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w600,
@@ -610,7 +610,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'TOTAL PRICE (INKL. MWST)',
+                          'TOTAL PRICE (INKL. MWST)'.tr,
                           style: GoogleFonts.manrope(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w800,
@@ -676,7 +676,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                               SizedBox(width: 8.w),
                               Text(
                                 !hasSelectedTime
-                                    ? 'Select time'
+                                    ? 'Select time'.tr
                                     : '${controller.selectedStartTime.value} - ${controller.addMinutesToTime(controller.selectedStartTime.value, controller.selectedDurationMinutes.value)}',
                                 style: GoogleFonts.manrope(
                                   fontSize: 14.sp,
@@ -723,7 +723,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                       borderRadius: BorderRadius.circular(16.r),
                       child: Center(
                         child: Text(
-                          'Confirm Booking',
+                          'Confirm Booking'.tr,
                           style: GoogleFonts.manrope(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w700,

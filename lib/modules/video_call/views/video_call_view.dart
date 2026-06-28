@@ -121,7 +121,7 @@ class VideoCallView extends GetView<VideoCallController> {
           ),
           SizedBox(height: 24.h),
           Text(
-            'Waiting for consultant to join...',
+            'Waiting for consultant to join...'.tr,
             style: GoogleFonts.manrope(
               color: Colors.white,
               fontSize: 16.sp,
@@ -131,7 +131,7 @@ class VideoCallView extends GetView<VideoCallController> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Timing & charging will start when they join',
+            'Timing & charging will start when they join'.tr,
             style: GoogleFonts.manrope(
               color: Colors.white54,
               fontSize: 12.sp,
@@ -169,7 +169,7 @@ class VideoCallView extends GetView<VideoCallController> {
                 radius: 54.r,
                 backgroundColor: const Color(0xFF1E293B),
                 child: Text(
-                  'YOU',
+                  'YOU'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 28.sp,
                     fontWeight: FontWeight.bold,
@@ -197,7 +197,7 @@ class VideoCallView extends GetView<VideoCallController> {
           ),
           SizedBox(height: 24.h),
           Text(
-            'Your camera is turned off',
+            'Your camera is turned off'.tr,
             style: GoogleFonts.manrope(
               color: Colors.white,
               fontSize: 16.sp,
@@ -299,7 +299,7 @@ class VideoCallView extends GetView<VideoCallController> {
           ),
           SizedBox(height: 24.h),
           Text(
-            '${controller.booking.consultant?.name ?? 'Consultant'} turned camera off',
+            (controller.booking.consultant?.name ?? 'Consultant'.tr) + ' turned camera off'.tr,
             style: GoogleFonts.manrope(
               color: Colors.white,
               fontSize: 16.sp,
@@ -308,7 +308,7 @@ class VideoCallView extends GetView<VideoCallController> {
           ),
           SizedBox(height: 6.h),
           Text(
-            'Audio is still active',
+            'Audio is still active'.tr,
             style: GoogleFonts.manrope(
               color: const Color(0xFF94A3B8),
               fontSize: 13.sp,
@@ -379,7 +379,7 @@ class VideoCallView extends GetView<VideoCallController> {
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  waiting ? "PAUSED" : controller.formattedTime,
+                  waiting ? "PAUSED".tr : controller.formattedTime,
                   style: GoogleFonts.manrope(
                     color: Colors.white,
                     fontSize: 13.sp,
@@ -513,7 +513,7 @@ class VideoCallView extends GetView<VideoCallController> {
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  'Camera off',
+                  'Camera off'.tr,
                   style: GoogleFonts.manrope(
                     color: Colors.white70,
                     fontSize: 10.sp,
@@ -550,7 +550,7 @@ class VideoCallView extends GetView<VideoCallController> {
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  'Cam Off',
+                  'Cam Off'.tr,
                   style: GoogleFonts.manrope(
                     color: Colors.white70,
                     fontSize: 10.sp,

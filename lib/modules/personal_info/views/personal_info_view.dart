@@ -35,7 +35,7 @@ class PersonalInfoView extends GetView<PersonalInfoController> {
           ),
         ),
         title: Text(
-          'Personal Info',
+          'Personal Info'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w800,
@@ -58,14 +58,14 @@ class PersonalInfoView extends GetView<PersonalInfoController> {
                 children: [
                   Expanded(
                     child: _ProfileInputField(
-                      label: 'FIRST NAME',
+                      label: 'FIRST NAME'.tr,
                       controller: controller.firstNameController,
                     ),
                   ),
                   SizedBox(width: 16.w),
                   Expanded(
                     child: _ProfileInputField(
-                      label: 'LAST NAME',
+                      label: 'LAST NAME'.tr,
                       controller: controller.lastNameController,
                     ),
                   ),
@@ -73,7 +73,7 @@ class PersonalInfoView extends GetView<PersonalInfoController> {
               ),
               SizedBox(height: 20.h),
               _ProfileInputField(
-                label: 'EMAIL ADDRESS',
+                label: 'EMAIL ADDRESS'.tr,
                 controller: controller.emailController,
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -87,7 +87,7 @@ class PersonalInfoView extends GetView<PersonalInfoController> {
           height: 56.h,
           width: double.infinity,
           child: CustomElevatedButton(
-            label: 'Save Changes',
+            label: 'Save Changes'.tr,
             onPressed: controller.saveChanges,
             backgroundColor: AppTheme.secondaryColor,
           ),

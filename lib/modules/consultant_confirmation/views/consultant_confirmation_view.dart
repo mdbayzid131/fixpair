@@ -28,7 +28,7 @@ class ConsultantConfirmationView
         ),
         centerTitle: true,
         title: Text(
-          'Confirm Your Consultation',
+          'Confirm Your Consultation'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -57,7 +57,7 @@ class ConsultantConfirmationView
                 _buildBillingSummary(),
                 SizedBox(height: 24.h),
                 Text(
-                  'PAYMENT METHOD',
+                  'PAYMENT METHOD'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w800,
@@ -177,7 +177,7 @@ class ConsultantConfirmationView
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Billing Summary',
+            'Billing Summary'.tr,
             style: GoogleFonts.manrope(
               fontSize: 18.sp,
               fontWeight: FontWeight.w800,
@@ -186,18 +186,18 @@ class ConsultantConfirmationView
           ),
           SizedBox(height: 24.h),
           _buildSummaryRow(
-            'Consultant Rate',
+            'Consultant Rate'.tr,
             controller.consultantRate,
             isPrice: true,
           ),
           SizedBox(height: 16.h),
           const Divider(color: Color(0xFFF1F5F9), thickness: 1),
           SizedBox(height: 16.h),
-          _buildSummaryRow('Consultant Fee', controller.consultantFee),
+          _buildSummaryRow('Consultant Fee'.tr, controller.consultantFee),
           SizedBox(height: 12.h),
-          _buildSummaryRow('Platform Service Fee', controller.platformFee),
+          _buildSummaryRow('Platform Service Fee'.tr, controller.platformFee),
           SizedBox(height: 12.h),
-          _buildSummaryRow('VAT (19%)', controller.vat),
+          _buildSummaryRow('VAT (19%)'.tr, controller.vat),
           SizedBox(height: 20.h),
           const Divider(color: Color(0xFFF1F5F9), thickness: 1),
           SizedBox(height: 20.h),
@@ -205,7 +205,7 @@ class ConsultantConfirmationView
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'PRE-AUTHORIZED HOLD',
+                'PRE-AUTHORIZED HOLD'.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w800,
@@ -319,7 +319,7 @@ class ConsultantConfirmationView
               controller.fetchPaymentMethods();
             },
             child: Text(
-              controller.hasCard.value ? 'Change' : 'Add Card',
+              controller.hasCard.value ? 'Change'.tr : 'Add Card'.tr,
               style: GoogleFonts.manrope(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
@@ -369,21 +369,21 @@ class ConsultantConfirmationView
                       ),
                     ),
                   ),
-                  const TextSpan(
-                    text: 'Secure Payment\n',
-                    style: TextStyle(
+                  TextSpan(
+                    text: 'Secure Payment\n'.tr,
+                    style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF2563EB),
                     ),
                   ),
-                  const TextSpan(text: 'You will '),
-                  const TextSpan(
-                    text: 'only be charged for the actual minutes used',
-                    style: TextStyle(fontWeight: FontWeight.w700),
+                  TextSpan(text: 'You will '.tr),
+                  TextSpan(
+                    text: 'only be charged for the actual minutes used'.tr,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                  const TextSpan(
+                  TextSpan(
                     text:
-                        '. The total amount is a temporary hold on your card.',
+                        '. The total amount is a temporary hold on your card.'.tr,
                   ),
                 ],
               ),
@@ -434,7 +434,7 @@ class ConsultantConfirmationView
               ),
               SizedBox(width: 12.w),
               Text(
-                'Authorize Payment & Start Call',
+                'Authorize Payment & Start Call'.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w800,

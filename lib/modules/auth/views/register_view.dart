@@ -56,7 +56,7 @@ class RegisterView extends GetView<RegisterController> {
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 40.w),
                       child: Text(
-                        'Expert advice across Germany.\nWhenever you need it.',
+                        'Expert advice across Germany.\nWhenever you need it.'.tr,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.manrope(
                           fontSize: 15.sp,
@@ -80,7 +80,7 @@ class RegisterView extends GetView<RegisterController> {
 
                     // 2. Create Section
                     Text(
-                      'Create an account',
+                      'Create an account'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.w700,
@@ -89,7 +89,7 @@ class RegisterView extends GetView<RegisterController> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Sign up to get started.',
+                      'Sign up to get started.'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w400,
@@ -103,7 +103,7 @@ class RegisterView extends GetView<RegisterController> {
                     // 4. Input Fields
                     CustomTextField(
                       controller: controller.nameController,
-                      hintText: 'Full Name',
+                      hintText: 'Full Name'.tr,
                       validator: Validators.name,
                       label: '',
                       isLabelVisible: false,
@@ -135,7 +135,7 @@ class RegisterView extends GetView<RegisterController> {
                     Obx(
                       () => CustomTextField(
                         controller: controller.passwordController,
-                        hintText: 'Password',
+                        hintText: 'Password'.tr,
                         obscureText: !controller.isPasswordVisible.value,
                         label: '',
                         isLabelVisible: false,
@@ -165,7 +165,7 @@ class RegisterView extends GetView<RegisterController> {
                     Obx(
                       () => CustomTextField(
                         controller: controller.confirmPasswordController,
-                        hintText: 'Confirm Password',
+                        hintText: 'Confirm Password'.tr,
                         obscureText: !controller.isConfirmPasswordVisible.value,
                         label: '',
                         isLabelVisible: false,
@@ -187,7 +187,7 @@ class RegisterView extends GetView<RegisterController> {
                         ),
                         validator: (v) {
                           if (v != controller.passwordController.text) {
-                            return 'Passwords do not match';
+                            return 'Passwords do not match'.tr;
                           }
                           return null;
                         },
@@ -217,9 +217,9 @@ class RegisterView extends GetView<RegisterController> {
                                 color: const Color(0xFF374151),
                               ),
                               children: [
-                                const TextSpan(text: 'I agree to the '),
+                                TextSpan(text: 'I agree to the '.tr),
                                 TextSpan(
-                                  text: 'Terms & Conditions',
+                                  text: 'Terms & Conditions'.tr,
                                   style: const TextStyle(
                                     color: Color(0xFF0066FF),
                                     fontWeight: FontWeight.w700,
@@ -229,9 +229,9 @@ class RegisterView extends GetView<RegisterController> {
                                       Get.toNamed(AppRoutes.TERMS_CONDITIONS);
                                     },
                                 ),
-                                const TextSpan(text: ' and '),
+                                TextSpan(text: ' and '.tr),
                                 TextSpan(
-                                  text: 'Privacy Policy (GDPR)',
+                                  text: 'Privacy Policy (GDPR)'.tr,
                                   style: const TextStyle(
                                     color: Color(0xFF0066FF),
                                     fontWeight: FontWeight.w700,
@@ -253,7 +253,7 @@ class RegisterView extends GetView<RegisterController> {
                     // 6. Sign Up Button
                     Obx(
                       () => CustomElevatedButton(
-                        label: 'Sign Up',
+                        label: 'Sign Up'.tr,
                         onPressed: controller.agreeToTerms.value
                             ? controller.register
                             : null,
@@ -280,7 +280,7 @@ class RegisterView extends GetView<RegisterController> {
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12.w),
                           child: Text(
-                            'OR CONTINUE WITH',
+                            'OR CONTINUE WITH'.tr,
                             style: GoogleFonts.manrope(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w700,
@@ -325,7 +325,7 @@ class RegisterView extends GetView<RegisterController> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Already have an account? ",
+                            "Already have an account? ".tr,
                             style: GoogleFonts.manrope(
                               fontSize: 14.sp,
                               color: const Color(0xFF4B5563),
@@ -334,7 +334,7 @@ class RegisterView extends GetView<RegisterController> {
                           GestureDetector(
                             onTap: controller.goToLogin,
                             child: Text(
-                              'Log in',
+                              'Log in'.tr,
                               style: GoogleFonts.manrope(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,

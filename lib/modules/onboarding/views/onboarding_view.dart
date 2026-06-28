@@ -63,7 +63,7 @@ class OnboardingView extends GetView<OnboardingController> {
                     return TextButton(
                       onPressed: () => controller.skipOnboarding(),
                       child: Text(
-                        'Skip',
+                        'Skip'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
@@ -127,9 +127,9 @@ class OnboardingView extends GetView<OnboardingController> {
                         child: Text(
                           controller.isLastPage
                               ? (controller.fromProfile
-                                    ? 'Close Tutorial'
-                                    : 'Get Started')
-                              : 'Next',
+                                    ? 'Close Tutorial'.tr
+                                    : 'Get Started'.tr)
+                              : 'Next'.tr,
                           style: GoogleFonts.manrope(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w700,
@@ -881,7 +881,7 @@ class OnboardingView extends GetView<OnboardingController> {
           Expanded(child: Center(child: child)),
           SizedBox(height: 16.h),
           Text(
-            title,
+            title.tr,
             style: GoogleFonts.manrope(
               fontSize: 24.sp,
               fontWeight: FontWeight.w800,
@@ -893,7 +893,7 @@ class OnboardingView extends GetView<OnboardingController> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.w),
             child: Text(
-              description,
+              description.tr,
               style: GoogleFonts.manrope(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,

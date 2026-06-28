@@ -1,11 +1,13 @@
 import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/core/bindings/initial_binding.dart';
+import 'package:fixpair/core/localization/app_translations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:get/get.dart';
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Locale initialLocale;
+  const MyApp({super.key, required this.initialLocale});
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,9 @@ class MyApp extends StatelessWidget {
           initialRoute: AppRoutes.SPLASH,
           getPages: pages,
           initialBinding: InitialBinding(),
+          translations: AppTranslations(),
+          locale: initialLocale,
+          fallbackLocale: const Locale('en', 'US'),
         );
       },
     );

@@ -132,7 +132,7 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Reviews & Ratings',
+          'Reviews & Ratings'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -169,7 +169,7 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
                       ),
                       SizedBox(height: 16.h),
                       Text(
-                        'No reviews yet',
+                        'No reviews yet'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
@@ -253,7 +253,7 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  '$totalReviews ${totalReviews == 1 ? 'Review' : 'Reviews'}',
+                  totalReviews == 1 ? '$totalReviews ' + 'Review'.tr : '$totalReviews ' + 'Reviews'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -331,15 +331,15 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
     final imageUrl = ApiConstants.getImageUrl(review.user?.image);
     final ratingCount = (review.rating ?? 5.0).toInt();
 
-    String timeStr = 'Some time ago';
+    String timeStr = 'Some time ago'.tr;
     if (review.createdAt != null) {
       final difference = DateTime.now().difference(review.createdAt!);
       if (difference.inDays == 0) {
-        timeStr = 'Today';
+        timeStr = 'Today'.tr;
       } else if (difference.inDays == 1) {
-        timeStr = '1 day ago';
+        timeStr = '1 day ago'.tr;
       } else if (difference.inDays < 7) {
-        timeStr = '${difference.inDays} days ago';
+        timeStr = '${difference.inDays} ' + 'days ago'.tr;
       } else {
         timeStr = DateFormat('MMM dd, yyyy').format(review.createdAt!);
       }
@@ -385,7 +385,7 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      review.user?.name ?? 'Anonymous User',
+                      review.user?.name ?? 'Anonymous User'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
@@ -419,7 +419,7 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
           ),
           SizedBox(height: 12.h),
           Text(
-            review.comment ?? 'No comment provided.',
+            review.comment ?? 'No comment provided.'.tr,
             style: GoogleFonts.manrope(
               fontSize: 13.sp,
               fontWeight: FontWeight.w500,

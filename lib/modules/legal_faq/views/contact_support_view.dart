@@ -30,7 +30,7 @@ class ContactSupportView extends GetView<LegalFAQController> {
         ),
         centerTitle: true,
         title: Text(
-          'Contact Support',
+          'Contact Support'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -71,7 +71,7 @@ class ContactSupportView extends GetView<LegalFAQController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Contact Support',
+                        'Contact Support'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.w800,
@@ -80,7 +80,7 @@ class ContactSupportView extends GetView<LegalFAQController> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'We usually reply within 24 hours',
+                        'We usually reply within 24 hours'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w500,
@@ -92,19 +92,19 @@ class ContactSupportView extends GetView<LegalFAQController> {
                       // Email Card
                       _buildContactMethodCard(
                         icon: Icons.mail_outline_rounded,
-                        title: 'EMAIL US',
+                        title: 'EMAIL US'.tr,
                         value: email,
                         onTap: () {
                           if (email.isEmpty) return;
                           _showActionConfirmationDialog(
                             context: context,
-                            title: 'Send Email',
+                            title: 'Send Email'.tr,
                             message:
-                                'Do you want to open your mail app to send an email to $email?',
+                                'Do you want to open your mail app to send an email to '.tr + email + '?',
                             icon: Icons.mail_rounded,
                             iconColor: const Color(0xFF0066FF),
                             iconBg: const Color(0xFFE0EFFF),
-                            confirmText: 'Send',
+                            confirmText: 'Send'.tr,
                             confirmColor: const Color(0xFF0066FF),
                             onConfirm: () async {
                               final Uri uri = Uri.parse('mailto:$email');
@@ -128,19 +128,19 @@ class ContactSupportView extends GetView<LegalFAQController> {
                       // Call Card
                       _buildContactMethodCard(
                         icon: Icons.phone_outlined,
-                        title: 'CALL US',
+                        title: 'CALL US'.tr,
                         value: phone,
                         onTap: () {
                           if (phone.isEmpty) return;
                           _showActionConfirmationDialog(
                             context: context,
-                            title: 'Make a Call',
+                            title: 'Make a Call'.tr,
                             message:
-                                'Do you want to open your phone app to call $phone?',
+                                'Do you want to open your phone app to call '.tr + phone + '?',
                             icon: Icons.phone_rounded,
                             iconColor: const Color(0xFF10B981),
                             iconBg: const Color(0xFFDCFCE7),
-                            confirmText: 'Call',
+                            confirmText: 'Call'.tr,
                             confirmColor: const Color(0xFF10B981),
                             onConfirm: () async {
                               final Uri uri = Uri.parse('tel:$phone');
@@ -241,7 +241,7 @@ class ContactSupportView extends GetView<LegalFAQController> {
                         ),
                       ),
                       child: Text(
-                        'Cancel',
+                        'Cancel'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w700,

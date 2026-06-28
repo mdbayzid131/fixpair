@@ -28,7 +28,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
         ),
         centerTitle: true,
         title: Text(
-          'Select Option',
+          'Select Option'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -48,7 +48,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
             }),
             SizedBox(height: 32.h),
             Text(
-              'How would you like to connect?',
+              'How would you like to connect?'.tr,
               style: GoogleFonts.manrope(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w800,
@@ -148,7 +148,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                   ),
                 ),
                 Text(
-                  expert.tags ?? 'General Consultant',
+                  expert.tags ?? 'General Consultant'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
@@ -223,7 +223,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Instant Video Call',
+                      'Instant Video Call'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w800,
@@ -232,7 +232,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      'Connect immediately via secure video link. Billed per minute.',
+                      'Connect immediately via secure video link. Billed per minute.'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -246,7 +246,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
             ],
           ),
           SizedBox(height: 20.h),
-          _buildOptionButton('Book Instant Call', [
+          _buildOptionButton('Book Instant Call'.tr, [
             const Color(0xFFFF6B00),
             const Color(0xFFFF8A00),
           ], () => controller.bookInstant()),
@@ -286,7 +286,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Schedule a Booking',
+                      'Schedule a Booking'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w800,
@@ -295,7 +295,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      'Book a specific time slot (15, 30, or 60 min) in advance.',
+                      'Book a specific time slot (15, 30, or 60 min) in advance.'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -310,7 +310,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
           ),
           SizedBox(height: 20.h),
           _buildOptionButton(
-            'Choose Time',
+            'Choose Time'.tr,
             [const Color(0xFF0066FF), const Color(0xFF0052D1)],
             () => Get.toNamed(AppRoutes.SCHEDULE_BOOKING, arguments: expert),
           ),
@@ -350,7 +350,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Request Callback',
+                    'Request Callback'.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 17.sp,
                       fontWeight: FontWeight.w800,
@@ -359,7 +359,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    'Leave your details and the consultant will contact you.',
+                    'Leave your details and the consultant will contact you.'.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
@@ -395,7 +395,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
-              'All prices are including 19% VAT (inkl. MwSt). Payments are securely processed after the consultation ends.',
+              'All prices are including 19% VAT (inkl. MwSt). Payments are securely processed after the consultation ends.'.tr,
               style: GoogleFonts.manrope(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w500,

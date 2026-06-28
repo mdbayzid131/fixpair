@@ -48,7 +48,7 @@ class SuccessView extends StatelessWidget {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 40.w),
                     child: Text(
-                      'Expert advice across Germany.\nWhenever you need it.',
+                      'Expert advice across Germany.\nWhenever you need it.'.tr,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.manrope(
                         fontSize: 15.sp,
@@ -92,7 +92,7 @@ class SuccessView extends StatelessWidget {
 
                   // 3. Success Text
                   Text(
-                    'Success!',
+                    'Success!'.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 28.sp,
                       fontWeight: FontWeight.w800,
@@ -101,7 +101,7 @@ class SuccessView extends StatelessWidget {
                   ),
                   SizedBox(height: 16.h),
                   Text(
-                    'Congratulations! You have been\nsuccessfully authenticated',
+                    'Congratulations! You have been\nsuccessfully authenticated'.tr,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.manrope(
                       fontSize: 15.sp,
@@ -114,7 +114,7 @@ class SuccessView extends StatelessWidget {
 
                   // 4. Back to Login Button
                   CustomElevatedButton(
-                    label: 'Back to login',
+                    label: 'Back to login'.tr,
                     onPressed: () => Get.offAllNamed(AppRoutes.LOGIN),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF6B00),

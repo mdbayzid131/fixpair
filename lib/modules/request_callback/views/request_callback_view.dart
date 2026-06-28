@@ -24,7 +24,7 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
         ),
         centerTitle: true,
         title: Text(
-          'Request Callback',
+          'Request Callback'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -37,7 +37,7 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionLabel('When should they call?'),
+            _buildSectionLabel('When should they call?'.tr),
             SizedBox(height: 16.h),
             _buildTimeOptions(),
             // SizedBox(height: 32.h),
@@ -52,9 +52,9 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildSectionLabel('Reason for consultation'),
+                _buildSectionLabel('Reason for consultation'.tr),
                 Text(
-                  'OPTIONAL',
+                  'OPTIONAL'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
@@ -67,7 +67,7 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
             _buildMultilineField(),
             SizedBox(height: 16.h),
             Text(
-              'This helps the consultant prepare and ensures they are the right fit for your needs.',
+              'This helps the consultant prepare and ensures they are the right fit for your needs.'.tr,
               style: GoogleFonts.manrope(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w500,
@@ -122,7 +122,7 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    option['title']!,
+                    option['title']!.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w800,
@@ -131,7 +131,7 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    option['subtitle']!,
+                    option['subtitle']!.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
@@ -194,7 +194,7 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
           color: const Color(0xFF1D293D),
         ),
         decoration: InputDecoration(
-          hintText: 'Briefly describe what you need help with..',
+          hintText: 'Briefly describe what you need help with..'.tr,
           hintStyle: GoogleFonts.manrope(color: const Color(0xFF94A3B8)),
           prefixIcon: Padding(
             padding: EdgeInsets.only(bottom: 50.h),
@@ -245,7 +245,7 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
                       ),
                     )
                   : Text(
-                      'Request Callback',
+                      'Request Callback'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,

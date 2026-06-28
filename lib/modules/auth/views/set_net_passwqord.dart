@@ -50,7 +50,7 @@ class SetNewPasswordScreen extends GetView<SetNewPassController> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'Set New Password',
+                        'Set New Password'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w500,
@@ -93,7 +93,7 @@ class SetNewPasswordScreen extends GetView<SetNewPassController> {
 
                   // 2. Title Section
                   Text(
-                    'Create New Password',
+                    'Create New Password'.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 24.sp,
                       fontWeight: FontWeight.w700,
@@ -102,7 +102,7 @@ class SetNewPasswordScreen extends GetView<SetNewPassController> {
                   ),
                   SizedBox(height: 12.h),
                   Text(
-                    "Choose a strong password to secure your account.",
+                    "Choose a strong password to secure your account.".tr,
                     style: GoogleFonts.manrope(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w400,
@@ -116,7 +116,7 @@ class SetNewPasswordScreen extends GetView<SetNewPassController> {
                   Obx(
                     () => CustomTextField(
                       controller: controller.newPasswordController,
-                      hintText: 'New Password',
+                      hintText: 'New Password'.tr,
                       onChanged: controller.validatePasswordRules,
                       obscureText: !controller.isPasswordVisible.value,
                       fillColor: const Color(0xFFF8FAFC),
@@ -143,7 +143,7 @@ class SetNewPasswordScreen extends GetView<SetNewPassController> {
                   Obx(
                     () => CustomTextField(
                       controller: controller.confirmPasswordController,
-                      hintText: 'Confirm Password',
+                      hintText: 'Confirm Password'.tr,
                       obscureText: !controller.isConfirmPasswordVisible.value,
                       fillColor: const Color(0xFFF8FAFC),
                       isLabelVisible: false,
@@ -204,7 +204,7 @@ class SetNewPasswordScreen extends GetView<SetNewPassController> {
                   // 5. Save Button
                   Obx(
                     () => CustomElevatedButton(
-                      label: 'Save Password',
+                      label: 'Save Password'.tr,
                       onPressed: controller.submitNewPassword,
                       isLoading: controller.isLoading.value,
                       style: ElevatedButton.styleFrom(

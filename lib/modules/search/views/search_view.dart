@@ -52,7 +52,7 @@ class _SearchViewState extends State<SearchView> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Find Consultant',
+          'Search Consultants'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -91,7 +91,7 @@ class _SearchViewState extends State<SearchView> {
                       controller: controller.searchController,
                       onSubmitted: (_) => controller.fetchConsultants(),
                       decoration: InputDecoration(
-                        hintText: 'Search by names...',
+                        hintText: 'Search by names...'.tr,
                         hintStyle: GoogleFonts.manrope(
                           fontSize: 14.sp,
                           color: const Color(0xFF94A3B8),
@@ -147,7 +147,7 @@ class _SearchViewState extends State<SearchView> {
                       ),
                       SizedBox(height: 16.h),
                       Text(
-                        'No consultants found',
+                        'No consultants found'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 16.sp,
                           color: Colors.grey,
@@ -350,7 +350,7 @@ class _SearchViewState extends State<SearchView> {
                         ),
                       ),
                       Text(
-                        expert.tags?.toString() ?? 'No Tags available',
+                        expert.tags?.toString() ?? 'No Tags available'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 13.sp,
                           color: const Color(0xFF64748B),
@@ -406,7 +406,7 @@ class _SearchViewState extends State<SearchView> {
                               borderRadius: BorderRadius.circular(6.r),
                             ),
                             child: Text(
-                              isOnline ? 'Online Now' : 'Offline',
+                              isOnline ? 'Online Now'.tr : 'Offline'.tr,
                               style: GoogleFonts.manrope(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w700,

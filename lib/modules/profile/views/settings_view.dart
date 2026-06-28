@@ -25,7 +25,7 @@ class SettingsView extends GetView<ProfileController> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Settings',
+          'Settings'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -55,7 +55,7 @@ class SettingsView extends GetView<ProfileController> {
                     icon: Icons.lock_outline_rounded,
                     iconBg: const Color(0xFFE0EFFF),
                     iconColor: const Color(0xFF0066FF),
-                    label: 'Change Password',
+                    label: 'Change Password'.tr,
                     onTap: () => Get.toNamed(AppRoutes.CHANGE_PASSWORD),
                   ),
                   const Divider(
@@ -68,7 +68,7 @@ class SettingsView extends GetView<ProfileController> {
                     icon: Icons.explore_outlined,
                     iconBg: const Color(0xFFEBE9FE),
                     iconColor: const Color(0xFF7C3AED),
-                    label: 'App Guide & Tutorial',
+                    label: 'App Guide & Tutorial'.tr,
                     onTap: () => Get.toNamed(
                       AppRoutes.ONBOARDING,
                       arguments: {'fromProfile': true},
@@ -81,10 +81,23 @@ class SettingsView extends GetView<ProfileController> {
                     endIndent: 20,
                   ),
                   _buildMenuItem(
+                    icon: Icons.language_rounded,
+                    iconBg: const Color(0xFFE0F2FE),
+                    iconColor: const Color(0xFF0284C7),
+                    label: 'Language'.tr,
+                    onTap: () => _showLanguageSelection(context),
+                  ),
+                  const Divider(
+                    height: 1,
+                    color: Color(0xFFF1F5F9),
+                    indent: 70,
+                    endIndent: 20,
+                  ),
+                  _buildMenuItem(
                     icon: Icons.delete_forever_outlined,
                     iconBg: const Color(0xFFFEF2F2),
                     iconColor: const Color(0xFFEF4444),
-                    label: 'Delete Account',
+                    label: 'Delete Account'.tr,
                     onTap: () => _showDeleteConfirmation(context),
                     isLast: true,
                   ),
@@ -179,7 +192,7 @@ class SettingsView extends GetView<ProfileController> {
               ),
               SizedBox(height: 24.h),
               Text(
-                'Delete Account?',
+                'Delete Account?'.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w800,
@@ -189,7 +202,7 @@ class SettingsView extends GetView<ProfileController> {
               ),
               SizedBox(height: 12.h),
               Text(
-                'Are you sure you want to delete your account? This action is permanent and cannot be undone.',
+                'Are you sure you want to delete your account? This action is permanent and cannot be undone.'.tr,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.manrope(
                   fontSize: 15.sp,
@@ -212,7 +225,7 @@ class SettingsView extends GetView<ProfileController> {
                         ),
                       ),
                       child: Text(
-                        'Cancel',
+                        'Cancel'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
@@ -237,7 +250,7 @@ class SettingsView extends GetView<ProfileController> {
                         ),
                       ),
                       child: Text(
-                        'Delete',
+                        'Delete'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
@@ -253,6 +266,107 @@ class SettingsView extends GetView<ProfileController> {
         ),
       ),
       barrierDismissible: true,
+    );
+  }
+
+  void _showLanguageSelection(BuildContext context) {
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 28.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(28.r),
+            topRight: Radius.circular(28.r),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Select Language'.tr,
+              style: GoogleFonts.manrope(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF1D293D),
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Obx(() => _buildLanguageOption(
+                  title: 'English',
+                  langCode: 'en',
+                  isSelected: controller.currentLanguage.value == 'en',
+                )),
+            SizedBox(height: 16.h),
+            Obx(() => _buildLanguageOption(
+                  title: 'German'.tr,
+                  langCode: 'de',
+                  isSelected: controller.currentLanguage.value == 'de',
+                )),
+            SizedBox(height: 24.h),
+          ],
+        ),
+      ),
+      isDismissible: true,
+      enableDrag: true,
+    );
+  }
+
+  Widget _buildLanguageOption({
+    required String title,
+    required String langCode,
+    required bool isSelected,
+  }) {
+    return InkWell(
+      onTap: () {
+        controller.setLanguage(langCode);
+        Get.back();
+      },
+      borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFEFF6FF) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF3B82F6) : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: GoogleFonts.manrope(
+                fontSize: 16.sp,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                color: isSelected ? const Color(0xFF1D293D) : const Color(0xFF64748B),
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle_rounded,
+                color: const Color(0xFF3B82F6),
+                size: 22.sp,
+              )
+            else
+              Icon(
+                Icons.circle_outlined,
+                color: const Color(0xFFCBD5E1),
+                size: 22.sp,
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

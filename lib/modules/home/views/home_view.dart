@@ -43,7 +43,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildSectionTitle('Upcoming Booking'),
+                          _buildSectionTitle('Upcoming Booking'.tr),
                           SizedBox(height: 12.h),
                           SizedBox(
                             height: 190.h,
@@ -69,7 +69,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                     }),
 
                     // 4. Recommended Experts
-                    _buildSectionTitle('Recommended Experts'),
+                    _buildSectionTitle('Recommended Experts'.tr),
                     SizedBox(height: 12.h),
                     Obx(() {
                       if (controller.isLoading.value &&
@@ -91,7 +91,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 32.h),
                             child: Text(
-                              'No recommended consultants found',
+                              'No recommended consultants found'.tr,
                               style: GoogleFonts.manrope(
                                 fontSize: 14.sp,
                                 color: const Color(0xFF94A3B8),
@@ -196,7 +196,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Guten Morgen,',
+                          'Good Morning,'.tr,
                           style: GoogleFonts.manrope(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w500,
@@ -272,7 +272,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Text(
-              'Find your expert\nconsultation today.',
+              'Find your expert\nconsultation today.'.tr,
               style: GoogleFonts.manrope(
                 fontSize: 28.sp,
                 fontWeight: FontWeight.w800,
@@ -303,7 +303,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                   Get.find<BottomNavBarController>().changeTab(1);
                 },
                 decoration: InputDecoration(
-                  hintText: 'Search for doctors, lawyers...',
+                  hintText: 'Search for doctors, lawyers...'.tr,
                   hintStyle: GoogleFonts.manrope(
                     fontSize: 14.sp,
                     color: const Color(0xFF94A3B8),
@@ -343,7 +343,7 @@ Widget _buildUpcomingBooking(BookingModel booking) {
   // Format date and time
   String timeStr = 'N/A';
   if (booking.bookingType?.toLowerCase() == 'instant') {
-    timeStr = 'Instant';
+    timeStr = 'Instant'.tr;
   } else if (booking.date != null && booking.startTime != null) {
     final now = DateTime.now();
     final date = booking.date!;
@@ -351,12 +351,12 @@ Widget _buildUpcomingBooking(BookingModel booking) {
         date.year == now.year && date.month == now.month && date.day == now.day;
 
     if (isToday) {
-      timeStr = 'Today, ${booking.startTime}';
+      timeStr = '${'Today'.tr}, ${booking.startTime}';
     } else {
       timeStr = '${DateFormat('MMM dd').format(date)}, ${booking.startTime}';
     }
   } else if (booking.startTime != null) {
-    timeStr = 'Today, ${booking.startTime}';
+    timeStr = '${'Today'.tr}, ${booking.startTime}';
   }
 
   return Container(
@@ -491,7 +491,7 @@ Widget _buildUpcomingBooking(BookingModel booking) {
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: Text(
-                    'Join',
+                    'Join'.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
@@ -515,7 +515,7 @@ Widget _buildExpertCard(UserData consultant) {
   final rating = consultant.displayRating;
   final price = '${consultant.perMinuteRate ?? 0}.00€/min';
   final isOnline = consultant.activeStatus == true;
-  final status = isOnline ? 'Online' : 'Offline';
+  final status = isOnline ? 'Online'.tr : 'Offline'.tr;
   final image = ApiConstants.getImageUrl(consultant.image);
 
   return GestureDetector(

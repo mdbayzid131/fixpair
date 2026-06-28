@@ -174,7 +174,7 @@ class SplashView extends GetView<SplashController> {
 
                   // Tagline
                   Text(
-                    'EXPERTISE ON DEMAND',
+                    'EXPERTISE ON DEMAND'.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w700,

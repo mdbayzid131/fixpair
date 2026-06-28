@@ -31,7 +31,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
         ),
         centerTitle: true,
         title: Text(
-          'Consultant Profile',
+          'Consultant Profile'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -46,7 +46,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
 
         final UserData? expert = controller.expert.value;
         if (expert == null) {
-          return const Center(child: Text('Consultant not found'));
+          return Center(child: Text('Consultant not found'.tr));
         }
 
         return SingleChildScrollView(
@@ -146,13 +146,13 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                   children: [
                     _buildBadge(
                       expert.consultancyType?.toString().toUpperCase() ??
-                          'CONSULTANT',
+                          'CONSULTANT'.tr,
                       const Color(0xFFE0EFFF),
                       const Color(0xFF0066FF),
                     ),
                     SizedBox(width: 8.w),
                     _buildBadge(
-                      isOnline ? 'ONLINE' : 'OFFLINE',
+                      isOnline ? 'ONLINE'.tr : 'OFFLINE'.tr,
                       isOnline
                           ? const Color(0xFFDCFCE7)
                           : const Color(0xFFF1F5F9),
@@ -188,7 +188,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                   ],
                 ),
                 Text(
-                  expert.tags ?? 'General Consultant',
+                  expert.tags ?? 'General Consultant'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w500,
@@ -286,7 +286,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
           Expanded(
             child: _buildStatItem(
               Icons.workspace_premium_outlined,
-              'EXPERIENCE',
+              'EXPERIENCE'.tr,
               expert.experience ?? 'N/A',
               const Color(0xFFE0EFFF),
               const Color(0xFF0066FF),
@@ -297,7 +297,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
             child: Obx(() {
               return _buildStatItem(
                 Icons.chat_bubble_outline_rounded,
-                'CONSULTATIONS',
+                'CONSULTATIONS'.tr,
                 '${controller.totalConsultations.value}',
                 const Color(0xFFF5F3FF),
                 const Color(0xFF7C3AED),
@@ -308,7 +308,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
           Expanded(
             child: _buildStatItem(
               Icons.translate_rounded,
-              'LANGUAGES',
+              'LANGUAGES'.tr,
               (expert.languages != null && expert.languages!.isNotEmpty)
                   ? (expert.languages!.length > 1
                         ? '${expert.languages!.first} +${expert.languages!.length - 1}'
@@ -381,7 +381,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Spoken Languages',
+                'Spoken Languages'.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w800,
@@ -426,7 +426,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                     backgroundColor: const Color(0xFF0066FF),
                   ),
                   child: Text(
-                    'Close',
+                    'Close'.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
@@ -449,7 +449,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'About Expert',
+            'About Expert'.tr,
             style: GoogleFonts.manrope(
               fontSize: 18.sp,
               fontWeight: FontWeight.w800,
@@ -461,7 +461,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
             final isExpanded = controller.isAboutExpanded.value;
             final aboutText =
                 expert.expertise ??
-                'No detailed information available for this consultant yet.';
+                'No detailed information available for this consultant yet.'.tr;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -486,7 +486,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          isExpanded ? 'Read less' : 'Read more',
+                          isExpanded ? 'Read less'.tr : 'Read more'.tr,
                           style: GoogleFonts.manrope(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w700,
@@ -524,7 +524,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Reviews',
+                  'Reviews'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w800,
@@ -540,7 +540,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                     ),
                     behavior: HitTestBehavior.opaque,
                     child: Text(
-                      'See all $total',
+                      'See all '.tr + '$total',
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
@@ -559,7 +559,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                 padding: EdgeInsets.symmetric(vertical: 20.h),
                 child: Center(
                   child: Text(
-                    'No reviews yet',
+                    'No reviews yet'.tr,
                     style: GoogleFonts.manrope(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
@@ -592,15 +592,15 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
     final imageUrl = ApiConstants.getImageUrl(review.user?.image);
     final ratingCount = (review.rating ?? 5.0).toInt();
 
-    String timeStr = 'Some time ago';
+    String timeStr = 'Some time ago'.tr;
     if (review.createdAt != null) {
       final difference = DateTime.now().difference(review.createdAt!);
       if (difference.inDays == 0) {
         timeStr = 'Today';
       } else if (difference.inDays == 1) {
-        timeStr = '1 day ago';
+        timeStr = '1 day ago'.tr;
       } else if (difference.inDays < 7) {
-        timeStr = '${difference.inDays} days ago';
+        timeStr = '${difference.inDays} ' + 'days ago'.tr;
       } else {
         timeStr = DateFormat('MMM dd, yyyy').format(review.createdAt!);
       }
@@ -646,7 +646,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      review.user?.name ?? 'Anonymous User',
+                      review.user?.name ?? 'Anonymous User'.tr,
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
@@ -680,7 +680,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
           ),
           SizedBox(height: 12.h),
           Text(
-            review.comment ?? 'No comment provided.',
+            review.comment ?? 'No comment provided.'.tr,
             style: GoogleFonts.manrope(
               fontSize: 13.sp,
               fontWeight: FontWeight.w500,
@@ -731,8 +731,8 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                       SizedBox(width: 8.w),
                       Text(
                         isOnline
-                            ? 'Available for instant call'
-                            : 'Currently Offline',
+                            ? 'Available for instant call'.tr
+                            : 'Currently Offline'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
@@ -800,7 +800,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                     borderRadius: BorderRadius.circular(16.r),
                     child: Center(
                       child: Text(
-                        isOnline ? 'Book Consultation' : 'Unavailable',
+                        isOnline ? 'Book Consultation'.tr : 'Unavailable'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,

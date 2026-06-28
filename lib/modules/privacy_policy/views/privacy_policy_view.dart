@@ -24,7 +24,7 @@ class PrivacyPolicyView extends GetView<PrivacyPolicyController> {
         ),
         centerTitle: true,
         title: Text(
-          'Privacy Policy (GDPR)',
+          'Privacy Policy (GDPR)'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -39,7 +39,7 @@ class PrivacyPolicyView extends GetView<PrivacyPolicyController> {
         if (controller.privacyPolicyItems.isEmpty) {
           return Center(
             child: Text(
-              'No Privacy Policy data available',
+              'No Privacy Policy data available'.tr,
               style: GoogleFonts.manrope(
                 fontSize: 14.sp,
                 color: const Color(0xFF64748B),
@@ -70,7 +70,7 @@ class PrivacyPolicyView extends GetView<PrivacyPolicyController> {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  'Last updated: ${controller.privacyPolicyItems.first.updatedAt != null ? controller.privacyPolicyItems.first.updatedAt!.substring(0, 10) : 'April 1, 2026'}',
+                  'Last updated: '.tr + '${controller.privacyPolicyItems.first.updatedAt != null ? controller.privacyPolicyItems.first.updatedAt!.substring(0, 10) : 'April 1, 2026'}',
                   style: GoogleFonts.manrope(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w500,

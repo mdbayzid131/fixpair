@@ -25,7 +25,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
         ),
         centerTitle: true,
         title: Text(
-          'Consultation Summary',
+          'Consultation Summary'.tr,
           style: GoogleFonts.manrope(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -87,7 +87,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
           ),
           SizedBox(height: 20.h),
           Text(
-            'Consultation Completed',
+            'Consultation Completed'.tr,
             style: GoogleFonts.manrope(
               fontSize: 22.sp,
               fontWeight: FontWeight.w800,
@@ -96,7 +96,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Your session with ${controller.consultantName.value}\nwas successful.',
+            'Your session with'.tr + ' ${controller.consultantName.value}\n' + 'was successful.'.tr,
             textAlign: TextAlign.center,
             style: GoogleFonts.manrope(
               fontSize: 15.sp,
@@ -130,7 +130,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Invoice Details',
+                'Invoice Details'.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w800,
@@ -147,7 +147,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
-                  'Paid',
+                  'Paid'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w800,
@@ -158,19 +158,19 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
             ],
           ),
           SizedBox(height: 24.h),
-          _buildDetailRow('Invoice No', controller.invoiceNo.value),
+          _buildDetailRow('Invoice No'.tr, controller.invoiceNo.value),
           SizedBox(height: 16.h),
-          _buildDetailRow('Date', controller.date.value),
+          _buildDetailRow('Date'.tr, controller.date.value),
           SizedBox(height: 16.h),
-          _buildDetailRow('Duration', controller.duration.value),
+          _buildDetailRow('Duration'.tr, controller.duration.value),
           SizedBox(height: 16.h),
-          _buildDetailRow('Rate', controller.rate.value),
+          _buildDetailRow('Rate'.tr, controller.rate.value),
           SizedBox(height: 16.h),
-          _buildDetailRow('Subtotal', controller.subtotal.value),
+          _buildDetailRow('Subtotal'.tr, controller.subtotal.value),
           SizedBox(height: 16.h),
-          _buildDetailRow('Platform Fee', controller.platformFee.value),
+          _buildDetailRow('Platform Fee'.tr, controller.platformFee.value),
           SizedBox(height: 16.h),
-          _buildDetailRow('VAT (19%)', controller.vat.value),
+          _buildDetailRow('VAT (19%)'.tr, controller.vat.value),
           SizedBox(height: 20.h),
           Divider(color: Colors.grey.withValues(alpha: 0.1), thickness: 1),
           SizedBox(height: 20.h),
@@ -178,7 +178,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Total Charged',
+                'Total Charged'.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
@@ -204,7 +204,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
               color: const Color(0xFF0066FF),
             ),
             label: Text(
-              'Download PDF Invoice',
+              'Download PDF Invoice'.tr,
               style: GoogleFonts.manrope(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
@@ -245,7 +245,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
     return Column(
       children: [
         Text(
-          'How was your experience?',
+          'How was your experience?'.tr,
           style: GoogleFonts.manrope(
             fontSize: 16.sp,
             fontWeight: FontWeight.w800,
@@ -287,7 +287,7 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
             maxLines: 4,
             decoration: InputDecoration(
               hintText:
-                  'What did you like or dislike about working with this consultation?',
+                  'What did you like or dislike about working with this consultation?'.tr,
               hintStyle: GoogleFonts.manrope(
                 fontSize: 13.sp,
                 color: const Color(0xFF94A3B8),
@@ -304,13 +304,13 @@ class ConsultationSummaryView extends GetView<ConsultationSummaryController> {
     return Column(
       children: [
         _buildActionButton(
-          label: 'Submit Review',
+          label: 'Submit Review'.tr,
           color: const Color(0xFF0066FF),
           onTap: () => controller.submitReview(),
         ),
         SizedBox(height: 16.h),
         _buildActionButton(
-          label: 'Back to Home',
+          label: 'Back to Home'.tr,
           color: const Color(0xFFFF6B00),
           onTap: () => Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR),
         ),
