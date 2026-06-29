@@ -64,7 +64,7 @@ class PaymentMethodsView extends GetView<PaymentController> {
     final String last4 = method['last4'] ?? '****';
     final String brand = (method['brand'] ?? 'card').toString().toUpperCase();
     final bool isDefault = method['isDefault'] ?? false;
-    final String id = method['id'] ?? '';
+    final String id = method['methodId'] ?? '';
 
     return GestureDetector(
       onTap: isDefault ? null : () => controller.setDefaultCard(id),
