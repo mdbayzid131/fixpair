@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -438,6 +439,7 @@ class VideoCallController extends GetxController {
   }
 
   void _setNativeCallActive(bool isActive) {
+    if (!Platform.isAndroid) return;
     try {
       _channel.invokeMethod('setCallActive', {'isActive': isActive});
     } catch (e) {
