@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/data/models/user_model.dart';
@@ -15,15 +14,16 @@ import 'package:fixpair/core/services/auth_service.dart';
 import 'package:fixpair/core/utils/logger.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
 
-class VideoCallController extends GetxController {
+class VideoCallController extends GetxController with WidgetsBindingObserver {
   final UserRepository _userRepository = Get.find();
-
-  static const _channel = MethodChannel('fixpair/pip');
 
   // Agora Config
   static const String appId = ApiConstants.agoraAppId;
 
   late RtcEngine engine;
+  late final AgoraPipController _pipController;
+  final RxBool isInPipMode = false.obs;
+
   final RxInt remoteUid = 0.obs;
   final RxBool isJoined = false.obs;
   final RxBool isRemoteVideoMuted = false.obs;
@@ -54,6 +54,7 @@ class VideoCallController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     // Default initial position near the bottom-right corner
     pipTop.value = Get.height - 290.0;
     pipLeft.value = Get.width - 115.0;
@@ -106,6 +107,28 @@ class VideoCallController extends GetxController {
       ),
     );
 
+    // Initialize PiP Controller
+    _pipController = engine.createPipController();
+    _pipController.registerPipStateChangedObserver(
+      AgoraPipStateChangedObserver(
+        onPipStateChanged: (AgoraPipState state, String? error) {
+          AppLogger.info('[Agora PiP] State changed to: $state, error: $error');
+          isInPipMode.value = (state == AgoraPipState.pipStateStarted);
+        },
+      ),
+    );
+
+    final bool isAutoEnterSupported = await _pipController.pipIsAutoEnterSupported();
+    AppLogger.info('[Agora PiP] Auto-enter PiP supported: $isAutoEnterSupported');
+
+    await _pipController.pipSetup(
+      AgoraPipOptions(
+        autoEnterEnabled: isAutoEnterSupported,
+        aspectRatioX: 2,
+        aspectRatioY: 3,
+      ),
+    );
+
     // Set speakerphone enabled by default as requested by backend
     await engine.setDefaultAudioRouteToSpeakerphone(true);
 
@@ -114,7 +137,6 @@ class VideoCallController extends GetxController {
       RtcEngineEventHandler(
         onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
           isJoined.value = true;
-          _setNativeCallActive(true);
           AppLogger.info(
             '[Agora] Channel joined successfully! elapsed: $elapsed',
           );
@@ -403,7 +425,7 @@ class VideoCallController extends GetxController {
     if (_isEndingCall) return;
     _isEndingCall = true;
 
-    _setNativeCallActive(false);
+    WidgetsBinding.instance.removeObserver(this);
 
     try {
       await FlutterCallkitIncoming.endCall(sessionId);
@@ -419,7 +441,16 @@ class VideoCallController extends GetxController {
     } catch (e) {
       AppLogger.warning('[Agora] Error ending session: $e');
     }
+
     _timer?.cancel();
+
+    try {
+      await _pipController.pipDispose();
+      await _pipController.dispose();
+    } catch (e) {
+      AppLogger.warning('[Agora PiP] Error disposing PiP on endCall: $e');
+    }
+
     await engine.leaveChannel();
     await engine.release();
 
@@ -438,17 +469,6 @@ class VideoCallController extends GetxController {
     Get.delete<VideoCallController>(force: true);
   }
 
-  void _setNativeCallActive(bool isActive) {
-    if (!Platform.isAndroid) return;
-    try {
-      _channel.invokeMethod('setCallActive', {'isActive': isActive});
-    } catch (e) {
-      AppLogger.warning(
-        '[Agora] Error invoking setCallActive MethodChannel: $e',
-      );
-    }
-  }
-
   @override
   void onClose() {
     if (_isEndingCall) {
@@ -457,8 +477,16 @@ class VideoCallController extends GetxController {
     }
     _isEndingCall = true;
 
-    _setNativeCallActive(false);
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
+
+    try {
+      _pipController.pipDispose();
+      _pipController.dispose();
+    } catch (e) {
+      AppLogger.warning('[Agora PiP] Error disposing PiP on onClose: $e');
+    }
+
     engine.leaveChannel();
     engine.release();
     closeOverlay();
@@ -473,5 +501,32 @@ class VideoCallController extends GetxController {
     }
 
     super.onClose();
+  }
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    super.didChangeAppLifecycleState(state);
+    AppLogger.info('[App Lifecycle] State changed to: $state');
+
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      // Only enter system PiP if the call is joined, we are not already in PiP, and not ending call
+      if (isJoined.value && !isInPipMode.value && !_isEndingCall) {
+        try {
+          AppLogger.info('[Agora PiP] App went to background, starting PiP mode');
+          await _pipController.pipStart();
+        } catch (e) {
+          AppLogger.warning('[Agora PiP] Error entering PiP mode: $e');
+        }
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (Platform.isIOS && isInPipMode.value) {
+        try {
+          AppLogger.info('[Agora PiP] App resumed, stopping PiP mode');
+          await _pipController.pipStop();
+        } catch (e) {
+          AppLogger.warning('[Agora PiP] Error exiting PiP mode: $e');
+        }
+      }
+    }
   }
 }
