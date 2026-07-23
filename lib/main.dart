@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'firebase_options.dart';
 import 'package:fixpair/core/services/storage_service.dart';
 import 'package:fixpair/config/constants/storage_constants.dart';
+import 'package:fixpair/core/services/app_lock_service.dart';
 
 import 'app.dart';
 
@@ -25,7 +28,7 @@ void main() async {
   await Stripe.instance.applySettings();
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  //   await GetStorage.init();
+  await GetStorage.init();
 
   // Load saved language
   final savedLang = await StorageService.getString(StorageConstants.language);
@@ -36,9 +39,7 @@ void main() async {
     initialLocale = const Locale('en', 'US');
   }
 
-  // Get.put<AppLockService>(AppLockService(), permanent: true);
-  // Initialize services here
-  // await initServices();
+  Get.put<AppLockService>(AppLockService(), permanent: true);
 
   runApp(MyApp(initialLocale: initialLocale));
 }

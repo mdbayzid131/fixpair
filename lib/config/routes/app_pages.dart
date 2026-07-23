@@ -25,6 +25,7 @@ import '../../modules/auth/views/forgot_password_view.dart';
 import '../../modules/auth/views/otp_verify_screen.dart';
 import '../../modules/auth/views/set_net_passwqord.dart';
 import '../../modules/auth/views/success_view.dart';
+import '../../modules/auth/views/lock_view.dart';
 import '../../modules/history/bindings/history_binding.dart';
 import '../../modules/history/views/history_view.dart';
 import '../../modules/profile/bindings/profile_binding.dart';
@@ -267,5 +268,9 @@ final pages = [
     name: AppRoutes.CONSULTATION_REPORT,
     page: () => const ConsultationReportView(),
     binding: ConsultationSummaryBinding(),
+  ),
+  GetPage(
+    name: AppRoutes.LOCK,
+    page: () => const LockView(),
   ),
 ];

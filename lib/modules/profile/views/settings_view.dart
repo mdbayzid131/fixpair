@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../config/routes/app_pages.dart';
+import '../../../core/services/app_lock_service.dart';
 import '../controllers/profile_controller.dart';
 
 class SettingsView extends GetView<ProfileController> {
@@ -64,6 +65,47 @@ class SettingsView extends GetView<ProfileController> {
                     indent: 70,
                     endIndent: 20,
                   ),
+                  Obx(
+                    () => _buildSwitchMenuItem(
+                      icon: Icons.fingerprint_rounded,
+                      iconBg: const Color(0xFFDCFCE7),
+                      iconColor: const Color(0xFF16A34A),
+                      label: 'App Lock (Biometric)'.tr,
+                      value: AppLockService.to.biometricEnabled.value,
+                      onChanged: (val) {
+                        AppLockService.to.setBiometricEnabled(val);
+                      },
+                    ),
+                  ),
+                  const Divider(
+                    height: 1,
+                    color: Color(0xFFF1F5F9),
+                    indent: 70,
+                    endIndent: 20,
+                  ),
+                  Obx(() {
+                    if (!AppLockService.to.biometricEnabled.value) {
+                      return const SizedBox.shrink();
+                    }
+                    return Column(
+                      children: [
+                        _buildMenuItem(
+                          icon: Icons.timer_outlined,
+                          iconBg: const Color(0xFFFEF3C7),
+                          iconColor: const Color(0xFFD97706),
+                          label: 'Auto-Lock Timeout'.tr,
+                          trailingText: AppLockService.to.timeoutLabel.tr,
+                          onTap: () => _showAutoLockTimeoutSelection(context),
+                        ),
+                        const Divider(
+                          height: 1,
+                          color: Color(0xFFF1F5F9),
+                          indent: 70,
+                          endIndent: 20,
+                        ),
+                      ],
+                    );
+                  }),
                   _buildMenuItem(
                     icon: Icons.explore_outlined,
                     iconBg: const Color(0xFFEBE9FE),
@@ -115,6 +157,7 @@ class SettingsView extends GetView<ProfileController> {
     required Color iconBg,
     required Color iconColor,
     required String label,
+    String? trailingText,
     required VoidCallback onTap,
     bool isLast = false,
   }) {
@@ -146,13 +189,62 @@ class SettingsView extends GetView<ProfileController> {
                 ),
               ),
             ),
+            if (trailingText != null) ...[
+              Text(
+                trailingText,
+                style: GoogleFonts.manrope(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF64748B),
+                ),
+              ),
+              SizedBox(width: 8.w),
+            ],
             Icon(
               Icons.chevron_right_rounded,
               color: const Color(0xFF94A3B8),
-              size: 24.sp,
+              size: 20.sp,
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSwitchMenuItem({
+    required IconData icon,
+    required Color iconBg,
+    required Color iconColor,
+    required String label,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+            child: Icon(icon, color: iconColor, size: 22.sp),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.manrope(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1D293D),
+              ),
+            ),
+          ),
+          Switch.adaptive(
+            value: value,
+            onChanged: onChanged,
+            activeColor: const Color(0xFF0066FF),
+          ),
+        ],
       ),
     );
   }
@@ -328,6 +420,127 @@ class SettingsView extends GetView<ProfileController> {
     return InkWell(
       onTap: () {
         controller.setLanguage(langCode);
+        Get.back();
+      },
+      borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFEFF6FF) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF3B82F6) : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: GoogleFonts.manrope(
+                fontSize: 16.sp,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                color: isSelected ? const Color(0xFF1D293D) : const Color(0xFF64748B),
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle_rounded,
+                color: const Color(0xFF3B82F6),
+                size: 22.sp,
+              )
+            else
+              Icon(
+                Icons.circle_outlined,
+                color: const Color(0xFFCBD5E1),
+                size: 22.sp,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAutoLockTimeoutSelection(BuildContext context) {
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 28.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(28.r),
+            topRight: Radius.circular(28.r),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Auto-Lock Timeout'.tr,
+              style: GoogleFonts.manrope(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w800,
+                color: const Color(0xFF1D293D),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Select how long after leaving the app it should lock automatically.'.tr,
+              style: GoogleFonts.manrope(
+                fontSize: 13.sp,
+                color: const Color(0xFF64748B),
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Obx(() => _buildTimeoutOption(
+                  title: 'When device locks'.tr,
+                  seconds: -1,
+                  isSelected: AppLockService.to.autoLockTimeoutSeconds.value == -1,
+                )),
+            SizedBox(height: 12.h),
+            Obx(() => _buildTimeoutOption(
+                  title: 'After 1 minute'.tr,
+                  seconds: 60,
+                  isSelected: AppLockService.to.autoLockTimeoutSeconds.value == 60,
+                )),
+            SizedBox(height: 12.h),
+            Obx(() => _buildTimeoutOption(
+                  title: 'After 5 minutes'.tr,
+                  seconds: 300,
+                  isSelected: AppLockService.to.autoLockTimeoutSeconds.value == 300,
+                )),
+            SizedBox(height: 12.h),
+            Obx(() => _buildTimeoutOption(
+                  title: 'After 15 minutes'.tr,
+                  seconds: 900,
+                  isSelected: AppLockService.to.autoLockTimeoutSeconds.value == 900,
+                )),
+            SizedBox(height: 24.h),
+          ],
+        ),
+      ),
+      isDismissible: true,
+      enableDrag: true,
+    );
+  }
+
+  Widget _buildTimeoutOption({
+    required String title,
+    required int seconds,
+    required bool isSelected,
+  }) {
+    return InkWell(
+      onTap: () {
+        AppLockService.to.setAutoLockTimeout(seconds);
         Get.back();
       },
       borderRadius: BorderRadius.circular(16.r),
