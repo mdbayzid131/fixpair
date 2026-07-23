@@ -449,9 +449,8 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                 final isSelected =
                     controller.selectedDurationMinutes.value == duration;
 
-                // Calculate price for this duration
+                // Get per-minute rate for display
                 final rate = controller.expert.value?.perMinuteRate ?? 0;
-                final price = duration * rate;
 
                 return Padding(
                   padding: EdgeInsets.only(right: 12.w),
@@ -545,7 +544,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                           ),
                           const Spacer(),
                           Text(
-                            '€${price.toStringAsFixed(2)}',
+                            '€${rate.toDouble().toStringAsFixed(2)} / min',
                             style: GoogleFonts.manrope(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w800,
@@ -610,7 +609,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'TOTAL PRICE (INKL. MWST)'.tr,
+                          'BILLING RATE'.tr,
                           style: GoogleFonts.manrope(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w800,
@@ -623,7 +622,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: controller.totalPrice.toStringAsFixed(2),
+                                text: (controller.expert.value?.perMinuteRate ?? 0).toDouble().toStringAsFixed(2),
                                 style: GoogleFonts.manrope(
                                   fontSize: 28.sp,
                                   fontWeight: FontWeight.w800,
@@ -631,7 +630,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                                 ),
                               ),
                               TextSpan(
-                                text: '€',
+                                text: '€ / min',
                                 style: GoogleFonts.manrope(
                                   fontSize: 20.sp,
                                   fontWeight: FontWeight.w700,
@@ -639,6 +638,15 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          'Billed by the minute'.tr,
+                          style: GoogleFonts.manrope(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFFFF6B00),
                           ),
                         ),
                       ],

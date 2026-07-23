@@ -252,6 +252,8 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
   }
 
   Widget _buildPaymentInfo(BookingModel booking) {
+    final isCompleted = booking.status?.toLowerCase() == 'completed';
+
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -269,7 +271,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Payment Summary'.tr,
+            isCompleted ? 'Payment Summary'.tr : 'Billing Information'.tr,
             style: GoogleFonts.manrope(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -277,33 +279,83 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
             ),
           ),
           SizedBox(height: 16.h),
-          _buildAmountRow('Consultation Fee'.tr, booking.totalAmount ?? 0),
-          SizedBox(height: 12.h),
-          _buildAmountRow('Platform Fee'.tr, 5.0), // Placeholder if not in model
-          SizedBox(height: 12.h),
-          const Divider(color: Color(0xFFF1F5F9)),
-          SizedBox(height: 12.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total Amount'.tr,
-                style: GoogleFonts.manrope(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFF1D293D),
+          if (isCompleted) ...[
+            _buildAmountRow('Consultation Fee'.tr, booking.totalAmount ?? 0),
+            SizedBox(height: 12.h),
+            _buildAmountRow('Platform Fee'.tr, booking.platformFee ?? 5.0),
+            SizedBox(height: 12.h),
+            const Divider(color: Color(0xFFF1F5F9)),
+            SizedBox(height: 12.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total Amount'.tr,
+                  style: GoogleFonts.manrope(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1D293D),
+                  ),
                 ),
-              ),
-              Text(
-                '${(booking.totalAmount ?? 0) + 5}€',
-                style: GoogleFonts.manrope(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w800,
-                  color: const Color(0xFFFF6B00),
+                Text(
+                  '${(booking.totalAmount ?? 0) + (booking.platformFee ?? 5.0)}€',
+                  style: GoogleFonts.manrope(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFFFF6B00),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ] else ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Consultant Rate'.tr,
+                  style: GoogleFonts.manrope(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+                Text(
+                  '${booking.perMinuteRate ?? 0}€ / min',
+                  style: GoogleFonts.manrope(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1D293D),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            _buildAmountRow('Platform Fee'.tr, booking.platformFee ?? 5.0),
+            SizedBox(height: 12.h),
+            const Divider(color: Color(0xFFF1F5F9)),
+            SizedBox(height: 12.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Billing Mode'.tr,
+                  style: GoogleFonts.manrope(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1D293D),
+                  ),
+                ),
+                Text(
+                  'Billed by the minute'.tr,
+                  style: GoogleFonts.manrope(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFFFF6B00),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
