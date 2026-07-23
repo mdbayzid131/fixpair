@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "827439833710-s4bhcp5b80km0h8t4ruhlnq0d3acn2ee.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fixpair.app",
+            "certificate_hash": "9c44273c40ef19199292e52a386bec5920ccee07"
+          }
+        },
+        {
           "client_id": "827439833710-5u93rqf7vuq1qe99hmvbpul0t80t7uv3.apps.googleusercontent.com",
           "client_type": 3
         }
