@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/core/services/auth_service.dart';
 import 'package:fixpair/core/utils/helpers.dart';
+import 'package:fixpair/core/utils/validators.dart';
 
 class SetNewPassController extends GetxController {
   final AuthService _authService = Get.find();
@@ -21,7 +22,9 @@ class SetNewPassController extends GetxController {
   // Password rules
   final hasMinLength = false.obs;
   final hasUppercase = false.obs;
-  final hasNumberOrSpecial = false.obs;
+  final hasLowercase = false.obs;
+  final hasDigit = false.obs;
+  final hasSpecial = false.obs;
 
   @override
   void onInit() {
@@ -39,12 +42,11 @@ class SetNewPassController extends GetxController {
   void validatePasswordRules(String text) {
     hasMinLength.value = text.length >= 8;
     hasUppercase.value = text.contains(RegExp(r'[A-Z]'));
-    // Checks for number OR special character
-    hasNumberOrSpecial.value =
-        text.contains(RegExp(r'[0-9]')) ||
-        text.contains(
-          RegExp(r'[!@#\$&*~`%\^\(\)\-_=\+\[\{\]\}\|;:\x27",<\.>\/\?]'),
-        );
+    hasLowercase.value = text.contains(RegExp(r'[a-z]'));
+    hasDigit.value = text.contains(RegExp(r'[0-9]'));
+    hasSpecial.value = text.contains(
+      RegExp(r'[!@#\$&*~`%\^\(\)\-_=\+\[\{\]\}\|;:\x27",<\.>\/\?]'),
+    );
   }
 
   void togglePasswordVisibility() {
@@ -66,6 +68,19 @@ class SetNewPassController extends GetxController {
     if (newPasswordController.text.isEmpty ||
         confirmPasswordController.text.isEmpty) {
       Helpers.showError('Please fill in both fields');
+      return;
+    }
+
+    final passwordValResult = Validators.password(
+      newPasswordController.text,
+      minLength: 8,
+      requireDigit: true,
+      requireUppercase: true,
+      requireLowercase: true,
+      requireSpecialChar: true,
+    );
+    if (passwordValResult != null) {
+      Helpers.showError(passwordValResult);
       return;
     }
 

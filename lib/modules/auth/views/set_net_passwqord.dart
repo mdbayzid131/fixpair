@@ -168,38 +168,54 @@ class SetNewPasswordScreen extends GetView<SetNewPassController> {
                   SizedBox(height: 24.h),
 
                   // 4. Password Requirements
-                  // Container(
-                  //   width: double.infinity,
-                  //   padding: EdgeInsets.all(16.w),
-                  //   decoration: BoxDecoration(
-                  //     color: const Color(0xFFF8FAFC),
-                  //     borderRadius: BorderRadius.circular(12.r),
-                  //     border: Border.all(color: const Color(0xFFE2E8F0)),
-                  //   ),
-                  //   child: Obx(() => Column(
-                  //     crossAxisAlignment: CrossAxisAlignment.start,
-                  //     children: [
-                  //       Text(
-                  //         'Password must contain:',
-                  //         style: GoogleFonts.manrope(
-                  //           fontSize: 13.sp,
-                  //           fontWeight: FontWeight.w700,
-                  //           color: const Color(0xFF1D293D),
-                  //         ),
-                  //       ),
-                  //       SizedBox(height: 12.h),
-                  //       _buildRequirementRow(controller.hasMinLength.value, 'At least 8 characters'),
-                  //       SizedBox(height: 8.h),
-                  //       _buildRequirementRow(controller.hasUppercase.value, 'One uppercase letter'),
-                  //       SizedBox(height: 8.h),
-                  //       _buildRequirementRow(
-                  //         controller.hasNumberOrSpecial.value,
-                  //         'One number or special character',
-                  //       ),
-                  //     ],
-                  //   )),
-                  // ),
-                  // SizedBox(height: 40.h),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Obx(() => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Password must contain:'.tr,
+                          style: GoogleFonts.manrope(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1D293D),
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        _buildRequirementRow(
+                          controller.hasMinLength.value,
+                          'At least 8 characters'.tr,
+                        ),
+                        SizedBox(height: 8.h),
+                        _buildRequirementRow(
+                          controller.hasUppercase.value,
+                          'One uppercase letter'.tr,
+                        ),
+                        SizedBox(height: 8.h),
+                        _buildRequirementRow(
+                          controller.hasLowercase.value,
+                          'One lowercase letter'.tr,
+                        ),
+                        SizedBox(height: 8.h),
+                        _buildRequirementRow(
+                          controller.hasDigit.value,
+                          'One number'.tr,
+                        ),
+                        SizedBox(height: 8.h),
+                        _buildRequirementRow(
+                          controller.hasSpecial.value,
+                          'One special character'.tr,
+                        ),
+                      ],
+                    )),
+                  ),
+                  SizedBox(height: 40.h),
 
                   // 5. Save Button
                   Obx(

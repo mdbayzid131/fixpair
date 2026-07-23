@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "827439833710-6g8h7qkp8inmbaf504juu1mgijm68llq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fixpair.app",
+            "certificate_hash": "6fdb91216076d0d1f6155491b2da956437befdc8"
+          }
+        },
+        {
           "client_id": "827439833710-81uv8i5077nq5kbs3st8glcfs799hbd7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

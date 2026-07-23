@@ -34,6 +34,7 @@ class Validators {
     int minLength = 6,
     bool requireDigit = false,
     bool requireUppercase = false,
+    bool requireLowercase = false,
     bool requireSpecialChar = false,
     String? message,
   }) {
@@ -55,7 +56,13 @@ class Validators {
       return 'Password must contain at least one uppercase letter';
     }
 
-    if (requireSpecialChar && !RegExp(r'[!@#\$&*~]').hasMatch(password)) {
+    if (requireLowercase && !RegExp(r'[a-z]').hasMatch(password)) {
+      return 'Password must contain at least one lowercase letter';
+    }
+
+    if (requireSpecialChar &&
+        !RegExp(r'[!@#\$&*~`%\^\(\)\-_=\+\[\{\]\}\|;:\x27",<\.>\/\?]')
+            .hasMatch(password)) {
       return 'Password must contain at least one special character';
     }
 

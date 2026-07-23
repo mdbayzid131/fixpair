@@ -156,7 +156,14 @@ class RegisterView extends GetView<RegisterController> {
                           ),
                         ),
                         validator: (value) {
-                          return Validators.password(value, minLength: 8);
+                          return Validators.password(
+                            value,
+                            minLength: 8,
+                            requireDigit: true,
+                            requireUppercase: true,
+                            requireLowercase: true,
+                            requireSpecialChar: true,
+                          );
                         },
                       ),
                     ),

@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/core/utils/helpers.dart';
 
-class OtpController extends GetxController {
+class OtpController extends GetxController with WidgetsBindingObserver {
   final AuthService _authService = Get.find();
   final otpController = TextEditingController();
   late final String email;
@@ -13,12 +13,14 @@ class OtpController extends GetxController {
   final isLoading = false.obs;
 
   Timer? _timer;
+  DateTime? _endTime;
   final remainingSeconds = 120.obs; // 2 minutes
   final isResendEnabled = false.obs;
 
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     if (Get.arguments is Map) {
       email = Get.arguments['email'] ?? '';
       isForgotPassword = Get.arguments['isForgotPassword'] == true;
@@ -29,22 +31,38 @@ class OtpController extends GetxController {
     startTimer();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _updateTimer();
+    }
+  }
+
   void startTimer() {
+    _endTime = DateTime.now().add(const Duration(seconds: 120));
     remainingSeconds.value = 120;
     isResendEnabled.value = false;
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (remainingSeconds.value > 0) {
-        remainingSeconds.value--;
-      } else {
-        isResendEnabled.value = true;
-        _timer?.cancel();
-      }
+      _updateTimer();
     });
+  }
+
+  void _updateTimer() {
+    if (_endTime == null) return;
+    final diff = _endTime!.difference(DateTime.now()).inSeconds;
+    if (diff > 0) {
+      remainingSeconds.value = diff;
+    } else {
+      remainingSeconds.value = 0;
+      isResendEnabled.value = true;
+      _timer?.cancel();
+    }
   }
 
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     otpController.dispose();
     _timer?.cancel();
     super.onClose();
