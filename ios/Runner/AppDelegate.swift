@@ -25,17 +25,14 @@ import UIKit
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
 
-    let controller = engineBridge.pluginRegistry.window?.rootViewController as? FlutterViewController
-    if let controller = controller {
-      let channel = FlutterMethodChannel(name: "com.fixpair.app/device_lock", binaryMessenger: controller.binaryMessenger)
-      channel.setMethodCallHandler { [weak self] (call, result) in
-        if call.method == "isDeviceLocked" {
-          let isLocked = !(UIApplication.shared.isProtectedDataAvailable) || (self?.wasScreenLocked ?? false)
-          self?.wasScreenLocked = false
-          result(isLocked)
-        } else {
-          result(FlutterMethodNotImplemented)
-        }
+    let channel = FlutterMethodChannel(name: "com.fixpair.app/device_lock", binaryMessenger: engineBridge.applicationRegistrar.messenger())
+    channel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+      if call.method == "isDeviceLocked" {
+        let isLocked = !(UIApplication.shared.isProtectedDataAvailable) || (self?.wasScreenLocked ?? false)
+        self?.wasScreenLocked = false
+        result(isLocked)
+      } else {
+        result(FlutterMethodNotImplemented)
       }
     }
   }
