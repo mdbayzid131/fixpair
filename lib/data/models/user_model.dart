@@ -122,6 +122,8 @@ class UserData {
   final double? rating;
   final double? averageRating;
   final String? tag;
+  final String? bio;
+  final List<String>? expertiseList;
 
   UserData({
     this.authentication,
@@ -155,6 +157,8 @@ class UserData {
     this.rating,
     this.averageRating,
     this.tag,
+    this.bio,
+    this.expertiseList,
   });
 
   factory UserData.fromJson(Map<String, dynamic> json) {
@@ -179,7 +183,14 @@ class UserData {
         consultancyType: json['consultancyType']?.toString(),
         experience: json['experience']?.toString(),
         languages: json['languages'] is List ? json['languages'] : [],
-        expertise: json['expertise']?.toString(),
+        expertise: json['expertise'] is List
+            ? (json['expertise'] as List).join(', ')
+            : json['expertise']?.toString(),
+        expertiseList: json['expertise'] is List
+            ? (json['expertise'] as List).map((e) => e.toString()).toList()
+            : (json['expertise'] != null && json['expertise'].toString().isNotEmpty
+                ? json['expertise'].toString().split(',').map((e) => e.trim()).toList()
+                : []),
         visitFee: int.tryParse(json['visitFee']?.toString() ?? '0') ?? 0,
         perMinuteRate:
             int.tryParse(json['perMinuteRate']?.toString() ?? '0') ?? 0,
@@ -204,6 +215,7 @@ class UserData {
             ? double.tryParse(json['averageRating'].toString())
             : null,
         tag: json['tag']?.toString(),
+        bio: json['bio']?.toString(),
       );
     } catch (e) {
       debugPrint('UserData Parsing Error: $e');
@@ -244,6 +256,8 @@ class UserData {
       'rating': rating,
       'averageRating': averageRating,
       'tag': tag,
+      'bio': bio,
+      'expertiseList': expertiseList,
     };
   }
 

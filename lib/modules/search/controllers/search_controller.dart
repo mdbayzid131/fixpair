@@ -39,6 +39,30 @@ class SearchController extends GetxController {
     });
   }
 
+  // Filter & Sort state
+  final sortBy = 'none'
+      .obs; // 'none', 'price_low_to_high', 'price_high_to_low', 'rating_high_to_low'
+  final rateRange = const RangeValues(0, 100).obs;
+  final minRating = 0.0.obs; // 0.0, 4.0, 4.5
+  final isFilterApplied = false.obs;
+
+  void applyFilters() {
+    isFilterApplied.value =
+        sortBy.value != 'none' ||
+        rateRange.value.start > 0 ||
+        rateRange.value.end < 100 ||
+        minRating.value > 0.0;
+    fetchConsultants();
+  }
+
+  void resetFilters() {
+    sortBy.value = 'none';
+    rateRange.value = const RangeValues(0, 100);
+    minRating.value = 0.0;
+    isFilterApplied.value = false;
+    fetchConsultants();
+  }
+
   Future<void> fetchConsultants({bool isLoadMore = false}) async {
     if (isLoadMore) {
       if (!_hasMore) return;
@@ -52,9 +76,22 @@ class SearchController extends GetxController {
     }
 
     try {
+      String? apiSort;
+      if (sortBy.value == 'price_low_to_high') {
+        apiSort = 'perMinuteRate';
+      } else if (sortBy.value == 'price_high_to_low') {
+        apiSort = '-perMinuteRate';
+      } else if (sortBy.value == 'rating_high_to_low') {
+        apiSort = '-averageRating';
+      }
+
       final response = await _userRepository.getConsultants(
         consultancyType: selectedCategory.value,
-        name: searchController.text,
+        searchTerm: searchController.text,
+        minPrice: rateRange.value.start,
+        maxPrice: rateRange.value.end,
+        minRating: minRating.value > 0.0 ? minRating.value : null,
+        sort: apiSort,
         page: _currentPage,
       );
 

@@ -39,8 +39,8 @@ class BottomNavBarView extends GetView<BottomNavBarController> {
         ),
         child: SafeArea(
           top: false,
-          child: SizedBox(
-            height: 68.h,
+          child: Padding(
+            padding: EdgeInsets.only(top: 8.h, bottom: 6.h),
             child: Obx(
               () => Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,

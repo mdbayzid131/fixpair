@@ -29,14 +29,22 @@ class UserRepository {
   // Get consultants list with filters and pagination
   Future<Response> getConsultants({
     String? consultancyType,
-    String? name,
+    String? searchTerm,
+    double? minPrice,
+    double? maxPrice,
+    double? minRating,
+    String? sort,
     int page = 1,
     int limit = 10,
   }) async {
     final query = {
       if (consultancyType != null && consultancyType != 'All')
         'consultancyType': consultancyType.toLowerCase(),
-      if (name != null && name.isNotEmpty) 'name': name,
+      if (searchTerm != null && searchTerm.isNotEmpty) 'searchTerm': searchTerm,
+      if (minPrice != null) 'minPrice': minPrice.round(),
+      if (maxPrice != null) 'maxPrice': maxPrice.round(),
+      if (minRating != null) 'minRating': minRating,
+      if (sort != null && sort.isNotEmpty) 'sort': sort,
       'page': page,
       'limit': limit,
     };

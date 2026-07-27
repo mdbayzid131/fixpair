@@ -59,17 +59,6 @@ class _SearchViewState extends State<SearchView> {
             color: const Color(0xFF1D293D),
           ),
         ),
-        // actions: [
-        //   IconButton(
-        //     onPressed: () {},
-        //     icon: Icon(
-        //       Icons.filter_list_rounded,
-        //       color: const Color(0xFF64748B),
-        //       size: 24.sp,
-        //     ),
-        //   ),
-        //   SizedBox(width: 8.w),
-        // ],
       ),
       body: Column(
         children: [
@@ -81,44 +70,82 @@ class _SearchViewState extends State<SearchView> {
               children: [
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Container(
-                    height: 56.h,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
-                    child: TextField(
-                      controller: controller.searchController,
-                      onSubmitted: (_) => controller.fetchConsultants(),
-                      decoration: InputDecoration(
-                        hintText: 'Search by names...'.tr,
-                        hintStyle: GoogleFonts.manrope(
-                          fontSize: 14.sp,
-                          color: const Color(0xFF94A3B8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 56.h,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                          child: TextField(
+                            controller: controller.searchController,
+                            onSubmitted: (_) => controller.fetchConsultants(),
+                            decoration: InputDecoration(
+                              hintText: 'Search by names...'.tr,
+                              hintStyle: GoogleFonts.manrope(
+                                fontSize: 14.sp,
+                                color: const Color(0xFF94A3B8),
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search_rounded,
+                                color: const Color(0xFF94A3B8),
+                                size: 22.sp,
+                              ),
+                              suffixIcon: Obx(
+                                () => controller.searchQuery.value.isNotEmpty
+                                    ? IconButton(
+                                        icon: const Icon(
+                                          Icons.clear_rounded,
+                                          color: Color(0xFF94A3B8),
+                                        ),
+                                        onPressed: () {
+                                          controller.searchController.clear();
+                                          controller.fetchConsultants();
+                                        },
+                                      )
+                                    : const SizedBox.shrink(),
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 18.h,
+                              ),
+                            ),
+                          ),
                         ),
-                        prefixIcon: Icon(
-                          Icons.search_rounded,
-                          color: const Color(0xFF94A3B8),
-                          size: 22.sp,
-                        ),
-                        suffixIcon: Obx(
-                          () => controller.searchQuery.value.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(
-                                    Icons.clear_rounded,
-                                    color: Color(0xFF94A3B8),
-                                  ),
-                                  onPressed: () {
-                                    controller.searchController.clear();
-                                    controller.fetchConsultants();
-                                  },
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 18.h),
                       ),
-                    ),
+                      SizedBox(width: 12.w),
+                      Obx(() {
+                        final hasFilter = controller.isFilterApplied.value;
+                        return GestureDetector(
+                          onTap: () => _showFilterBottomSheet(context),
+                          child: Container(
+                            height: 56.h,
+                            width: 56.h,
+                            decoration: BoxDecoration(
+                              color: hasFilter
+                                  ? const Color(0xFFE0EFFF)
+                                  : const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(16.r),
+                              border: Border.all(
+                                color: hasFilter
+                                    ? const Color(0xFF0066FF)
+                                    : Colors.transparent,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.filter_list_rounded,
+                              color: hasFilter
+                                  ? const Color(0xFF0066FF)
+                                  : const Color(0xFF64748B),
+                              size: 24.sp,
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
                   ),
                 ),
                 SizedBox(height: 20.h),
@@ -235,9 +262,9 @@ class _SearchViewState extends State<SearchView> {
           borderRadius: BorderRadius.circular(24.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: const Color(0xFF0F172A).withOpacity(0.04),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
@@ -261,41 +288,31 @@ class _SearchViewState extends State<SearchView> {
                               placeholder: (context, url) => Container(
                                 color: const Color(0xFFF1F5F9),
                                 child: const Center(
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 ),
                               ),
                               errorWidget: (context, url, error) => Container(
                                 color: const Color(0xFFF1F5F9),
                                 child: Icon(
-                                  Icons.person,
+                                  Icons.person_rounded,
                                   size: 40.sp,
-                                  color: Colors.grey,
+                                  color: const Color(0xFF94A3B8),
                                 ),
                               ),
                             )
                           : Container(
                               color: const Color(0xFFF1F5F9),
                               child: Icon(
-                                Icons.person,
+                                Icons.person_rounded,
                                 size: 40.sp,
-                                color: Colors.grey,
+                                color: const Color(0xFF94A3B8),
                               ),
                             ),
                     ),
                   ),
-                  Positioned(
-                    top: 10.h,
-                    right: 10.w,
-                    child: Container(
-                      width: 12.w,
-                      height: 12.w,
-                      decoration: BoxDecoration(
-                        color: isOnline ? const Color(0xFF10B981) : Colors.grey,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                    ),
-                  ),
+
                   Positioned(
                     bottom: 10.h,
                     left: 10.w,
@@ -345,50 +362,58 @@ class _SearchViewState extends State<SearchView> {
                         expert.name ?? 'No Name',
                         style: GoogleFonts.manrope(
                           fontSize: 16.sp,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1D293D),
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF1E293B),
                         ),
                       ),
+                      SizedBox(height: 4.h),
                       Text(
-                        expert.tags?.toString() ?? 'No Tags available'.tr,
-                        style: GoogleFonts.manrope(
-                          fontSize: 13.sp,
-                          color: const Color(0xFF64748B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        expert.expertise ?? 'No Expertise',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        '${(expert.consultancyType != null && expert.consultancyType!.isNotEmpty) ? (expert.consultancyType![0].toUpperCase() + expert.consultancyType!.substring(1)) : "Lawyer"}  •  ${(expert.experience != null && expert.experience!.trim().isNotEmpty) ? (expert.experience!.toLowerCase().contains("exp") ? expert.experience! : (expert.experience!.toLowerCase().contains("year") || expert.experience!.toLowerCase().contains("month") ? "${expert.experience!} exp." : "${expert.experience!}+ years exp.")) : "5+ years exp."}',
                         style: GoogleFonts.manrope(
                           fontSize: 12.sp,
-                          color: const Color(0xFF94A3B8),
-                          height: 1.4,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF64748B),
                         ),
                       ),
+                      // SizedBox(height: 6.h),
+                      // Text(
+                      //   expert.bio ?? 'No Bio available'.tr,
+                      //   maxLines: 2,
+                      //   overflow: TextOverflow.ellipsis,
+                      //   style: GoogleFonts.manrope(
+                      //     fontSize: 13.sp,
+                      //     color: const Color(0xFF475569),
+                      //     fontWeight: FontWeight.w500,
+                      //     height: 1.4,
+                      //   ),
+                      // ),
+                      SizedBox(height: 10.h),
+                      _buildExpertiseChips(expert.expertiseList),
                       const Spacer(),
-                      const Divider(color: Color(0xFFF1F5F9), height: 1),
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 8.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           RichText(
                             text: TextSpan(
                               style: GoogleFonts.manrope(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF1D293D),
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF0F172A),
                               ),
                               children: [
-                                TextSpan(text: '${expert.perMinuteRate ?? 0}€'),
+                                TextSpan(
+                                  text: '${expert.perMinuteRate ?? 0}€',
+                                  style: const TextStyle(
+                                    color: Color(0xFF0066FF),
+                                  ),
+                                ),
                                 TextSpan(
                                   text: '/min',
                                   style: TextStyle(
-                                    fontSize: 11.sp,
+                                    fontSize: 12.sp,
                                     color: const Color(0xFF94A3B8),
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
@@ -403,15 +428,15 @@ class _SearchViewState extends State<SearchView> {
                               color: isOnline
                                   ? const Color(0xFFDCFCE7)
                                   : const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(6.r),
+                              borderRadius: BorderRadius.circular(8.r),
                             ),
                             child: Text(
-                              isOnline ? 'Online Now'.tr : 'Offline'.tr,
+                              isOnline ? 'Available'.tr : 'Offline'.tr,
                               style: GoogleFonts.manrope(
                                 fontSize: 11.sp,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w800,
                                 color: isOnline
-                                    ? const Color(0xFF10B981)
+                                    ? const Color(0xFF16A34A)
                                     : const Color(0xFF64748B),
                               ),
                             ),
@@ -426,6 +451,338 @@ class _SearchViewState extends State<SearchView> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showFilterBottomSheet(BuildContext context) {
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.all(24.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24.r),
+            topRight: Radius.circular(24.r),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Filter Consultants'.tr,
+                  style: GoogleFonts.manrope(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1D293D),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Get.back(),
+                  child: Container(
+                    padding: EdgeInsets.all(4.w),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF1F5F9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Color(0xFF64748B),
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 24.h),
+
+            // Price/Rate Range
+            Text(
+              'Per Minute Rate Range'.tr,
+              style: GoogleFonts.manrope(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1D293D),
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Obx(() {
+              final range = controller.rateRange.value;
+              return Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${range.start.round()}€/min',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF0066FF),
+                        ),
+                      ),
+                      Text(
+                        '${range.end.round()}€/min',
+                        style: GoogleFonts.manrope(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF0066FF),
+                        ),
+                      ),
+                    ],
+                  ),
+                  RangeSlider(
+                    values: range,
+                    min: 0,
+                    max: 100,
+                    divisions: 20,
+                    activeColor: const Color(0xFF0066FF),
+                    inactiveColor: const Color(0xFFE2E8F0),
+                    labels: RangeLabels(
+                      '${range.start.round()}€',
+                      '${range.end.round()}€',
+                    ),
+                    onChanged: (values) {
+                      controller.rateRange.value = values;
+                    },
+                  ),
+                ],
+              );
+            }),
+            SizedBox(height: 24.h),
+
+            // Rating Filter Options
+            Text(
+              'Minimum Rating'.tr,
+              style: GoogleFonts.manrope(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1D293D),
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Obx(() {
+              final activeRating = controller.minRating.value;
+              return Row(
+                children: [
+                  _buildRatingChip('All'.tr, 0.0, activeRating),
+                  SizedBox(width: 8.w),
+                  _buildRatingChip('4.0+ ★', 4.0, activeRating),
+                  SizedBox(width: 8.w),
+                  _buildRatingChip('4.5+ ★', 4.5, activeRating),
+                ],
+              );
+            }),
+            SizedBox(height: 24.h),
+
+            // Sort Options
+            Text(
+              'Sort Options'.tr,
+              style: GoogleFonts.manrope(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1D293D),
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Obx(() {
+              final activeSort = controller.sortBy.value;
+              return Wrap(
+                spacing: 8.w,
+                runSpacing: 8.h,
+                children: [
+                  _buildSortChip(
+                    'Low to High Price'.tr,
+                    'price_low_to_high',
+                    activeSort,
+                  ),
+                  _buildSortChip(
+                    'High to Low Price'.tr,
+                    'price_high_to_low',
+                    activeSort,
+                  ),
+                  _buildSortChip(
+                    'Top Rated'.tr,
+                    'rating_high_to_low',
+                    activeSort,
+                  ),
+                ],
+              );
+            }),
+            SizedBox(height: 32.h),
+
+            // Action Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      controller.resetFilters();
+                      Get.back();
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                    ),
+                    child: Text(
+                      'Reset All'.tr,
+                      style: GoogleFonts.manrope(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      controller.applyFilters();
+                      Get.back();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0066FF),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Apply Filter'.tr,
+                      style: GoogleFonts.manrope(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  Widget _buildRatingChip(String label, double rating, double activeRating) {
+    final isSelected = activeRating == rating;
+    return GestureDetector(
+      onTap: () {
+        controller.minRating.value = rating;
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFE0EFFF) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF0066FF)
+                : const Color(0xFFE2E8F0),
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.manrope(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w600,
+            color: isSelected
+                ? const Color(0xFF0066FF)
+                : const Color(0xFF64748B),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortChip(String label, String value, String activeSort) {
+    final isSelected = activeSort == value;
+    return GestureDetector(
+      onTap: () {
+        controller.sortBy.value = isSelected ? 'none' : value;
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFE0EFFF) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF0066FF)
+                : const Color(0xFFE2E8F0),
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.manrope(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w600,
+            color: isSelected
+                ? const Color(0xFF0066FF)
+                : const Color(0xFF64748B),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpertiseChips(List<String>? expertiseList) {
+    if (expertiseList == null || expertiseList.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final items = expertiseList.where((e) => e.trim().isNotEmpty).toList();
+    if (items.isEmpty) return const SizedBox.shrink();
+
+    const int maxChips = 3;
+    final showMore = items.length > maxChips;
+    final displayItems = showMore ? items.take(maxChips).toList() : items;
+
+    return Wrap(
+      spacing: 6.w,
+      runSpacing: 4.h,
+      children: [
+        ...displayItems.map(
+          (item) => Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Text(
+              item,
+              style: GoogleFonts.manrope(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF475569),
+              ),
+            ),
+          ),
+        ),
+        if (showMore)
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Text(
+              '+${items.length - maxChips}',
+              style: GoogleFonts.manrope(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF0066FF),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -1,0 +1,45 @@
+GET   /api/v1/user/consultants?searchTerm=expert [GET-CONSULTANTS-SEARCH] - User searches for consultants
+ REQUEST 
+{
+  "params": {},
+  "query": {},
+  "body": {},
+  "headers": {
+    "Authorization": "Bearer ***"
+  }
+}
+ RESPONSE SUCCESS 
+{
+  "success": true,
+  "message": "Consultants retrieved successfully",
+  "pagination": {
+    "total": 1,
+    "limit": 10,
+    "page": 1,
+    "totalPage": 1
+  },
+  "data": [
+    {
+      "_id": "6a66ff257d341a077d7801de",
+      "name": "Expert Consultant",
+      "image": "https://i.ibb.co/z5YHLV9/profile.png",
+      "consultancyType": "advisor",
+      "experience": "10 years",
+      "languages": [
+        "English",
+        "French"
+      ],
+      "expertise": [
+        "Business Strategy",
+        "Financial Planning"
+      ],
+      "bio": "I am a senior advisor with a decade of experience.",
+      "perMinuteRate": 150,
+      "activeStatus": false,
+      "averageRating": 0,
+      "totalReviews": 0,
+      "createdAt": "2026-07-27T06:48:05.942Z",
+      "updatedAt": "2026-07-27T06:48:06.120Z"
+    }
+  ]
+}
