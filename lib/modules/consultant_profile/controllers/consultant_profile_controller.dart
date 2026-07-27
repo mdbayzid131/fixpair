@@ -32,14 +32,11 @@ class ConsultantProfileController extends GetxController {
       if (response.statusCode == 200) {
         final userData = UserData.fromJson(response.data['data']);
         expert.value = userData;
+        totalConsultations.value = userData.totalConsultations ?? 0;
       }
 
-      // Fetch reviews, stats, and total consultations in parallel
-      await Future.wait([
-        fetchReviews(id),
-        fetchStats(id),
-        fetchTotalConsultations(id),
-      ]);
+      // Fetch reviews and stats in parallel
+      await Future.wait([fetchReviews(id), fetchStats(id)]);
     } catch (e) {
       AppLogger.warning('Error fetching consultant details: ${e.toString()}');
     } finally {
@@ -76,20 +73,6 @@ class ConsultantProfileController extends GetxController {
       }
     } catch (e) {
       AppLogger.warning('Error fetching consultant stats: ${e.toString()}');
-    }
-  }
-
-  Future<void> fetchTotalConsultations(String id) async {
-    try {
-      final response = await _userRepository.getConsultantTotalConsultations(
-        id,
-      );
-      if (response.statusCode == 200) {
-        final data = response.data['data'];
-        totalConsultations.value = data['totalConsultations'] ?? 0;
-      }
-    } catch (e) {
-      AppLogger.warning('Error fetching total consultations: ${e.toString()}');
     }
   }
 

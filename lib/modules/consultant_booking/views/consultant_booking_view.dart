@@ -147,14 +147,14 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                     color: const Color(0xFF1D293D),
                   ),
                 ),
-                Text(
-                  expert.tags ?? 'General Consultant'.tr,
-                  style: GoogleFonts.manrope(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF64748B),
-                  ),
-                ),
+                // Text(
+                //   expert.tags ?? 'General Consultant'.tr,
+                //   style: GoogleFonts.manrope(
+                //     fontSize: 14.sp,
+                //     fontWeight: FontWeight.w500,
+                //     color: const Color(0xFF64748B),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -186,34 +186,46 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
   }
 
   Widget _buildInstantCallOption(UserData expert) {
+    final isOnline = expert.activeStatus ?? false;
+
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: const Color(0xFFFFE5D0), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFFF6B00).withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(
+          color: isOnline ? const Color(0xFFFFE5D0) : const Color(0xFFE2E8F0),
+          width: 1.5,
+        ),
+        boxShadow: isOnline
+            ? [
+                BoxShadow(
+                  color: const Color(0xFFFF6B00).withOpacity(0.04),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 padding: EdgeInsets.all(12.w),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFFF7ED),
+                decoration: BoxDecoration(
+                  color: isOnline
+                      ? const Color(0xFFFFF7ED)
+                      : const Color(0xFFF1F5F9),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.videocam_rounded,
-                  color: const Color(0xFFF59E0B),
+                  color: isOnline
+                      ? const Color(0xFFF59E0B)
+                      : const Color(0xFF94A3B8),
                   size: 28.sp,
                 ),
               ),
@@ -227,12 +239,15 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                       style: GoogleFonts.manrope(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF1D293D),
+                        color: isOnline
+                            ? const Color(0xFF1D293D)
+                            : const Color(0xFF64748B),
                       ),
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      'Connect immediately via secure video link. Billed per minute.'.tr,
+                      'Connect immediately via secure video link. Billed per minute.'
+                          .tr,
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -245,11 +260,46 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
               ),
             ],
           ),
+          if (!isOnline) ...[
+            SizedBox(height: 16.h),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF2F2),
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: const Color(0xFFFCA5A5), width: 1),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: const Color(0xFFEF4444),
+                    size: 16.sp,
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      'Consultant is currently unavailable for instant calls.'
+                          .tr,
+                      style: GoogleFonts.manrope(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFFB91C1C),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           SizedBox(height: 20.h),
-          _buildOptionButton('Book Instant Call'.tr, [
-            const Color(0xFFFF6B00),
-            const Color(0xFFFF8A00),
-          ], () => controller.bookInstant()),
+          _buildOptionButton(
+            'Book Instant Call'.tr,
+            isOnline
+                ? [const Color(0xFFFF6B00), const Color(0xFFFF8A00)]
+                : [const Color(0xFFCBD5E1), const Color(0xFF94A3B8)],
+            isOnline ? () => controller.bookInstant() : null,
+          ),
         ],
       ),
     );
@@ -295,7 +345,8 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      'Book a specific time slot (15, 30, or 60 min) in advance.'.tr,
+                      'Book a specific time slot (15, 30, or 60 min) in advance.'
+                          .tr,
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -359,7 +410,8 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    'Leave your details and the consultant will contact you.'.tr,
+                    'Leave your details and the consultant will contact you.'
+                        .tr,
                     style: GoogleFonts.manrope(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
@@ -395,7 +447,8 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
-              'All prices are including 19% VAT (inkl. MwSt). Payments are securely processed after the consultation ends.'.tr,
+              'All prices are including 19% VAT (inkl. MwSt). Payments are securely processed after the consultation ends.'
+                  .tr,
               style: GoogleFonts.manrope(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w500,
@@ -412,7 +465,7 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
   Widget _buildOptionButton(
     String label,
     List<Color> colors,
-    VoidCallback onTap,
+    VoidCallback? onTap,
   ) {
     return Container(
       width: double.infinity,
@@ -420,13 +473,15 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: colors),
         borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: colors[0].withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: onTap != null
+            ? [
+                BoxShadow(
+                  color: colors[0].withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [],
       ),
       child: Material(
         color: Colors.transparent,

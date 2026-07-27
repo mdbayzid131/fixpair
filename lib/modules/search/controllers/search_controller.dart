@@ -42,22 +42,24 @@ class SearchController extends GetxController {
   // Filter & Sort state
   final sortBy = 'none'
       .obs; // 'none', 'price_low_to_high', 'price_high_to_low', 'rating_high_to_low'
-  final rateRange = const RangeValues(0, 100).obs;
+  final minPriceController = TextEditingController();
+  final maxPriceController = TextEditingController();
   final minRating = 0.0.obs; // 0.0, 4.0, 4.5
   final isFilterApplied = false.obs;
 
   void applyFilters() {
     isFilterApplied.value =
         sortBy.value != 'none' ||
-        rateRange.value.start > 0 ||
-        rateRange.value.end < 100 ||
+        minPriceController.text.trim().isNotEmpty ||
+        maxPriceController.text.trim().isNotEmpty ||
         minRating.value > 0.0;
     fetchConsultants();
   }
 
   void resetFilters() {
     sortBy.value = 'none';
-    rateRange.value = const RangeValues(0, 100);
+    minPriceController.clear();
+    maxPriceController.clear();
     minRating.value = 0.0;
     isFilterApplied.value = false;
     fetchConsultants();
@@ -85,11 +87,20 @@ class SearchController extends GetxController {
         apiSort = '-averageRating';
       }
 
+      double? minPrice;
+      double? maxPrice;
+      if (minPriceController.text.trim().isNotEmpty) {
+        minPrice = double.tryParse(minPriceController.text.trim());
+      }
+      if (maxPriceController.text.trim().isNotEmpty) {
+        maxPrice = double.tryParse(maxPriceController.text.trim());
+      }
+
       final response = await _userRepository.getConsultants(
         consultancyType: selectedCategory.value,
         searchTerm: searchController.text,
-        minPrice: rateRange.value.start,
-        maxPrice: rateRange.value.end,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
         minRating: minRating.value > 0.0 ? minRating.value : null,
         sort: apiSort,
         page: _currentPage,
@@ -137,6 +148,8 @@ class SearchController extends GetxController {
     Future.delayed(const Duration(milliseconds: 500), () {
       try {
         searchController.dispose();
+        minPriceController.dispose();
+        maxPriceController.dispose();
       } catch (_) {}
     });
 

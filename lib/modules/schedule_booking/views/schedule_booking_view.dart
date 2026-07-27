@@ -82,6 +82,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
               SizedBox(height: 16.h),
               _buildTimeGrid(),
               _buildDurationSelector(),
+              _buildNoteInput(),
               SizedBox(height: 40.h),
             ],
           ),
@@ -750,5 +751,68 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
         ),
       ),
     );
+  }
+
+  Widget _buildNoteInput() {
+    return Obx(() {
+      if (controller.selectedStartTime.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 32.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '4. Add Notes'.tr,
+                style: GoogleFonts.manrope(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1D293D),
+                ),
+              ),
+              Text(
+                'OPTIONAL'.tr,
+                style: GoogleFonts.manrope(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF94A3B8),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: TextField(
+              controller: controller.reasonController,
+              maxLines: 3,
+              style: GoogleFonts.manrope(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1D293D),
+              ),
+              decoration: InputDecoration(
+                hintText: 'Briefly describe what you need help with..'.tr,
+                hintStyle: GoogleFonts.manrope(
+                  color: const Color(0xFF94A3B8),
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.all(16.w),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 }

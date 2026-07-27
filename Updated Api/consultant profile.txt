@@ -1,0 +1,64 @@
+📝 USER STORY:
+As a regular user
+I want to view a consultant's full details
+So that I can see their expertise and bio before booking
+
+📖 BDD SCENARIO: VIEW CONSULTANT DETAILS
+Feature: User Consultation Management
+
+Given I am logged in as a normal user
+When I send a GET request to fetch the consultant details by ID
+Then I should receive the consultant's details successfully
+
+3:32:32 PM | Admin Flow E2E Tests (Fixpair) > User Consultation Management > should fetch consultant details by id as a user | stdout
+Mon Jul 27 2026 15:32:32 [SERVER-NAME] info: GET /api/v1/user/6a6725b0a87c44abb8c32110 200 - 3.712 ms
+3:32:32 PM | Admin Flow E2E Tests (Fixpair) > User Consultation Management > should fetch consultant details by id as a user | stdout
+
+
+ GET   /api/v1/user/6a6725b0a87c44abb8c32110 [GET-CONSULTANT-DETAILS-AS-USER] - User fetches specific consultant details
+ REQUEST 
+{
+  "params": {},
+  "query": {},
+  "body": {},
+  "headers": {
+    "Authorization": "Bearer ***"
+  }
+}
+ RESPONSE SUCCESS 
+{
+  "success": true,
+  "message": "User data retrieved successfully",
+  "data": {
+    "_id": "6a6725b0a87c44abb8c32110",
+    "name": "Expert Consultant",
+    "role": "CONSULTANT",
+    "email": "consultant_1785144751751@test.com",
+    "image": "https://i.ibb.co/z5YHLV9/profile.png",
+    "status": "active",
+    "verified": true,
+    "consultancyType": "advisor",
+    "experience": "10 years",
+    "languages": [
+      "English",
+      "French"
+    ],
+    "expertise": [
+      "Business Strategy",
+      "Financial Planning"
+    ],
+    "bio": "I am a senior advisor with a decade of experience.",
+    "perMinuteRate": 150,
+    "activeStatus": false,
+    "averageRating": 0,
+    "totalReviews": 0,
+    "totalConsultations": 0,
+    "createdAt": "2026-07-27T09:32:32.712Z",
+    "updatedAt": "2026-07-27T09:32:32.878Z",
+    "__v": 0,
+    "stats": {
+      "avgRating": 0,
+      "totalReviews": 0
+    }
+  }
+}

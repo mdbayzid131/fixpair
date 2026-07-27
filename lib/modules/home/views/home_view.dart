@@ -513,7 +513,7 @@ Widget _buildExpertCard(UserData consultant) {
   final role = consultant.expertise ?? consultant.consultancyType ?? 'Expert';
   final category = (consultant.consultancyType ?? 'Expert').toUpperCase();
   final rating = consultant.displayRating;
-  final price = '${consultant.perMinuteRate ?? 0}.00€/min';
+  final price = '${(consultant.perMinuteRate ?? 0).toDouble().toStringAsFixed(2)}€/min';
   final isOnline = consultant.activeStatus == true;
   final status = isOnline ? 'Online'.tr : 'Offline'.tr;
   final image = ApiConstants.getImageUrl(consultant.image);

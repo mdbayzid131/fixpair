@@ -88,60 +88,51 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            children: [
-              Container(
-                width: 100.w,
-                height: 100.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24.r),
-                  color: const Color(0xFFF1F5F9),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+          Container(
+            width: 100.w,
+            height: 100.w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24.r),
+              color: const Color(0xFFF1F5F9),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24.r),
-                  child: imageUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: imageUrl,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                          errorWidget: (context, url, error) => Icon(
-                            Icons.person,
-                            size: 40.sp,
-                            color: Colors.grey,
-                          ),
-                        )
-                      : Icon(Icons.person, size: 40.sp, color: Colors.grey),
-                ),
-              ),
-              Positioned(
-                bottom: 4.h,
-                right: 4.w,
-                child: Container(
-                  width: 18.w,
-                  height: 18.w,
-                  decoration: BoxDecoration(
-                    color: isOnline ? const Color(0xFF10B981) : Colors.grey,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24.r),
+              child: imageUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      errorWidget: (context, url, error) =>
+                          Icon(Icons.person, size: 40.sp, color: Colors.grey),
+                    )
+                  : Icon(Icons.person, size: 40.sp, color: Colors.grey),
+            ),
           ),
           SizedBox(width: 20.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  expert.name ?? 'No Name',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.manrope(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1D293D),
+                  ),
+                ),
+                SizedBox(height: 10.h),
                 Row(
                   children: [
                     _buildBadge(
@@ -152,7 +143,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                     ),
                     SizedBox(width: 8.w),
                     _buildBadge(
-                      isOnline ? 'ONLINE'.tr : 'OFFLINE'.tr,
+                      isOnline ? 'AVAILABLE'.tr : 'OFFLINE'.tr,
                       isOnline
                           ? const Color(0xFFDCFCE7)
                           : const Color(0xFFF1F5F9),
@@ -162,33 +153,11 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                     ),
                   ],
                 ),
-                SizedBox(height: 12.h),
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        expert.name ?? 'No Name',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.manrope(
-                          fontSize: 22.sp,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF1D293D),
-                        ),
-                      ),
-                    ),
-                    if (expert.verified == true) ...[
-                      SizedBox(width: 8.w),
-                      Icon(
-                        Icons.verified_rounded,
-                        color: const Color(0xFF0066FF),
-                        size: 20.sp,
-                      ),
-                    ],
-                  ],
-                ),
+                SizedBox(height: 10.h),
                 Text(
-                  expert.tags ?? 'General Consultant'.tr,
+                  expert.bio ?? 'No bio available'.tr,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.manrope(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w500,
@@ -770,37 +739,29 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                 width: double.infinity,
                 height: 56.h,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isOnline
-                        ? [const Color(0xFFFF6B00), const Color(0xFFFF8A00)]
-                        : [Colors.grey.shade400, Colors.grey.shade500],
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFF6B00), Color(0xFFFF8A00)],
                   ),
                   borderRadius: BorderRadius.circular(16.r),
-                  boxShadow: isOnline
-                      ? [
-                          BoxShadow(
-                            color: const Color(
-                              0xFFFF6B00,
-                            ).withValues(alpha: 0.3),
-                            blurRadius: 15,
-                            offset: const Offset(0, 8),
-                          ),
-                        ]
-                      : [],
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF6B00).withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: isOnline
-                        ? () => Get.toNamed(
-                            AppRoutes.CONSULTANT_BOOKING,
-                            arguments: expert,
-                          )
-                        : null,
+                    onTap: () => Get.toNamed(
+                      AppRoutes.CONSULTANT_BOOKING,
+                      arguments: expert,
+                    ),
                     borderRadius: BorderRadius.circular(16.r),
                     child: Center(
                       child: Text(
-                        isOnline ? 'Book Consultation'.tr : 'Unavailable'.tr,
+                        'Book Consultation'.tr,
                         style: GoogleFonts.manrope(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,

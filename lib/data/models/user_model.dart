@@ -110,7 +110,7 @@ class UserData {
   final List<dynamic>? languages;
   final String? expertise;
   final int? visitFee;
-  final int? perMinuteRate;
+  final num? perMinuteRate;
   final bool? activeStatus;
   final String? stripeCustomerId;
   final String? paypalPayerId;
@@ -124,6 +124,7 @@ class UserData {
   final String? tag;
   final String? bio;
   final List<String>? expertiseList;
+  final int? totalConsultations;
 
   UserData({
     this.authentication,
@@ -159,6 +160,7 @@ class UserData {
     this.tag,
     this.bio,
     this.expertiseList,
+    this.totalConsultations,
   });
 
   factory UserData.fromJson(Map<String, dynamic> json) {
@@ -188,12 +190,17 @@ class UserData {
             : json['expertise']?.toString(),
         expertiseList: json['expertise'] is List
             ? (json['expertise'] as List).map((e) => e.toString()).toList()
-            : (json['expertise'] != null && json['expertise'].toString().isNotEmpty
-                ? json['expertise'].toString().split(',').map((e) => e.trim()).toList()
-                : []),
+            : (json['expertise'] != null &&
+                      json['expertise'].toString().isNotEmpty
+                  ? json['expertise']
+                        .toString()
+                        .split(',')
+                        .map((e) => e.trim())
+                        .toList()
+                  : []),
         visitFee: int.tryParse(json['visitFee']?.toString() ?? '0') ?? 0,
         perMinuteRate:
-            int.tryParse(json['perMinuteRate']?.toString() ?? '0') ?? 0,
+            num.tryParse(json['perMinuteRate']?.toString() ?? '0') ?? 0,
         activeStatus:
             json['activeStatus'] == true ||
             json['activeStatus']?.toString() == 'true',
@@ -216,6 +223,8 @@ class UserData {
             : null,
         tag: json['tag']?.toString(),
         bio: json['bio']?.toString(),
+        totalConsultations:
+            int.tryParse(json['totalConsultations']?.toString() ?? '0') ?? 0,
       );
     } catch (e) {
       debugPrint('UserData Parsing Error: $e');
@@ -258,6 +267,7 @@ class UserData {
       'tag': tag,
       'bio': bio,
       'expertiseList': expertiseList,
+      'totalConsultations': totalConsultations,
     };
   }
 

@@ -3,6 +3,7 @@ import 'package:fixpair/core/services/api_checker.dart';
 import 'package:fixpair/core/utils/helpers.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -13,6 +14,7 @@ class ScheduleBookingController extends GetxController {
   final selectedTimeIndex = (-1).obs;
   final focusedDate = DateTime.now().obs;
   final isLoading = false.obs;
+  final reasonController = TextEditingController();
 
   final Rxn<UserData> expert = Rxn<UserData>();
   final RxMap<String, List<SlotModel>> slotsByDate =
@@ -47,6 +49,12 @@ class ScheduleBookingController extends GetxController {
         fetchSlots();
       }
     }
+  }
+
+  @override
+  void onClose() {
+    reasonController.dispose();
+    super.onClose();
   }
 
   Future<void> fetchSlots() async {
@@ -569,7 +577,9 @@ class ScheduleBookingController extends GetxController {
           "date": selectedDateKey,
           "startTime": selectedStartTime.value,
           "endTime": endTime,
-          "notes": "Scheduled Booking",
+          "notes": reasonController.text.trim().isNotEmpty
+              ? reasonController.text.trim()
+              : "Scheduled Booking",
         };
 
         final response = await _userRepository.bookConsultation(body);

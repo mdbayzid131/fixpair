@@ -502,7 +502,7 @@ class _SearchViewState extends State<SearchView> {
 
             // Price/Rate Range
             Text(
-              'Per Minute Rate Range'.tr,
+              'Per Minute Rate (€/min)'.tr,
               style: GoogleFonts.manrope(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
@@ -510,49 +510,86 @@ class _SearchViewState extends State<SearchView> {
               ),
             ),
             SizedBox(height: 12.h),
-            Obx(() {
-              final range = controller.rateRange.value;
-              return Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${range.start.round()}€/min',
-                        style: GoogleFonts.manrope(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF0066FF),
-                        ),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: const Color(0xFFE2E8F0),
+                        width: 1,
                       ),
-                      Text(
-                        '${range.end.round()}€/min',
-                        style: GoogleFonts.manrope(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF0066FF),
-                        ),
-                      ),
-                    ],
-                  ),
-                  RangeSlider(
-                    values: range,
-                    min: 0,
-                    max: 100,
-                    divisions: 20,
-                    activeColor: const Color(0xFF0066FF),
-                    inactiveColor: const Color(0xFFE2E8F0),
-                    labels: RangeLabels(
-                      '${range.start.round()}€',
-                      '${range.end.round()}€',
                     ),
-                    onChanged: (values) {
-                      controller.rateRange.value = values;
-                    },
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
+                    child: TextField(
+                      controller: controller.minPriceController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: GoogleFonts.manrope(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1D293D),
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Min (€)'.tr,
+                        hintStyle: GoogleFonts.manrope(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF94A3B8),
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                      ),
+                    ),
                   ),
-                ],
-              );
-            }),
+                ),
+                SizedBox(width: 16.w),
+                Text(
+                  'to'.tr,
+                  style: GoogleFonts.manrope(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: const Color(0xFFE2E8F0),
+                        width: 1,
+                      ),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
+                    child: TextField(
+                      controller: controller.maxPriceController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: GoogleFonts.manrope(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1D293D),
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Max (€)'.tr,
+                        hintStyle: GoogleFonts.manrope(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF94A3B8),
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
             SizedBox(height: 24.h),
 
             // Rating Filter Options
