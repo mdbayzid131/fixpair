@@ -516,13 +516,51 @@ class BookingModel {
     this.preferredWindow,
   });
 
+  BookingModel copyWith({
+    String? id,
+    UserData? user,
+    UserData? consultant,
+    String? bookingType,
+    String? notes,
+    num? perMinuteRate,
+    num? platformFee,
+    num? totalAmount,
+    String? status,
+    String? paymentStatus,
+    DateTime? createdAt,
+    DateTime? date,
+    String? startTime,
+    String? endTime,
+    String? preferredWindow,
+  }) {
+    return BookingModel(
+      id: id ?? this.id,
+      user: user ?? this.user,
+      consultant: consultant ?? this.consultant,
+      bookingType: bookingType ?? this.bookingType,
+      notes: notes ?? this.notes,
+      perMinuteRate: perMinuteRate ?? this.perMinuteRate,
+      platformFee: platformFee ?? this.platformFee,
+      totalAmount: totalAmount ?? this.totalAmount,
+      status: status ?? this.status,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
+      createdAt: createdAt ?? this.createdAt,
+      date: date ?? this.date,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      preferredWindow: preferredWindow ?? this.preferredWindow,
+    );
+  }
+
   factory BookingModel.fromJson(Map<String, dynamic> json) {
     return BookingModel(
-      id: json['_id'],
-      user: json['user'] != null ? UserData.fromJson(json['user']) : null,
-      consultant: json['consultant'] != null
+      id: json['_id'] ?? json['id'],
+      user: json['user'] is Map<String, dynamic>
+          ? UserData.fromJson(json['user'])
+          : (json['user'] is String ? UserData(id: json['user']) : null),
+      consultant: json['consultant'] is Map<String, dynamic>
           ? UserData.fromJson(json['consultant'])
-          : null,
+          : (json['consultant'] is String ? UserData(id: json['consultant']) : null),
       bookingType: json['bookingType'],
       notes: json['notes'],
       perMinuteRate: json['perMinuteRate'],

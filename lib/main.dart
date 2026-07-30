@@ -20,11 +20,13 @@ void main() async {
 
   // Initialize Stripe with your Publishable Key
   Stripe.publishableKey =
-      "pk_test_51RqgJZGXJvAsdd7omGPG7Z1sPRl3dJb9QY9oCfrl8tSn1StxRIAig3I5xK9hKk1gCVKwSQka5lUi683927AaIoPu00TYnG8Xx6"; //sakhaat bhai
+      "pk_test_51RzPsELje7aworqDsz57lVuTN8DGxH6isrNX2EDOxMmkZfYBciS7ckmSGwSRc6MEg1oOt2sl9vnV1QSJfvMUTzDs00mHWdBTLM"; //nayem (Publishable Key)
   // Stripe.publishableKey =
-  //     "pk_test_51TY3kL393GULNOfIRDSscdl5o4vLyqbLXuNmig7h86kUjDc42NDcoAGgvoA983mtVrixx5k6VsE2U4vXMIm3lzAO00e8905EIO";  //client
+  //     "pk_test_51RqgJZGXJvAsdd7omGPG7Z1sPRl3dJb9QY9oCfrl8tSn1StxRIAig3I5xK9hKk1gCVKwSQka5lUi683927AaIoPu00TYnG8Xx6"; //sakhaat bhai
   // Stripe.publishableKey =
-  //     "pk_test_51RzPsELje7aworqDsz57lVuTN8DGxH6isrNX2EDOxMmkZfYBciS7ckmSGwSRc6MEg1oOt2sl9vnV1QSJfvMUTzDs00mHWdBTLM";   //nayem
+  //     "pk_test_51TY3kL393GULNOfIRDSscdl5o4vLyqbLXuNmig7h86kUjDc42NDcoAGgvoA983mtVrixx5k6VsE2U4vXMIm3lzAO00e8905EIO"; //client
+
+
   await Stripe.instance.applySettings();
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);

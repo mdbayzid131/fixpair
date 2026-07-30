@@ -424,24 +424,38 @@ class ConsultantConfirmationView
         child: InkWell(
           onTap: isEnabled ? () => controller.startVideoCall() : null,
           borderRadius: BorderRadius.circular(20.r),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.lock_rounded,
-                color: isEnabled ? Colors.white : const Color(0xFF94A3B8),
-                size: 20.sp,
-              ),
-              SizedBox(width: 12.w),
-              Text(
-                'Authorize Payment & Start Call'.tr,
-                style: GoogleFonts.manrope(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w800,
-                  color: isEnabled ? Colors.white : const Color(0xFF94A3B8),
-                ),
-              ),
-            ],
+          child: Center(
+            child: controller.isLoading.value
+                ? SizedBox(
+                    width: 24.w,
+                    height: 24.w,
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.5,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.lock_rounded,
+                        color:
+                            isEnabled ? Colors.white : const Color(0xFF94A3B8),
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        'Authorize Payment & Start Call'.tr,
+                        style: GoogleFonts.manrope(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w800,
+                          color: isEnabled
+                              ? Colors.white
+                              : const Color(0xFF94A3B8),
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),

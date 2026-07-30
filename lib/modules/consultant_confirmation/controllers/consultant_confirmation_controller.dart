@@ -1,3 +1,4 @@
+import 'package:fixpair/core/services/api_checker.dart';
 import 'package:fixpair/core/services/auth_service.dart';
 import 'package:get/get.dart';
 import '../../../data/models/user_model.dart';
@@ -34,46 +35,81 @@ class ConsultantConfirmationController extends GetxController {
 
   final hasCard = false.obs;
   final isLoading = false.obs;
+  final Rxn<UserData> expert = Rxn<UserData>();
   BookingModel? booking;
 
   @override
   void onInit() {
     super.onInit();
 
-    // Check for booking in route arguments
-    if (Get.arguments is BookingModel) {
-      booking = Get.arguments as BookingModel;
+    // Check for booking or expert in route arguments
+    final args = Get.arguments;
+    if (args is BookingModel) {
+      booking = args;
       _loadBookingData(booking!);
-    } else if (Get.arguments is Map &&
-        Get.arguments['booking'] is BookingModel) {
-      booking = Get.arguments['booking'] as BookingModel;
-      _loadBookingData(booking!);
+    } else if (args is UserData) {
+      expert.value = args;
+      _loadExpertData(expert.value!);
+    } else if (args is Map) {
+      if (args['booking'] is BookingModel) {
+        booking = args['booking'] as BookingModel;
+        _loadBookingData(booking!);
+      } else if (args['expert'] is UserData) {
+        expert.value = args['expert'] as UserData;
+        _loadExpertData(expert.value!);
+      }
     }
 
     fetchPaymentMethods();
   }
 
-  void _loadBookingData(BookingModel booking) {
-    final consultant = booking.consultant;
+  void _loadExpertData(UserData expertData) {
+    expert.value = expertData;
+    consultantNameRx.value = expertData.name ?? 'Consultant';
+    consultantCategoryRx.value =
+        expertData.expertise ?? expertData.consultancyType ?? 'Expert';
+    consultantImageRx.value = expertData.image ?? expertData.avatar ?? '';
+
+    final rate = (expertData.perMinuteRate != null && expertData.perMinuteRate != 0)
+        ? expertData.perMinuteRate!
+        : 4;
+    consultantRateRx.value = '€${rate.toDouble().toStringAsFixed(2)} / min';
+
+    final rateNum = rate.toDouble();
+    final fee = rateNum * 30.0;
+    final platFee = 5.0;
+    final holdSubtotal = fee + platFee;
+    final vatAmount = holdSubtotal * 0.19;
+    final total = holdSubtotal + vatAmount;
+
+    consultantFeeRx.value = '€${fee.toStringAsFixed(2)}';
+    platformFeeRx.value = '€${platFee.toStringAsFixed(2)}';
+    vatRx.value = '€${vatAmount.toStringAsFixed(2)}';
+    totalHoldRx.value = '€${total.toStringAsFixed(2)}';
+  }
+
+  void _loadBookingData(BookingModel bookingData) {
+    booking = bookingData;
+    final consultant = bookingData.consultant;
     if (consultant != null) {
+      expert.value = consultant;
       consultantNameRx.value = consultant.name ?? 'Consultant';
       consultantCategoryRx.value =
           consultant.expertise ?? consultant.consultancyType ?? 'Expert';
-      consultantImageRx.value = consultant.image ?? '';
+      consultantImageRx.value = consultant.image ?? consultant.avatar ?? '';
 
-      final rate = (booking.perMinuteRate != null && booking.perMinuteRate != 0)
-          ? booking.perMinuteRate!
+      final rate = (bookingData.perMinuteRate != null && bookingData.perMinuteRate != 0)
+          ? bookingData.perMinuteRate!
           : (consultant.perMinuteRate != null && consultant.perMinuteRate != 0)
           ? consultant.perMinuteRate!
           : 4;
       consultantRateRx.value = '€${rate.toDouble().toStringAsFixed(2)} / min';
 
-      // Calculate billing details (e.g. assume a standard 30 min hold structure)
       final rateNum = rate.toDouble();
-      final fee = rateNum * 30.0; // standard hold calculation base
+      final fee = rateNum * 30.0;
       final platFee = 5.0;
       final holdSubtotal = fee + platFee;
-      final vatAmount = holdSubtotal * 0.19; // 19% VAT
+      final vatAmount = holdSubtotal * 0.19;
       final total = holdSubtotal + vatAmount;
 
       consultantFeeRx.value = '€${fee.toStringAsFixed(2)}';
@@ -116,56 +152,112 @@ class ConsultantConfirmationController extends GetxController {
   }
 
   Future<void> startVideoCall() async {
-    if (booking == null) {
-      Get.snackbar('Error', 'Invalid booking details');
-      return;
-    }
-
     try {
       isLoading.value = true;
-      Get.snackbar(
-        'Payment Authorized',
-        'Connecting to the consultant...',
-        snackPosition: SnackPosition.BOTTOM,
-        showProgressIndicator: true,
-      );
 
-      // 1. Create or get session
-      final sessionResponse = await _userRepository.createVideoSession(
-        booking!.id!,
-      );
+      BookingModel? targetBooking = booking;
+      String? channelName;
+      String? token;
+      String? sessionId;
 
-      if (sessionResponse.statusCode == 200 ||
-          sessionResponse.statusCode == 201) {
-        final sessionData = sessionResponse.data['data'];
-        final sessionId = sessionData['_id'];
+      if (targetBooking == null && expert.value != null) {
+        // Create instant consultation booking
+        final body = {
+          "consultantId": expert.value!.id,
+          "bookingType": "instant",
+        };
 
-        // 2. Join session to get token/channel
-        final joinResponse = await _userRepository.joinVideoSession(sessionId);
+        final response = await _userRepository.bookConsultation(body);
 
-        if (joinResponse.statusCode == 200) {
-          final joinData = joinResponse.data['data'];
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final resData = response.data['data'];
+          Map<String, dynamic> consultationJson = {};
+          if (resData is Map) {
+            if (resData.containsKey('consultation') &&
+                resData['consultation'] is Map) {
+              consultationJson =
+                  Map<String, dynamic>.from(resData['consultation']);
+            } else {
+              consultationJson = Map<String, dynamic>.from(resData);
+            }
 
-          Get.offNamed(
-            AppRoutes.VIDEO_CALL,
-            arguments: {
-              'booking': booking,
-              'sessionId': sessionId,
-              'token': joinData['token'],
-              'channelName': joinData['channelName'] ?? sessionId,
-            },
-          );
-        } else if (joinResponse.statusCode == 402) {
+            if (resData.containsKey('session') && resData['session'] is Map) {
+              final sessionMap = resData['session'];
+              channelName = sessionMap['channelName']?.toString();
+              token = sessionMap['token']?.toString();
+              sessionId = sessionMap['_id']?.toString() ??
+                  sessionMap['id']?.toString() ??
+                  sessionMap['consultation']?.toString();
+            }
+          }
+
+          targetBooking = BookingModel.fromJson(consultationJson);
+          if (targetBooking.consultant == null ||
+              targetBooking.consultant?.name == null) {
+            targetBooking = targetBooking.copyWith(consultant: expert.value);
+          }
+        } else if (response.statusCode == 402) {
           Get.find<AuthService>().showPaymentRequiredDialog();
+          return;
         } else {
-          Get.snackbar(
-            'Error',
-            joinResponse.statusMessage ?? 'Failed to join video call',
-          );
+          ApiChecker.checkWriteApi(response);
+          return;
         }
       }
+
+      if (targetBooking == null) {
+        Get.snackbar('Error'.tr, 'Invalid booking details'.tr);
+        return;
+      }
+
+      // If token/channelName was not directly present in instant booking response, fetch session via standard video-session APIs
+      if (channelName == null || token == null || sessionId == null) {
+        final sessionResponse = await _userRepository.createVideoSession(
+          targetBooking.id!,
+        );
+
+        if (sessionResponse.statusCode == 200 ||
+            sessionResponse.statusCode == 201) {
+          final sessionData = sessionResponse.data['data'];
+          sessionId = sessionData['_id'] ?? sessionData['id'];
+
+          final joinResponse =
+              await _userRepository.joinVideoSession(sessionId!);
+
+          if (joinResponse.statusCode == 200) {
+            final joinData = joinResponse.data['data'];
+            token = joinData['token'];
+            channelName = joinData['channelName'] ?? sessionId;
+          } else if (joinResponse.statusCode == 402) {
+            Get.find<AuthService>().showPaymentRequiredDialog();
+            return;
+          } else {
+            Get.snackbar(
+              'Error'.tr,
+              joinResponse.statusMessage ?? 'Failed to join video call'.tr,
+            );
+            return;
+          }
+        } else {
+          ApiChecker.checkWriteApi(sessionResponse);
+          return;
+        }
+      }
+
+      Get.offNamed(
+        AppRoutes.VIDEO_CALL,
+        arguments: {
+          'booking': targetBooking,
+          'sessionId': sessionId,
+          'token': token,
+          'channelName': channelName,
+        },
+      );
     } catch (e) {
-      Get.snackbar('Error', 'Could not start video call. Please try again.');
+      Get.snackbar(
+        'Error'.tr,
+        'Could not start video call. Please try again.'.tr,
+      );
     } finally {
       isLoading.value = false;
     }
