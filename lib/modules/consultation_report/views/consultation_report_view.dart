@@ -106,7 +106,8 @@ class ConsultationReportView extends GetView<ConsultationSummaryController> {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
                   child: Text(
-                    'The consultant has not submitted the summary report yet. Please wait until the consultant sends the report.'.tr,
+                    'The consultant has not submitted the summary report yet. Please wait until the consultant sends the report.'
+                        .tr,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.manrope(
                       fontSize: 14.sp,
@@ -193,7 +194,9 @@ class ConsultationReportView extends GetView<ConsultationSummaryController> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Your session with'.tr + ' ${controller.consultantName.value}\n' + 'was successful.'.tr,
+            'Your session with'.tr +
+                ' ${controller.consultantName.value}\n' +
+                'was successful.'.tr,
             textAlign: TextAlign.center,
             style: GoogleFonts.manrope(
               fontSize: 15.sp,

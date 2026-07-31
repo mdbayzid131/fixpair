@@ -62,7 +62,7 @@ class BottomNavBarView extends GetView<BottomNavBarController> {
                   _buildNavItem(
                     icon: Icons.calendar_month_outlined,
                     activeIcon: Icons.calendar_month_rounded,
-                    label: 'History'.tr,
+                    label: 'Bookings'.tr,
                     index: 2,
                     currentIndex: controller.currentIndex.value,
                   ),

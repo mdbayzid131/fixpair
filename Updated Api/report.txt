@@ -1,0 +1,158 @@
+📝 USER STORY:
+Title: View Consultation History and Report Status
+
+As a consultant
+I want to view my past bookings after generating a report
+So that I can verify the report is attached to the correct consultation
+
+📖 BDD SCENARIO: GET MY BOOKINGS AFTER REPORT CREATION
+Feature: Consultation History
+
+Given a report has been successfully generated
+When I fetch my completed bookings
+Then the response should include my past consultations along with their generated report ID and PDF URL
+
+10:57:30 AM | Report Module E2E Tests (Fixpair) > Report Generation Flow > should fetch the consultant's bookings and populate the report field | stdout
+Fri Jul 31 2026 10:57:30 [SERVER-NAME] info: GET /api/v1/consultation/my-bookings?status=completed 200 - 7.718 ms
+10:57:30 AM | Report Module E2E Tests (Fixpair) > Report Generation Flow > should fetch the consultant's bookings and populate the report field | stdout
+
+
+ GET   /api/v1/consultation/my-bookings?status=completed [GET-MY-BOOKINGS-REPORT] - Consultant fetches bookings with populated report
+ REQUEST 
+{
+  "params": {},
+  "query": {},
+  "body": {},
+  "headers": {
+    "Authorization": "Bearer ***"
+  }
+}
+ RESPONSE SUCCESS 
+{
+  "success": true,
+  "message": "Bookings retrieved successfully",
+  "pagination": {
+    "total": 1,
+    "limit": 10,
+    "page": 1,
+    "totalPage": 1
+  },
+  "data": [
+    {
+      "remindersSent": {
+        "twentyFourHour": false,
+        "oneHour": false
+      },
+      "_id": "6a6c2b3a019c83309a17212a",
+      "user": {
+        "_id": "6a6c2b3a019c83309a172123",
+        "name": "Normal User",
+        "email": "user_1785473850144@test.com",
+        "image": "https://i.ibb.co/z5YHLV9/profile.png"
+      },
+      "consultant": {
+        "_id": "6a6c2b3a019c83309a172120",
+        "name": "Expert Consultant",
+        "email": "consultant_1785473850144@test.com",
+        "image": "https://i.ibb.co/z5YHLV9/profile.png"
+      },
+      "bookingType": "instant",
+      "notes": null,
+      "perMinuteRate": 5,
+      "platformFee": 2,
+      "finalSettledAmount": 0,
+      "preAuthIntentId": null,
+      "authorizedAmount": 0,
+      "consumedAmount": 0,
+      "remainingMinutes": 0,
+      "billingStatus": "completed",
+      "terminationReason": null,
+      "status": "completed",
+      "paymentStatus": "paid",
+      "cancelledAt": null,
+      "cancelReason": null,
+      "cancelledBy": null,
+      "createdAt": "2026-07-31T04:57:30.540Z",
+      "updatedAt": "2026-07-31T04:57:30.540Z",
+      "report": {
+        "_id": "6a6c2b3a019c83309a172139",
+        "consultation": "6a6c2b3a019c83309a17212a",
+        "pdfUrl": "/reports/report-6a6c2b3a019c83309a17212a-1785473850585.pdf",
+        "createdAt": "2026-07-31T04:57:30.612Z",
+        "id": "6a6c2b3a019c83309a172139"
+      },
+      "id": "6a6c2b3a019c83309a17212a"
+    }
+  ]
+}
+
+
+
+10:57:30 AM | Report Module E2E Tests (Fixpair) > Report Generation Flow > should fetch a single report by ID as the normal user | stdout
+
+📝 USER STORY:
+Title: View My Consultation Report
+
+As a user
+I want to view a specific report generated for my consultation
+So that I can see the summary, notes, and download the PDF
+
+📖 BDD SCENARIO: GET SINGLE REPORT (USER)
+Feature: Report Management
+
+Given a report has been successfully generated for my consultation
+When I request the report by its ID
+Then I should receive the report details successfully
+
+10:57:30 AM | Report Module E2E Tests (Fixpair) > Report Generation Flow > should fetch a single report by ID as the normal user | stdout
+Fri Jul 31 2026 10:57:30 [SERVER-NAME] info: GET /api/v1/report/6a6c2b3a019c83309a172139 200 - 4.893 ms
+10:57:30 AM | Report Module E2E Tests (Fixpair) > Report Generation Flow > should fetch a single report by ID as the normal user | stdout
+
+
+ GET   /api/v1/report/6a6c2b3a019c83309a172139 [GET-SINGLE-REPORT-USER] - Normal user fetches their specific report by ID
+ REQUEST 
+{
+  "params": {},
+  "query": {},
+  "body": {},
+  "headers": {
+    "Authorization": "Bearer ***"
+  }
+}
+ RESPONSE SUCCESS 
+{
+  "success": true,
+  "message": "Report retrieved successfully",
+  "data": {
+    "_id": "6a6c2b3a019c83309a172139",
+    "consultation": {
+      "_id": "6a6c2b3a019c83309a17212a",
+      "bookingType": "instant",
+      "perMinuteRate": 5,
+      "status": "completed",
+      "id": "6a6c2b3a019c83309a17212a"
+    },
+    "user": {
+      "_id": "6a6c2b3a019c83309a172123",
+      "name": "Normal User",
+      "image": "https://i.ibb.co/z5YHLV9/profile.png"
+    },
+    "consultant": {
+      "_id": "6a6c2b3a019c83309a172120",
+      "name": "Expert Consultant",
+      "image": "https://i.ibb.co/z5YHLV9/profile.png"
+    },
+    "conversation": "user: Hello, I need some advice on my case.\nconsultant: Sure, I can help with that. Please tell me more.\nuser: It is about a contract dispute.\nconsultant: I see. I will review the documents and get back to you.",
+    "duration": 0,
+    "notes": "This was a very productive session about frontend architecture.",
+    "images": [],
+    "links": [
+      "https://reactjs.org"
+    ],
+    "pdfUrl": "/reports/report-6a6c2b3a019c83309a17212a-1785473850585.pdf",
+    "createdAt": "2026-07-31T04:57:30.612Z",
+    "updatedAt": "2026-07-31T04:57:30.612Z",
+    "__v": 0,
+    "id": "6a6c2b3a019c83309a172139"
+  }
+}

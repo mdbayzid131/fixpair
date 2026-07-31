@@ -288,7 +288,9 @@ class ConsultationSummaryController extends GetxController {
                           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                           children: [
                             pw.Text('Subtotal:'),
-                            pw.Text('${invoice.subtotal.toStringAsFixed(2)} EUR'),
+                            pw.Text(
+                              '${invoice.subtotal.toStringAsFixed(2)} EUR',
+                            ),
                           ],
                         ),
                         pw.SizedBox(height: 4),
@@ -296,7 +298,9 @@ class ConsultationSummaryController extends GetxController {
                           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                           children: [
                             pw.Text('Platform Fee:'),
-                            pw.Text('${invoice.platformFee.toStringAsFixed(2)} EUR'),
+                            pw.Text(
+                              '${invoice.platformFee.toStringAsFixed(2)} EUR',
+                            ),
                           ],
                         ),
                         pw.SizedBox(height: 4),

@@ -560,7 +560,9 @@ class BookingModel {
           : (json['user'] is String ? UserData(id: json['user']) : null),
       consultant: json['consultant'] is Map<String, dynamic>
           ? UserData.fromJson(json['consultant'])
-          : (json['consultant'] is String ? UserData(id: json['consultant']) : null),
+          : (json['consultant'] is String
+                ? UserData(id: json['consultant'])
+                : null),
       bookingType: json['bookingType'],
       notes: json['notes'],
       perMinuteRate: json['perMinuteRate'],
