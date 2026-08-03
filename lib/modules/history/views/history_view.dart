@@ -225,25 +225,59 @@ class _HistoryViewState extends State<HistoryView> {
     }
 
     IconData typeIcon;
+    String callTypeLabel = '';
+    Color callTypeBg = const Color(0xFFF1F5F9);
+    Color callTypeTxt = const Color(0xFF475569);
+    
     switch (booking.bookingType?.toLowerCase()) {
       case 'instant':
         typeIcon = Icons.bolt_rounded;
+        callTypeLabel = 'Instant Video'.tr;
+        callTypeBg = const Color(0xFFEFF6FF);
+        callTypeTxt = const Color(0xFF0066FF);
         break;
       case 'callback':
         typeIcon = Icons.phone_callback_rounded;
+        callTypeLabel = 'Callback Request'.tr;
+        callTypeBg = const Color(0xFFFFF1F2);
+        callTypeTxt = const Color(0xFFE11D48);
         break;
       case 'scheduled':
       default:
         typeIcon = Icons.videocam_rounded;
+        callTypeLabel = 'Scheduled Video'.tr;
+        callTypeBg = const Color(0xFFF0FDF4);
+        callTypeTxt = const Color(0xFF16A34A);
     }
 
-    String displayDate = '';
-    if (booking.bookingType == 'scheduled' && booking.date != null) {
-      displayDate =
-          '${DateFormat('MMM dd').format(booking.date!)}, ${booking.startTime}';
-    } else if (booking.createdAt != null) {
-      displayDate = DateFormat('MMM dd, HH:mm').format(booking.createdAt!);
+    final consultancyType = (booking.consultant?.consultancyType != null && booking.consultant!.consultancyType!.isNotEmpty)
+        ? (booking.consultant!.consultancyType![0].toUpperCase() + booking.consultant!.consultancyType!.substring(1))
+        : null;
+
+    final consultantRole = [
+      if (consultancyType != null) consultancyType,
+      if (booking.consultant?.experience != null && booking.consultant!.experience!.trim().isNotEmpty)
+        booking.consultant!.experience
+      else
+        booking.consultant?.tags ?? 'General Consultant',
+    ].join('  •  ');
+
+    final dateObj = booking.bookingType == 'scheduled' ? booking.date : booking.createdAt;
+    String displayCardDate = '';
+    String displayCardTime = '';
+
+    if (dateObj != null) {
+      final bgDate = dateObj.toUtc().add(const Duration(hours: 6));
+      displayCardDate = DateFormat('MMM dd, yyyy').format(bgDate);
+      if (booking.bookingType != 'scheduled') {
+        displayCardTime = DateFormat('HH:mm').format(bgDate);
+      }
     }
+
+    if (booking.bookingType == 'scheduled' && booking.startTime != null && booking.endTime != null) {
+      displayCardTime = '${booking.startTime} - ${booking.endTime}';
+    }
+
 
     return GestureDetector(
       onTap: () => Get.toNamed(AppRoutes.BOOKING_DETAILS, arguments: booking),
@@ -313,23 +347,46 @@ class _HistoryViewState extends State<HistoryView> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 10.w,
-                                vertical: 4.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(6.r),
-                              ),
-                              child: Text(
-                                (booking.status ?? 'PENDING').toUpperCase(),
-                                style: GoogleFonts.manrope(
-                                  fontSize: 10.sp,
-                                  fontWeight: FontWeight.w800,
-                                  color: statusColor,
+                            Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8.w,
+                                    vertical: 4.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(6.r),
+                                  ),
+                                  child: Text(
+                                    (booking.status ?? 'PENDING').toUpperCase(),
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w800,
+                                      color: statusColor,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                SizedBox(width: 6.w),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8.w,
+                                    vertical: 4.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: callTypeBg,
+                                    borderRadius: BorderRadius.circular(6.r),
+                                  ),
+                                  child: Text(
+                                    callTypeLabel.toUpperCase(),
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 9.sp,
+                                      fontWeight: FontWeight.w800,
+                                      color: callTypeTxt,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             if (booking.totalAmount != null &&
                                 booking.totalAmount! > 0)
@@ -353,7 +410,7 @@ class _HistoryViewState extends State<HistoryView> {
                           ),
                         ),
                         Text(
-                          booking.consultant?.tags ?? "General consultant",
+                          consultantRole,
                           style: GoogleFonts.manrope(
                             fontSize: 13.sp,
                             color: const Color(0xFF64748B),
@@ -369,48 +426,81 @@ class _HistoryViewState extends State<HistoryView> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(
-                      Icons.calendar_month_rounded,
-                      color: const Color(0xFF0066FF),
-                      size: 18.sp,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.calendar_month_rounded,
+                          color: const Color(0xFF0066FF),
+                          size: 16.sp,
+                        ),
+                        SizedBox(width: 6.w),
+                        Text(
+                          displayCardDate,
+                          style: GoogleFonts.manrope(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1D293D),
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      displayDate,
-                      style: GoogleFonts.manrope(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1D293D),
-                      ),
+                    Container(
+                      width: 1.w,
+                      height: 12.h,
+                      color: const Color(0xFFE2E8F0),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          color: const Color(0xFF0066FF),
+                          size: 16.sp,
+                        ),
+                        SizedBox(width: 6.w),
+                        Text(
+                          displayCardTime,
+                          style: GoogleFonts.manrope(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1D293D),
+                          ),
+                        ),
+                      ],
                     ),
                     if (booking.bookingType == 'scheduled') ...[
-                      const Spacer(),
                       Container(
                         width: 1.w,
-                        height: 14.h,
+                        height: 12.h,
                         color: const Color(0xFFE2E8F0),
                       ),
-                      const Spacer(),
-                      Icon(
-                        Icons.videocam_rounded,
-                        color: const Color(0xFF0066FF),
-                        size: 18.sp,
-                      ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        booking.durationText,
-                        style: GoogleFonts.manrope(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1D293D),
-                        ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.hourglass_empty_rounded,
+                            color: const Color(0xFF0066FF),
+                            size: 16.sp,
+                          ),
+                          SizedBox(width: 6.w),
+                          Text(
+                            booking.durationText,
+                            style: GoogleFonts.manrope(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1D293D),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ],

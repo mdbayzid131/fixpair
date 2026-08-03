@@ -254,6 +254,27 @@ class _SearchViewState extends State<SearchView> {
     final isOnline = expert.activeStatus ?? false;
     final imageUrl = ApiConstants.getImageUrl(expert.image ?? expert.avatar);
 
+    final consultancyType =
+        (expert.consultancyType != null && expert.consultancyType!.isNotEmpty)
+        ? (expert.consultancyType![0].toUpperCase() +
+              expert.consultancyType!.substring(1))
+        : null;
+
+    final experience =
+        (expert.experience != null && expert.experience!.trim().isNotEmpty)
+        ? (expert.experience!.toLowerCase().contains("exp")
+              ? expert.experience!
+              : (expert.experience!.toLowerCase().contains("year") ||
+                        expert.experience!.toLowerCase().contains("month")
+                    ? "${expert.experience!} exp."
+                    : "${expert.experience!}+ years exp."))
+        : null;
+
+    final infoText = [
+      if (consultancyType != null) consultancyType,
+      if (experience != null) experience,
+    ].join('  •  ');
+
     return GestureDetector(
       onTap: () => Get.toNamed(AppRoutes.CONSULTANT_PROFILE, arguments: expert),
       child: Container(
@@ -281,9 +302,7 @@ class _SearchViewState extends State<SearchView> {
                     ),
                     child: Container(
                       width: 110.w,
-                      constraints: BoxConstraints(
-                        minHeight: 110.h,
-                      ),
+                      constraints: BoxConstraints(minHeight: 110.h),
                       child: imageUrl.isNotEmpty
                           ? CachedNetworkImage(
                               imageUrl: imageUrl,
@@ -310,7 +329,7 @@ class _SearchViewState extends State<SearchView> {
                               child: Icon(
                                 Icons.person_rounded,
                                 size: 40.sp,
-                                  color: const Color(0xFF94A3B8),
+                                color: const Color(0xFF94A3B8),
                               ),
                             ),
                     ),
@@ -369,15 +388,17 @@ class _SearchViewState extends State<SearchView> {
                           color: const Color(0xFF1E293B),
                         ),
                       ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        '${(expert.consultancyType != null && expert.consultancyType!.isNotEmpty) ? (expert.consultancyType![0].toUpperCase() + expert.consultancyType!.substring(1)) : "Lawyer"}  •  ${(expert.experience != null && expert.experience!.trim().isNotEmpty) ? (expert.experience!.toLowerCase().contains("exp") ? expert.experience! : (expert.experience!.toLowerCase().contains("year") || expert.experience!.toLowerCase().contains("month") ? "${expert.experience!} exp." : "${expert.experience!}+ years exp.")) : "5+ years exp."}',
-                        style: GoogleFonts.manrope(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF64748B),
+                      if (infoText.isNotEmpty) ...[
+                        SizedBox(height: 4.h),
+                        Text(
+                          infoText,
+                          style: GoogleFonts.manrope(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF64748B),
+                          ),
                         ),
-                      ),
+                      ],
                       // SizedBox(height: 6.h),
                       // Text(
                       //   expert.bio ?? 'No Bio available'.tr,
@@ -528,7 +549,9 @@ class _SearchViewState extends State<SearchView> {
                     padding: EdgeInsets.symmetric(horizontal: 12.w),
                     child: TextField(
                       controller: controller.minPriceController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -571,7 +594,9 @@ class _SearchViewState extends State<SearchView> {
                     padding: EdgeInsets.symmetric(horizontal: 12.w),
                     child: TextField(
                       controller: controller.maxPriceController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       style: GoogleFonts.manrope(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -781,7 +806,7 @@ class _SearchViewState extends State<SearchView> {
     final items = expertiseList.where((e) => e.trim().isNotEmpty).toList();
     if (items.isEmpty) return const SizedBox.shrink();
 
-    const int maxChips = 3;
+    const int maxChips = 2;
     final showMore = items.length > maxChips;
     final displayItems = showMore ? items.take(maxChips).toList() : items;
 

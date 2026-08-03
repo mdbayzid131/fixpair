@@ -509,118 +509,152 @@ Widget _buildUpcomingBooking(BookingModel booking) {
 }
 
 Widget _buildExpertCard(UserData consultant) {
-  final name = consultant.name ?? 'Consultant';
-  final role = consultant.expertise ?? consultant.consultancyType ?? 'Expert';
-  final category = (consultant.consultancyType ?? 'Expert').toUpperCase();
-  final rating = consultant.displayRating;
-  final price = '${(consultant.perMinuteRate ?? 0).toDouble().toStringAsFixed(2)}€/min';
-  final isOnline = consultant.activeStatus == true;
-  final status = isOnline ? 'Online'.tr : 'Offline'.tr;
-  final image = ApiConstants.getImageUrl(consultant.image);
+  final isOnline = consultant.activeStatus ?? false;
+  final imageUrl = ApiConstants.getImageUrl(consultant.image ?? consultant.avatar);
+
+  final consultancyType =
+      (consultant.consultancyType != null && consultant.consultancyType!.isNotEmpty)
+      ? (consultant.consultancyType![0].toUpperCase() +
+            consultant.consultancyType!.substring(1))
+      : null;
+
+  final experience =
+      (consultant.experience != null && consultant.experience!.trim().isNotEmpty)
+      ? (consultant.experience!.toLowerCase().contains("exp")
+            ? consultant.experience!
+            : (consultant.experience!.toLowerCase().contains("year") ||
+                      consultant.experience!.toLowerCase().contains("month")
+                  ? "${consultant.experience!} exp."
+                  : "${consultant.experience!}+ years exp."))
+      : null;
+
+  final infoText = [
+    if (consultancyType != null) consultancyType,
+    if (experience != null) experience,
+  ].join('  •  ');
 
   return GestureDetector(
-    onTap: () {
-      Get.toNamed(AppRoutes.CONSULTANT_PROFILE, arguments: consultant);
-    },
+    onTap: () => Get.toNamed(AppRoutes.CONSULTANT_PROFILE, arguments: consultant),
     child: Container(
-      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: const Color(0x0A000000),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: const Color(0xFF0F172A).withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16.r),
-                child: SizedBox(
-                  width: 70.w,
-                  height: 70.w,
-                  child: image.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: image,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            color: const Color(0xFFF1F5F9),
-                            child: const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            // Left: Image
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24.r),
+                    bottomLeft: Radius.circular(24.r),
+                  ),
+                  child: Container(
+                    width: 110.w,
+                    constraints: BoxConstraints(minHeight: 110.h),
+                    child: imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: const Color(0xFFF1F5F9),
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
                             ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
+                            errorWidget: (context, url, error) => Container(
+                              color: const Color(0xFFF1F5F9),
+                              child: Icon(
+                                Icons.person_rounded,
+                                size: 40.sp,
+                                color: const Color(0xFF94A3B8),
+                              ),
+                            ),
+                          )
+                        : Container(
                             color: const Color(0xFFF1F5F9),
                             child: Icon(
-                              Icons.person,
-                              size: 30.sp,
-                              color: Colors.grey,
+                              Icons.person_rounded,
+                              size: 40.sp,
+                              color: const Color(0xFF94A3B8),
                             ),
                           ),
-                        )
-                      : Container(
-                          color: const Color(0xFFF1F5F9),
-                          child: Icon(
-                            Icons.person,
-                            size: 30.sp,
-                            color: Colors.grey,
-                          ),
-                        ),
-                ),
-              ),
-              Positioned(
-                top: 4.h,
-                right: 4.w,
-                child: Container(
-                  width: 12.w,
-                  height: 12.w,
-                  decoration: BoxDecoration(
-                    color: isOnline
-                        ? const Color(0xFF10B981)
-                        : const Color(0xFF94A3B8),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                Positioned(
+                  bottom: 10.h,
+                  left: 10.w,
+                  right: 10.w,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.star_rounded,
+                          color: const Color(0xFFFF6B00),
+                          size: 14.sp,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          '${consultant.stats?.avgRating ?? 0.0} (${consultant.stats?.totalReviews ?? 0})',
+                          style: GoogleFonts.manrope(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // Right: Info
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(16.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12.w,
-                            vertical: 4.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE0EFFF),
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
+                        Flexible(
                           child: Text(
-                            category,
+                            consultant.name ?? 'No Name',
                             style: GoogleFonts.manrope(
-                              fontSize: 10.sp,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF0066FF),
+                              color: const Color(0xFF1E293B),
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (consultant.activeTag != null &&
                             consultant.activeTag!.isNotEmpty) ...[
-                          SizedBox(width: 6.w),
+                          SizedBox(width: 8.w),
                           Container(
                             padding: EdgeInsets.symmetric(
                               horizontal: 8.w,
@@ -642,86 +676,133 @@ Widget _buildExpertCard(UserData consultant) {
                         ],
                       ],
                     ),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.star_rounded,
-                          color: const Color(0xFFFF6B00),
-                          size: 16.sp,
+                    if (infoText.isNotEmpty) ...[
+                      SizedBox(height: 4.h),
+                      Text(
+                        infoText,
+                        style: GoogleFonts.manrope(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF64748B),
                         ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          rating,
-                          style: GoogleFonts.manrope(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1D293D),
+                      ),
+                    ],
+                    SizedBox(height: 10.h),
+                    _buildExpertiseChips(consultant.expertiseList),
+                    const Spacer(),
+                    SizedBox(height: 8.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        RichText(
+                          text: TextSpan(
+                            style: GoogleFonts.manrope(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF0F172A),
+                            ),
+                            children: [
+                              TextSpan(
+                                text: '${consultant.perMinuteRate ?? 0}€',
+                                style: const TextStyle(
+                                  color: Color(0xFF0066FF),
+                                ),
+                              ),
+                              TextSpan(
+                                text: '/min',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: const Color(0xFF94A3B8),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 10.w,
+                            vertical: 6.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isOnline
+                                ? const Color(0xFFDCFCE7)
+                                : const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Text(
+                            isOnline ? 'Available'.tr : 'Offline'.tr,
+                            style: GoogleFonts.manrope(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w800,
+                              color: isOnline
+                                  ? const Color(0xFF16A34A)
+                                  : const Color(0xFF64748B),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ],
                 ),
-                SizedBox(height: 4.h),
-                Text(
-                  name,
-                  style: GoogleFonts.manrope(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1D293D),
-                  ),
-                ),
-                Text(
-                  role,
-                  style: GoogleFonts.manrope(
-                    fontSize: 12.sp,
-                    color: const Color(0xFF94A3B8),
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 8.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      price,
-                      style: GoogleFonts.manrope(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1D293D),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 6.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isOnline
-                            ? const Color(0xFFDCFCE7)
-                            : const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      child: Text(
-                        status,
-                        style: GoogleFonts.manrope(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w700,
-                          color: isOnline
-                              ? const Color(0xFF10B981)
-                              : const Color(0xFF64748B),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
+  );
+}
+
+Widget _buildExpertiseChips(List<String>? expertiseList) {
+  if (expertiseList == null || expertiseList.isEmpty) {
+    return const SizedBox.shrink();
+  }
+
+  final items = expertiseList.where((e) => e.trim().isNotEmpty).toList();
+  if (items.isEmpty) return const SizedBox.shrink();
+
+  const int maxChips = 2;
+  final showMore = items.length > maxChips;
+  final displayItems = showMore ? items.take(maxChips).toList() : items;
+
+  return Wrap(
+    spacing: 6.w,
+    runSpacing: 4.h,
+    children: [
+      ...displayItems.map(
+        (item) => Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Text(
+            item,
+            style: GoogleFonts.manrope(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF475569),
+            ),
+          ),
+        ),
+      ),
+      if (showMore)
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Text(
+            '+${items.length - maxChips}',
+            style: GoogleFonts.manrope(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF0066FF),
+            ),
+          ),
+        ),
+    ],
   );
 }

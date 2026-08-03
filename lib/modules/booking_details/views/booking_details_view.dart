@@ -211,9 +211,24 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
   Widget _buildBookingInfo(BookingModel booking) {
     String dateStr = 'N/A';
     if (booking.date != null) {
-      dateStr = DateFormat('EEEE, MMM dd, yyyy').format(booking.date!);
+      final bgDate = booking.date!.toUtc().add(const Duration(hours: 6));
+      dateStr = DateFormat('EEEE, MMM dd, yyyy').format(bgDate);
     } else if (booking.createdAt != null) {
-      dateStr = DateFormat('EEEE, MMM dd, yyyy').format(booking.createdAt!);
+      final bgDate = booking.createdAt!.toUtc().add(const Duration(hours: 6));
+      dateStr = DateFormat('EEEE, MMM dd, yyyy').format(bgDate);
+    }
+
+    String timeStr = 'N/A';
+    if (booking.bookingType == 'scheduled' && booking.startTime != null && booking.endTime != null) {
+      timeStr = '${booking.startTime} - ${booking.endTime}';
+    } else if (booking.startTime != null) {
+      timeStr = booking.startTime!;
+    }
+
+    String displayCreatedAt = 'N/A';
+    if (booking.createdAt != null) {
+      final createdAtBg = booking.createdAt!.toUtc().add(const Duration(hours: 6));
+      displayCreatedAt = DateFormat('EEEE, MMM dd, yyyy  •  hh:mm a').format(createdAtBg);
     }
 
     return Container(
@@ -236,7 +251,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
           _buildInfoRow(
             Icons.access_time_rounded,
             'Time'.tr,
-            booking.startTime ?? 'N/A',
+            timeStr,
           ),
           Divider(height: 24.h, color: const Color(0xFFF1F5F9)),
           _buildInfoRow(Icons.timer_outlined, 'Duration'.tr, booking.durationText),
@@ -245,6 +260,12 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
             Icons.videocam_outlined,
             'Type'.tr,
             booking.bookingType?.capitalizeFirst ?? 'Scheduled',
+          ),
+          Divider(height: 24.h, color: const Color(0xFFF1F5F9)),
+          _buildInfoRow(
+            Icons.edit_calendar_rounded,
+            'Booked on'.tr,
+            displayCreatedAt,
           ),
         ],
       ),
