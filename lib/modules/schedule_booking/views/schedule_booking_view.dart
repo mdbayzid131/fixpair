@@ -347,7 +347,11 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
       itemBuilder: (context, index) {
         final time = controller.times[index];
         return Obx(() {
-          final isSelected = controller.selectedTimeIndex.value == index;
+          final selectedStartIdx = controller.selectedTimeIndex.value;
+          final durationSlots = controller.selectedDurationMinutes.value ~/ 30;
+          final isSelected = selectedStartIdx != -1 &&
+              index >= selectedStartIdx &&
+              index < selectedStartIdx + durationSlots;
 
           final dateIndex = controller.selectedDateIndex.value;
           final bool isBooked;
@@ -385,7 +389,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            time,
+                            _formatToAmPm(time),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.manrope(
@@ -407,7 +411,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                         ],
                       )
                     : Text(
-                        time,
+                        _formatToAmPm(time),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.manrope(
@@ -532,7 +536,7 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
                           ),
                           SizedBox(height: 4.h),
                           Text(
-                            'Ends at '.tr + '$endTime',
+                            'Ends at '.tr + _formatToAmPm(endTime),
                             style: GoogleFonts.manrope(
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w600,
@@ -814,5 +818,18 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
         ],
       );
     });
+  }
+
+  String _formatToAmPm(String time24) {
+    try {
+      final parts = time24.split(':');
+      final hour = int.parse(parts[0]);
+      final minute = int.parse(parts[1]);
+      final period = hour >= 12 ? 'PM' : 'AM';
+      final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+      return '${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
+    } catch (e) {
+      return time24;
+    }
   }
 }

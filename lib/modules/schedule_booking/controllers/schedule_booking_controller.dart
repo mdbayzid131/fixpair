@@ -140,7 +140,7 @@ class ScheduleBookingController extends GetxController {
     _bookedByDate.clear();
     for (var b in bookedSlots) {
       if (b.date != null) {
-        final bDateKey = DateFormat('yyyy-MM-dd').format(b.date!.toLocal());
+        final bDateKey = DateFormat('yyyy-MM-dd').format(b.date!.toUtc().add(const Duration(hours: 6)));
         _bookedByDate.putIfAbsent(bDateKey, () => []).add(b);
       }
     }
@@ -339,6 +339,9 @@ class ScheduleBookingController extends GetxController {
     List<SlotModel> unavailableSlots,
     List<SlotModel> bookedSlots,
   ) {
+    _unavailableByDate[dateKey] = unavailableSlots;
+    _bookedByDate[dateKey] = bookedSlots;
+
     final currentDate = DateTime.parse(dateKey);
     final today = DateTime.now();
     final isToday = dateKey == DateFormat('yyyy-MM-dd').format(today);
@@ -375,7 +378,7 @@ class ScheduleBookingController extends GetxController {
     final List<SlotModel> dayBooked = [];
     for (var b in bookedSlots) {
       if (b.date != null) {
-        final bDateLocal = DateFormat('yyyy-MM-dd').format(b.date!.toLocal());
+        final bDateLocal = DateFormat('yyyy-MM-dd').format(b.date!.toUtc().add(const Duration(hours: 6)));
         if (bDateLocal == dateKey) {
           dayBooked.add(b);
         }

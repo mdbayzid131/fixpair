@@ -279,8 +279,11 @@ class _SearchViewState extends State<SearchView> {
                       topLeft: Radius.circular(24.r),
                       bottomLeft: Radius.circular(24.r),
                     ),
-                    child: SizedBox(
+                    child: Container(
                       width: 110.w,
+                      constraints: BoxConstraints(
+                        minHeight: 110.h,
+                      ),
                       child: imageUrl.isNotEmpty
                           ? CachedNetworkImage(
                               imageUrl: imageUrl,
@@ -307,7 +310,7 @@ class _SearchViewState extends State<SearchView> {
                               child: Icon(
                                 Icons.person_rounded,
                                 size: 40.sp,
-                                color: const Color(0xFF94A3B8),
+                                  color: const Color(0xFF94A3B8),
                               ),
                             ),
                     ),
