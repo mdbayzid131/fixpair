@@ -482,13 +482,16 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
             color: const Color(0xFF64748B),
           ),
         ),
-        const Spacer(),
-        Text(
-          value,
-          style: GoogleFonts.manrope(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1D293D),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: GoogleFonts.manrope(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1D293D),
+            ),
           ),
         ),
       ],

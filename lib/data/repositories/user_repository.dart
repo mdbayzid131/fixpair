@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:fixpair/data/models/user_model.dart';
+import 'package:flutter/material.dart';
 import '../../core/services/api_client.dart';
 import '../../config/constants/api_constants.dart';
 import 'package:get/get.dart' hide Response;
@@ -240,5 +242,40 @@ class UserRepository {
       'deviceType': GetPlatform.isIOS ? 'ios' : 'android',
       "action": "add",
     });
+  }
+
+  // Get a specific booking by ID from the active bookings list, with a fallback to the first active booking
+  Future<BookingModel?> getBookingById(String bookingId) async {
+    try {
+      final response = await getBookingsWithUrl(
+        '${ApiConstants.myBookings}?status=pending&status=accepted&status=confirmed&status=ongoing&limit=20',
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        final List<BookingModel> bookings = data.map((e) => BookingModel.fromJson(e)).toList();
+
+        // 1. Try to find the exact booking by ID
+        if (bookingId.isNotEmpty) {
+          for (var b in bookings) {
+            if (b.id == bookingId) {
+              return b;
+            }
+          }
+        }
+
+        // 2. Fallback: return the first active booking, prioritizing pending callback requests
+        if (bookings.isNotEmpty) {
+          for (var b in bookings) {
+            if (b.bookingType == 'callback' && b.status == 'pending') {
+              return b;
+            }
+          }
+          return bookings.first;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error getting booking by ID: $e');
+    }
+    return null;
   }
 }

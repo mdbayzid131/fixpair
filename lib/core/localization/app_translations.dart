@@ -326,6 +326,9 @@ class AppTranslations extends Translations {
           'Before 18:00 CET': 'Before 18:00 CET',
           'Tomorrow': 'Tomorrow',
           'Anytime during business hours': 'Anytime during business hours',
+          'Consultant on Another Call': 'Consultant on Another Call',
+          'This consultant is currently busy on another call. Would you like to request a callback or schedule a booking instead.':
+              'This consultant is currently busy on another call. Would you like to request a callback or schedule a booking instead.',
         },
         'de_DE': {
           'Profile': 'Profil',
@@ -650,6 +653,9 @@ class AppTranslations extends Translations {
           'Before 18:00 CET': 'Vor 18:00 Uhr MEZ',
           'Tomorrow': 'Morgen',
           'Anytime during business hours': 'Jederzeit während der Geschäftszeiten',
+          'Consultant on Another Call': 'Berater in anderem Gespräch',
+          'This consultant is currently busy on another call. Would you like to request a callback or schedule a booking instead.':
+              'Dieser Berater ist derzeit in einem anderen Gespräch besetzt. Möchten Sie stattdessen einen Rückruf anfordern oder einen Termin buchen?',
         }
       };
 }

@@ -47,6 +47,7 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
   Timer? _timer;
   bool _isEndingCall = false;
   late BookingModel booking;
+  final bookingRx = Rxn<BookingModel>();
   late String sessionId;
   late String token;
   late String channelName;
@@ -62,12 +63,20 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
     final args = Get.arguments;
     if (args != null) {
       booking = args['booking'];
+      bookingRx.value = booking;
       sessionId = args['sessionId'];
       token = args['token'] ?? "";
       channelName = args['channelName'] ?? "test_channel";
     }
 
     initAgora();
+
+    if (booking.id != null &&
+        (booking.consultant == null ||
+         booking.consultant?.name == null ||
+         booking.consultant?.name == 'A user')) {
+      _fetchRealBookingDetails();
+    }
   }
 
   void updatePipPosition(double dx, double dy) {
@@ -527,6 +536,20 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
           AppLogger.warning('[Agora PiP] Error exiting PiP mode: $e');
         }
       }
+    }
+  }
+
+  Future<void> _fetchRealBookingDetails() async {
+    try {
+      if (booking.id != null) {
+        final realBooking = await _userRepository.getBookingById(booking.id!);
+        if (realBooking != null) {
+          booking = realBooking;
+          bookingRx.value = realBooking;
+        }
+      }
+    } catch (e) {
+      AppLogger.debug('Error updating video call booking details: $e');
     }
   }
 }

@@ -214,45 +214,61 @@ class VideoCallView extends GetView<VideoCallController> {
       width: double.infinity,
       height: double.infinity,
       color: const Color(0xFF0F172A),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 130.w,
-                height: 130.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFFEF4444).withOpacity(0.2),
-                    width: 4,
+      child: Obx(() {
+        final booking = controller.bookingRx.value ?? controller.booking;
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 130.w,
+                  height: 130.w,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFFEF4444).withOpacity(0.2),
+                      width: 4,
+                    ),
                   ),
                 ),
-              ),
-              Container(
-                width: 108.w,
-                height: 108.w,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF1E293B),
-                  shape: BoxShape.circle,
-                ),
-                child: ClipOval(
-                  child:
-                      controller.booking.consultant?.avatar != null &&
-                          controller.booking.consultant!.avatar!.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: ApiConstants.getImageUrl(
-                            controller.booking.consultant!.avatar,
-                          ),
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                          errorWidget: (context, url, error) => Center(
+                Container(
+                  width: 108.w,
+                  height: 108.w,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF1E293B),
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child:
+                        booking.consultant?.avatar != null &&
+                            booking.consultant!.avatar!.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: ApiConstants.getImageUrl(
+                              booking.consultant!.avatar,
+                            ),
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            errorWidget: (context, url, error) => Center(
+                              child: Text(
+                                booking.consultant?.name
+                                        ?.substring(0, 1)
+                                        .toUpperCase() ??
+                                    'C',
+                                style: GoogleFonts.manrope(
+                                  fontSize: 36.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF94A3B8),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Center(
                             child: Text(
-                              controller.booking.consultant?.name
+                              booking.consultant?.name
                                       ?.substring(0, 1)
                                       .toUpperCase() ??
                                   'C',
@@ -263,60 +279,47 @@ class VideoCallView extends GetView<VideoCallController> {
                               ),
                             ),
                           ),
-                        )
-                      : Center(
-                          child: Text(
-                            controller.booking.consultant?.name
-                                    ?.substring(0, 1)
-                                    .toUpperCase() ??
-                                'C',
-                            style: GoogleFonts.manrope(
-                              fontSize: 36.sp,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF94A3B8),
-                            ),
-                          ),
-                        ),
-                ),
-              ),
-              Positioned(
-                bottom: 2,
-                right: 2,
-                child: Container(
-                  padding: EdgeInsets.all(8.w),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEF4444),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.videocam_off_rounded,
-                    color: Colors.white,
-                    size: 20.sp,
                   ),
                 ),
+                Positioned(
+                  bottom: 2,
+                  right: 2,
+                  child: Container(
+                    padding: EdgeInsets.all(8.w),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFEF4444),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.videocam_off_rounded,
+                      color: Colors.white,
+                      size: 20.sp,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 24.h),
+            Text(
+              (booking.consultant?.name ?? 'Consultant'.tr) + ' turned camera off'.tr,
+              style: GoogleFonts.manrope(
+                color: Colors.white,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
               ),
-            ],
-          ),
-          SizedBox(height: 24.h),
-          Text(
-            (controller.booking.consultant?.name ?? 'Consultant'.tr) + ' turned camera off'.tr,
-            style: GoogleFonts.manrope(
-              color: Colors.white,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
             ),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            'Audio is still active'.tr,
-            style: GoogleFonts.manrope(
-              color: const Color(0xFF94A3B8),
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w500,
+            SizedBox(height: 6.h),
+            Text(
+              'Audio is still active'.tr,
+              style: GoogleFonts.manrope(
+                color: const Color(0xFF94A3B8),
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      }),
     );
   }
 
@@ -393,29 +396,32 @@ class VideoCallView extends GetView<VideoCallController> {
         ),
 
         // Consultant Info
-        Column(
-          children: [
-            Text(
-              controller.booking.consultant?.name ?? 'Consultant',
-              style: GoogleFonts.manrope(
-                color: Colors.white,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w800,
+        Obx(() {
+          final booking = controller.bookingRx.value ?? controller.booking;
+          return Column(
+            children: [
+              Text(
+                booking.consultant?.name ?? 'Consultant',
+                style: GoogleFonts.manrope(
+                  color: Colors.white,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-            ),
-            SizedBox(height: 2.h),
-            Text(
-              controller.booking.consultant?.tags?.toUpperCase() ??
-                  'CONSULTATION',
-              style: GoogleFonts.manrope(
-                color: Colors.white54,
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.2,
+              SizedBox(height: 2.h),
+              Text(
+                booking.consultant?.tags?.toUpperCase() ??
+                    'CONSULTATION',
+                style: GoogleFonts.manrope(
+                  color: Colors.white54,
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
 
         // Cost Indicator
         Container(

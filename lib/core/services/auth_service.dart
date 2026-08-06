@@ -335,28 +335,75 @@ class AuthService extends GetxService {
   }
 
   void _handleIncomingCall(RemoteMessage message, {bool isFromTap = false}) {
+    debugPrint('🔥 [INCOMING CALL] Received payload data: ${message.data}');
     if (message.data['type'] != 'INCOMING_CALL') return;
 
     final sessionId = message.data['sessionId'];
     final token = message.data['token'];
     final channelName = message.data['channelName'] ?? sessionId;
-    final callerName = message.data['callerName'] ?? 'Consultant';
-    final callerAvatar = message.data['callerAvatar'] ?? '';
-    final bookingId = message.data['bookingId'] ?? '';
+
+    // Robust parsing of caller details and booking ID
+    final idKeys = ['bookingId', 'booking_id', 'booking', 'consultationId', 'consultation_id', 'id'];
+    String bookingId = '';
+    for (var key in idKeys) {
+      final val = message.data[key]?.toString();
+      if (val != null && val.isNotEmpty) {
+        bookingId = val;
+        break;
+      }
+    }
+
+    final nameKeys = ['consultantName', 'consultant_name', 'senderName', 'sender_name', 'name', 'displayName', 'callerName', 'caller_name'];
+    String callerName = 'Consultant';
+    for (var key in nameKeys) {
+      final val = message.data[key]?.toString();
+      if (val != null && val.isNotEmpty && val.toLowerCase() != 'a user' && val.toLowerCase() != 'user') {
+        callerName = val;
+        break;
+      }
+    }
+    if (callerName == 'Consultant') {
+      callerName = message.data['callerName']?.toString() ?? message.data['caller_name']?.toString() ?? 'Consultant';
+    }
+
+    final avatarKeys = ['consultantAvatar', 'consultant_avatar', 'senderAvatar', 'sender_avatar', 'avatar', 'image', 'callerAvatar', 'caller_avatar'];
+    String callerAvatar = '';
+    for (var key in avatarKeys) {
+      final val = message.data[key]?.toString();
+      if (val != null && val.isNotEmpty) {
+        callerAvatar = val;
+        break;
+      }
+    }
+
+    debugPrint('🔥 [INCOMING CALL] Parsed: sessionId=$sessionId, bookingId=$bookingId, callerName=$callerName, callerAvatar=$callerAvatar');
 
     if (sessionId == null || token == null) return;
 
-    final booking = BookingModel(
+    final bookingRx = BookingModel(
       id: bookingId,
       consultant: UserData(name: callerName, avatar: callerAvatar),
-    );
+    ).obs;
+
+    // Even if bookingId is empty, try to fetch real booking details (falls back to active callback/booking lookup)
+    debugPrint('🔥 [INCOMING CALL] Triggering repository booking fetch for ID: $bookingId');
+    _userRepository.getBookingById(bookingId).then((realBooking) {
+      if (realBooking != null) {
+        debugPrint('🔥 [INCOMING CALL] Successfully resolved booking details! Consultant: ${realBooking.consultant?.name}, ID: ${realBooking.id}');
+        bookingRx.value = realBooking;
+      } else {
+        debugPrint('🔥 [INCOMING CALL] Repository booking fetch returned null');
+      }
+    }).catchError((err) {
+      debugPrint('🔥 [INCOMING CALL] Error fetching booking details: $err');
+    });
 
     if (isFromTap) {
       // Tapped from background -> go directly to video call screen
-      _joinVideoCall(booking, sessionId, token, channelName);
+      _joinVideoCall(bookingRx.value, sessionId, token, channelName);
     } else {
       // Received in foreground -> show premium interactive ringing dialog
-      _showIncomingCallDialog(booking, sessionId, token, channelName);
+      _showIncomingCallDialog(bookingRx, sessionId, token, channelName);
     }
   }
 
@@ -546,7 +593,7 @@ class AuthService extends GetxService {
   }
 
   void _showIncomingCallDialog(
-    BookingModel booking,
+    Rx<BookingModel> bookingRx,
     String sessionId,
     String token,
     String channelName,
@@ -556,7 +603,9 @@ class AuthService extends GetxService {
       Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        child: Container(
+        child: Obx(() {
+          final booking = bookingRx.value;
+          return Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: const Color(
@@ -810,7 +859,8 @@ class AuthService extends GetxService {
               ),
             ],
           ),
-        ),
+        );
+        }),
       ),
     );
   }

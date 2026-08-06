@@ -564,10 +564,14 @@ class ScheduleBookingController extends GetxController {
           endTime: endTime,
         );
         if (response.statusCode == 200) {
+          isLoading.value = false;
           Helpers.showSuccess(
             'Booking rescheduled successfully. Waiting for consultant approval.',
           );
-          Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR, arguments: 2);
+          Future.microtask(() {
+            Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR, arguments: 2);
+          });
+          return;
         } else {
           Helpers.showError(
             response.data['message'] ?? 'Failed to reschedule booking',
@@ -587,8 +591,12 @@ class ScheduleBookingController extends GetxController {
 
         final response = await _userRepository.bookConsultation(body);
         if (response.statusCode == 200 || response.statusCode == 201) {
+          isLoading.value = false;
           Helpers.showBookingSuccess();
-          Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR, arguments: 2);
+          Future.microtask(() {
+            Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR, arguments: 2);
+          });
+          return;
         }
         ApiChecker.checkWriteApi(response);
       }

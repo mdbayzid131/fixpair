@@ -193,7 +193,7 @@ class ConsultantConfirmationView
           SizedBox(height: 16.h),
           const Divider(color: Color(0xFFF1F5F9), thickness: 1),
           SizedBox(height: 16.h),
-          _buildSummaryRow('Consultant Fee'.tr, controller.consultantFee),
+          _buildSummaryRow(controller.consultantFeeLabel, controller.consultantFee),
           SizedBox(height: 12.h),
           _buildSummaryRow('Platform Service Fee'.tr, controller.platformFee),
           SizedBox(height: 12.h),

@@ -23,9 +23,40 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     final sessionId = message.data['sessionId'];
     final token = message.data['token'];
     final channelName = message.data['channelName'] ?? sessionId;
-    final callerName = message.data['callerName'] ?? 'Consultant';
-    final callerAvatar = message.data['callerAvatar'] ?? '';
-    final bookingId = message.data['bookingId'] ?? '';
+
+    // Robust parsing of caller details and booking ID
+    final idKeys = ['bookingId', 'booking_id', 'booking', 'consultationId', 'consultation_id', 'id'];
+    String bookingId = '';
+    for (var key in idKeys) {
+      final val = message.data[key]?.toString();
+      if (val != null && val.isNotEmpty) {
+        bookingId = val;
+        break;
+      }
+    }
+
+    final nameKeys = ['consultantName', 'consultant_name', 'senderName', 'sender_name', 'name', 'displayName', 'callerName', 'caller_name'];
+    String callerName = 'Consultant';
+    for (var key in nameKeys) {
+      final val = message.data[key]?.toString();
+      if (val != null && val.isNotEmpty && val.toLowerCase() != 'a user' && val.toLowerCase() != 'user') {
+        callerName = val;
+        break;
+      }
+    }
+    if (callerName == 'Consultant') {
+      callerName = message.data['callerName']?.toString() ?? message.data['caller_name']?.toString() ?? 'Consultant';
+    }
+
+    final avatarKeys = ['consultantAvatar', 'consultant_avatar', 'senderAvatar', 'sender_avatar', 'avatar', 'image', 'callerAvatar', 'caller_avatar'];
+    String callerAvatar = '';
+    for (var key in avatarKeys) {
+      final val = message.data[key]?.toString();
+      if (val != null && val.isNotEmpty) {
+        callerAvatar = val;
+        break;
+      }
+    }
 
     if (sessionId != null && token != null) {
       final CallKitParams callKitParams = CallKitParams(

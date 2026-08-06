@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:fixpair/core/services/api_checker.dart';
 import 'package:fixpair/core/services/auth_service.dart';
 import 'package:get/get.dart';
@@ -13,6 +16,7 @@ class ConsultantConfirmationController extends GetxController {
   final consultantCategoryRx = 'Tax Consultation'.obs;
   final consultantImageRx = ''.obs;
   final consultantRateRx = '€4.00 / min'.obs;
+  final consultantFeeLabelRx = 'Consultant Fee'.obs;
   final consultantFeeRx = '€75.00'.obs;
   final platformFeeRx = '€5.00'.obs;
   final vatRx = '€20.00'.obs;
@@ -26,6 +30,7 @@ class ConsultantConfirmationController extends GetxController {
   String get consultantCategory => consultantCategoryRx.value;
   String get consultantImage => consultantImageRx.value;
   String get consultantRate => consultantRateRx.value;
+  String get consultantFeeLabel => consultantFeeLabelRx.value;
   String get consultantFee => consultantFeeRx.value;
   String get platformFee => platformFeeRx.value;
   String get vat => vatRx.value;
@@ -63,6 +68,31 @@ class ConsultantConfirmationController extends GetxController {
     fetchPaymentMethods();
   }
 
+  int _getBookingDurationInMinutes(BookingModel b) {
+    if (b.startTime != null && b.endTime != null && b.startTime!.isNotEmpty && b.endTime!.isNotEmpty) {
+      try {
+        final startParts = b.startTime!.trim().split(':').map((e) => int.parse(e.trim())).toList();
+        final endParts = b.endTime!.trim().split(':').map((e) => int.parse(e.trim())).toList();
+        if (startParts.length >= 2 && endParts.length >= 2) {
+          int startMins = startParts[0] * 60 + startParts[1];
+          int endMins = endParts[0] * 60 + endParts[1];
+          int diff = endMins - startMins;
+          if (diff > 0) return diff;
+        }
+      } catch (_) {}
+    }
+
+    if (b.notes != null && b.notes!.trim().isNotEmpty) {
+      final parsed = int.tryParse(b.notes!.trim());
+      if (parsed != null && parsed > 0) return parsed;
+    }
+
+    if (b.bookingType?.toLowerCase() == 'instant') {
+      return 15;
+    }
+    return 30;
+  }
+
   void _loadExpertData(UserData expertData) {
     expert.value = expertData;
     consultantNameRx.value = expertData.name ?? 'Consultant';
@@ -76,12 +106,14 @@ class ConsultantConfirmationController extends GetxController {
     consultantRateRx.value = '€${rate.toDouble().toStringAsFixed(2)} / min';
 
     final rateNum = rate.toDouble();
-    final fee = rateNum * 30.0;
+    final duration = 15; // 15-minute initial hold for instant call pre-authorization
+    final fee = rateNum * duration.toDouble();
     final platFee = 5.0;
     final holdSubtotal = fee + platFee;
     final vatAmount = holdSubtotal * 0.19;
     final total = holdSubtotal + vatAmount;
 
+    consultantFeeLabelRx.value = '${'Consultant Fee'.tr} ($duration min)';
     consultantFeeRx.value = '€${fee.toStringAsFixed(2)}';
     platformFeeRx.value = '€${platFee.toStringAsFixed(2)}';
     vatRx.value = '€${vatAmount.toStringAsFixed(2)}';
@@ -106,12 +138,18 @@ class ConsultantConfirmationController extends GetxController {
       consultantRateRx.value = '€${rate.toDouble().toStringAsFixed(2)} / min';
 
       final rateNum = rate.toDouble();
-      final fee = rateNum * 30.0;
+      final duration = _getBookingDurationInMinutes(bookingData);
+      final fee = rateNum * duration.toDouble();
       final platFee = 5.0;
       final holdSubtotal = fee + platFee;
       final vatAmount = holdSubtotal * 0.19;
       final total = holdSubtotal + vatAmount;
 
+      String durationText = '$duration min';
+      if (duration == 60) durationText = '1 hr';
+      if (duration == 120) durationText = '2 hrs';
+
+      consultantFeeLabelRx.value = '${'Consultant Fee'.tr} ($durationText)';
       consultantFeeRx.value = '€${fee.toStringAsFixed(2)}';
       platformFeeRx.value = '€${platFee.toStringAsFixed(2)}';
       vatRx.value = '€${vatAmount.toStringAsFixed(2)}';
@@ -196,6 +234,9 @@ class ConsultantConfirmationController extends GetxController {
               targetBooking.consultant?.name == null) {
             targetBooking = targetBooking.copyWith(consultant: expert.value);
           }
+        } else if (response.statusCode == 409) {
+          showConsultantBusyDialog();
+          return;
         } else if (response.statusCode == 402) {
           Get.find<AuthService>().showPaymentRequiredDialog();
           return;
@@ -244,15 +285,19 @@ class ConsultantConfirmationController extends GetxController {
         }
       }
 
-      Get.offNamed(
-        AppRoutes.VIDEO_CALL,
-        arguments: {
-          'booking': targetBooking,
-          'sessionId': sessionId,
-          'token': token,
-          'channelName': channelName,
-        },
-      );
+      isLoading.value = false;
+      Future.microtask(() {
+        Get.offNamed(
+          AppRoutes.VIDEO_CALL,
+          arguments: {
+            'booking': targetBooking,
+            'sessionId': sessionId,
+            'token': token,
+            'channelName': channelName,
+          },
+        );
+      });
+      return;
     } catch (e) {
       Get.snackbar(
         'Error'.tr,
@@ -261,5 +306,140 @@ class ConsultantConfirmationController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void showConsultantBusyDialog() {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.white,
+        elevation: 10,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28.r),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(24.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(20.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7), // Soft amber bg
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFFFEF3C7).withOpacity(0.5),
+                    width: 4,
+                  ),
+                ),
+                child: Icon(
+                  Icons.phone_callback_rounded,
+                  color: const Color(0xFFD97706), // Amber color
+                  size: 36.sp,
+                ),
+              ),
+              SizedBox(height: 24.h),
+              Text(
+                'Consultant on Another Call'.tr,
+                style: GoogleFonts.manrope(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1D293D),
+                  letterSpacing: 0.2,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                'This consultant is currently busy on another call. Would you like to request a callback or schedule a booking instead.'.tr,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.manrope(
+                  fontSize: 15.sp,
+                  color: const Color(0xFF64748B),
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 28.h),
+              Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                        Get.toNamed(
+                          AppRoutes.REQUEST_CALLBACK,
+                          arguments: expert.value,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0066FF),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                      ),
+                      child: Text(
+                        'Request Callback'.tr,
+                        style: GoogleFonts.manrope(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Get.back();
+                        Get.toNamed(
+                          AppRoutes.SCHEDULE_BOOKING,
+                          arguments: expert.value,
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                      ),
+                      child: Text(
+                        'Schedule a Booking'.tr,
+                        style: GoogleFonts.manrope(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1D293D),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  TextButton(
+                    onPressed: () => Get.back(),
+                    child: Text(
+                      'Cancel'.tr,
+                      style: GoogleFonts.manrope(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF64748B),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
   }
 }

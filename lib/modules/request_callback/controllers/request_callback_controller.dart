@@ -1,3 +1,4 @@
+import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/core/services/api_checker.dart';
 import 'package:fixpair/core/utils/helpers.dart';
 import 'package:fixpair/data/models/user_model.dart';
@@ -60,8 +61,12 @@ class RequestCallbackController extends GetxController {
       final response = await _userRepository.bookConsultation(body);
       ApiChecker.checkWriteApi(response);
       if (response.statusCode == 200 || response.statusCode == 201) {
+        isLoading.value = false;
         Helpers.showBookingSuccess();
-        Get.offAllNamed('/bottom-nav-bar', arguments: 2);
+        Future.microtask(() {
+          Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR, arguments: 2);
+        });
+        return;
       }
     } catch (e) {
       Helpers.showDebugLog('Callback request error: $e');

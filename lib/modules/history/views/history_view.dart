@@ -17,7 +17,7 @@ class HistoryView extends StatefulWidget {
 }
 
 class _HistoryViewState extends State<HistoryView> {
-  final HistoryController controller = Get.find<HistoryController>();
+  HistoryController get controller => Get.find<HistoryController>();
   final ScrollController _scrollController = ScrollController();
 
   @override

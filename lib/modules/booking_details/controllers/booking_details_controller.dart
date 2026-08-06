@@ -90,15 +90,19 @@ class BookingDetailsController extends GetxController {
         if (joinResponse.statusCode == 200) {
           final joinData = joinResponse.data['data'];
 
-          Get.offNamed(
-            AppRoutes.VIDEO_CALL,
-            arguments: {
-              'booking': bookingData,
-              'sessionId': sessionId,
-              'token': joinData['token'],
-              'channelName': joinData['channelName'] ?? sessionId,
-            },
-          );
+          isLoading.value = false;
+          Future.microtask(() {
+            Get.offNamed(
+              AppRoutes.VIDEO_CALL,
+              arguments: {
+                'booking': bookingData,
+                'sessionId': sessionId,
+                'token': joinData['token'],
+                'channelName': joinData['channelName'] ?? sessionId,
+              },
+            );
+          });
+          return;
         } else if (joinResponse.statusCode == 402) {
           Helpers.hideLoadingDialog();
           Get.find<AuthService>().showPaymentRequiredDialog();
