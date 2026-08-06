@@ -497,6 +497,7 @@ class BookingModel {
   final String? startTime;
   final String? endTime;
   final String? preferredWindow;
+  final bool? isReviewed;
 
   BookingModel({
     this.id,
@@ -514,6 +515,7 @@ class BookingModel {
     this.startTime,
     this.endTime,
     this.preferredWindow,
+    this.isReviewed,
   });
 
   BookingModel copyWith({
@@ -532,6 +534,7 @@ class BookingModel {
     String? startTime,
     String? endTime,
     String? preferredWindow,
+    bool? isReviewed,
   }) {
     return BookingModel(
       id: id ?? this.id,
@@ -549,6 +552,7 @@ class BookingModel {
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
       preferredWindow: preferredWindow ?? this.preferredWindow,
+      isReviewed: isReviewed ?? this.isReviewed,
     );
   }
 
@@ -577,6 +581,8 @@ class BookingModel {
       startTime: json['startTime'],
       endTime: json['endTime'],
       preferredWindow: json['preferredWindow'],
+      isReviewed: json['isReviewed'] == true ||
+          json['isReviewed']?.toString() == 'true',
     );
   }
 

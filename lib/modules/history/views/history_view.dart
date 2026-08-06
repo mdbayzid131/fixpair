@@ -250,16 +250,25 @@ class _HistoryViewState extends State<HistoryView> {
         callTypeTxt = const Color(0xFF16A34A);
     }
 
-    final consultancyType = (booking.consultant?.consultancyType != null && booking.consultant!.consultancyType!.isNotEmpty)
-        ? (booking.consultant!.consultancyType![0].toUpperCase() + booking.consultant!.consultancyType!.substring(1))
+    final consultancyType = (booking.consultant?.consultancyType != null &&
+            booking.consultant!.consultancyType!.trim().isNotEmpty)
+        ? (booking.consultant!.consultancyType![0].toUpperCase() +
+            booking.consultant!.consultancyType!.substring(1))
+        : null;
+
+    final exp = (booking.consultant?.experience != null &&
+            booking.consultant!.experience!.trim().isNotEmpty)
+        ? booking.consultant!.experience!.trim()
+        : null;
+
+    final tag = (booking.consultant?.tags != null &&
+            booking.consultant!.tags!.trim().isNotEmpty)
+        ? booking.consultant!.tags!.trim()
         : null;
 
     final consultantRole = [
-      if (consultancyType != null) consultancyType,
-      if (booking.consultant?.experience != null && booking.consultant!.experience!.trim().isNotEmpty)
-        booking.consultant!.experience
-      else
-        booking.consultant?.tags ?? 'General Consultant',
+      if (consultancyType != null) consultancyType else if (tag != null) tag,
+      if (exp != null) exp,
     ].join('  •  ');
 
     final dateObj = booking.bookingType == 'scheduled' ? booking.date : booking.createdAt;
@@ -554,6 +563,7 @@ class _HistoryViewState extends State<HistoryView> {
     } else if (booking.status?.toLowerCase() == 'pending') {
       return _buildDangerButton('Cancel'.tr, () => _showCancelDialog(booking.id!));
     } else if (booking.status?.toLowerCase() == 'completed') {
+      final bool isReviewed = booking.isReviewed ?? false;
       return Column(
         children: [
           Row(
@@ -579,8 +589,13 @@ class _HistoryViewState extends State<HistoryView> {
               ),
             ],
           ),
-          SizedBox(height: 12.h),
-          _buildPrimaryButton('Leave Review'.tr, () => _showReviewDialog(booking)),
+          if (!isReviewed) ...[
+            SizedBox(height: 12.h),
+            _buildPrimaryButton(
+              'Leave Review'.tr,
+              () => _showReviewDialog(booking),
+            ),
+          ],
         ],
       );
     }
@@ -618,7 +633,7 @@ class _HistoryViewState extends State<HistoryView> {
                   ),
                   SizedBox(height: 8.h),
                   Text(
-                    'Rate your consultation with '.tr + '${booking.consultant?.name ?? "your expert".tr}',
+                    '${'Rate your consultation with '.tr}${booking.consultant?.name ?? "your expert".tr}',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.manrope(
                       fontSize: 13.sp,

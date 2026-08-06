@@ -61,6 +61,15 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
               const Divider(height: 1, color: Color(0xFFF1F5F9)),
               _buildStatsRow(expert),
               const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              if ((expert.expertiseList != null &&
+                      expert.expertiseList!.isNotEmpty) ||
+                  (expert.expertise != null &&
+                      expert.expertise!.trim().isNotEmpty)) ...[
+                SizedBox(height: 24.h),
+                _buildExpertiseSection(expert),
+                SizedBox(height: 24.h),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              ],
               SizedBox(height: 24.h),
               _buildAboutSection(expert),
               SizedBox(height: 24.h),
@@ -121,19 +130,22 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   expert.name ?? 'No Name',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.manrope(
-                    fontSize: 22.sp,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.w800,
                     color: const Color(0xFF1D293D),
                   ),
                 ),
-                SizedBox(height: 10.h),
-                Row(
+                SizedBox(height: 8.h),
+                Wrap(
+                  spacing: 8.w,
+                  runSpacing: 6.h,
                   children: [
                     _buildBadge(
                       expert.consultancyType?.toString().toUpperCase() ??
@@ -141,7 +153,6 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                       const Color(0xFFE0EFFF),
                       const Color(0xFF0066FF),
                     ),
-                    SizedBox(width: 8.w),
                     _buildBadge(
                       isOnline ? 'AVAILABLE'.tr : 'OFFLINE'.tr,
                       isOnline
@@ -154,17 +165,6 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                   ],
                 ),
                 SizedBox(height: 10.h),
-                Text(
-                  expert.bio ?? 'No bio available'.tr,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.manrope(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF64748B),
-                  ),
-                ),
-                SizedBox(height: 12.h),
                 Row(
                   children: [
                     Container(
@@ -174,9 +174,10 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFFF7ED),
-                        borderRadius: BorderRadius.circular(10.r),
+                        borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.star_rounded,
@@ -187,6 +188,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                           Obx(() {
                             final stats = controller.stats.value;
                             return Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   '${stats?.avgRating ?? expert.stats?.avgRating ?? 0.0} ',
@@ -210,13 +212,27 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                         ],
                       ),
                     ),
-                    SizedBox(width: 16.w),
-                    Text(
-                      '${expert.perMinuteRate ?? 0}€/min',
-                      style: GoogleFonts.manrope(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1D293D),
+                    SizedBox(width: 12.w),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '${expert.perMinuteRate ?? 0}€',
+                            style: GoogleFonts.manrope(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF1D293D),
+                            ),
+                          ),
+                          TextSpan(
+                            text: '/min',
+                            style: GoogleFonts.manrope(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -412,6 +428,10 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
   }
 
   Widget _buildAboutSection(UserData expert) {
+    final bioText = (expert.bio != null && expert.bio!.trim().isNotEmpty)
+        ? expert.bio!.trim()
+        : 'No bio available for this consultant yet.'.tr;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
@@ -425,17 +445,14 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
               color: const Color(0xFF1D293D),
             ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           Obx(() {
             final isExpanded = controller.isAboutExpanded.value;
-            final aboutText =
-                expert.expertise ??
-                'No detailed information available for this consultant yet.'.tr;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  aboutText,
+                  bioText,
                   maxLines: isExpanded ? null : 3,
                   overflow: isExpanded
                       ? TextOverflow.visible
@@ -447,7 +464,7 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
                     height: 1.6,
                   ),
                 ),
-                if (aboutText.length > 100) ...[
+                if (bioText.length > 100) ...[
                   SizedBox(height: 8.h),
                   InkWell(
                     onTap: () => controller.toggleAboutExpansion(),
@@ -476,6 +493,67 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
               ],
             );
           }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpertiseSection(UserData expert) {
+    final list = expert.expertiseList ?? [];
+    final text = expert.expertise?.trim() ?? '';
+
+    if (list.isEmpty && text.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Specialties'.tr,
+            style: GoogleFonts.manrope(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF1D293D),
+            ),
+          ),
+          SizedBox(height: 12.h),
+          if (list.isNotEmpty)
+            Wrap(
+              spacing: 8.w,
+              runSpacing: 8.h,
+              children: list.map((item) {
+                return Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 14.w,
+                    vertical: 8.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(10.r),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Text(
+                    item,
+                    style: GoogleFonts.manrope(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF334155),
+                    ),
+                  ),
+                );
+              }).toList(),
+            )
+          else
+            Text(
+              text,
+              style: GoogleFonts.manrope(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF64748B),
+                height: 1.6,
+              ),
+            ),
         ],
       ),
     );

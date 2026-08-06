@@ -172,7 +172,7 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
               ),
             ),
           ),
-
+          
           SizedBox(width: 16.w),
           Expanded(
             child: Column(
@@ -187,7 +187,18 @@ class BookingDetailsView extends GetView<BookingDetailsController> {
                   ),
                 ),
                 Text(
-                  booking.consultant?.tags ?? 'General Consultant',
+                  [
+                    if (booking.consultant?.consultancyType != null &&
+                        booking.consultant!.consultancyType!.trim().isNotEmpty)
+                      booking.consultant!.consultancyType![0].toUpperCase() +
+                          booking.consultant!.consultancyType!.substring(1)
+                    else if (booking.consultant?.tags != null &&
+                        booking.consultant!.tags!.trim().isNotEmpty)
+                      booking.consultant!.tags!.trim(),
+                    if (booking.consultant?.experience != null &&
+                        booking.consultant!.experience!.trim().isNotEmpty)
+                      booking.consultant!.experience!.trim(),
+                  ].join('  •  '),
                   style: GoogleFonts.manrope(
                     fontSize: 13.sp,
                     color: const Color(0xFF64748B),

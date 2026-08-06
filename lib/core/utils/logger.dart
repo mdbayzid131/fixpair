@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -22,7 +23,7 @@ class AppLogger {
       debugPrint('│ Query: ${options.queryParameters}');
     }
     if (options.data != null) {
-      debugPrint('│ Body: ${options.data}');
+      _printLongString('Body: ${_formatData(options.data)}');
     }
     debugPrint('└ ➡️➡️➡️➡️ REQUEST $_divider ➡️➡️➡️➡️');
     debugPrint('');
@@ -35,9 +36,7 @@ class AppLogger {
     debugPrint('');
     debugPrint('┌ ✅✅✅✅ RESPONSE $_divider ✅✅✅✅');
     debugPrint('│ [${response.statusCode}] ${response.requestOptions.uri}');
-    debugPrint(
-      '│ Data: ${_truncate(response.data?.toString(), showAll: true)}',
-    );
+    _printLongString('Data: ${_formatData(response.data)}');
     debugPrint('└ ✅✅✅✅ RESPONSE $_divider ✅✅✅✅');
     debugPrint('');
   }
@@ -52,9 +51,7 @@ class AppLogger {
     debugPrint('│ URL: ${e.requestOptions.uri}');
     if (e.response != null) {
       debugPrint('│ Status: ${e.response?.statusCode}');
-      debugPrint(
-        '│ Data: ${_truncate(e.response?.data?.toString(), showAll: true)}',
-      );
+      _printLongString('Data: ${_formatData(e.response?.data)}');
     }
     debugPrint('└ ❌❌❌❌ ERROR $_divider ❌❌❌❌ ');
     debugPrint('');
@@ -63,25 +60,19 @@ class AppLogger {
   /// General debug log (only in debug mode)
   static void debug(String message) {
     if (!kDebugMode) return;
-    debugPrint('');
-    debugPrint('🔍🔍🔍 DEBUG: $message');
-    debugPrint('');
+    _printLongString('🔍🔍🔍 DEBUG: $message', prefix: '');
   }
 
   /// Info-level log
   static void info(String message) {
     if (!kDebugMode) return;
-    debugPrint('');
-    debugPrint('ℹ️ℹ️ℹ️ℹ INFO: $message');
-    debugPrint('');
+    _printLongString('ℹ️ℹ️ℹ️ℹ INFO: $message', prefix: '');
   }
 
   /// Warning-level log
   static void warning(String message) {
     if (!kDebugMode) return;
-    debugPrint('');
-    debugPrint('⚠️⚠️⚠️ WARNING: $message');
-    debugPrint('');
+    _printLongString('⚠️⚠️⚠️ WARNING: $message', prefix: '');
   }
 
   // ──────────────────── PRIVATE HELPERS ────────────────────
@@ -95,17 +86,38 @@ class AppLogger {
     return sanitized;
   }
 
-  /// Truncate long strings to keep logs readable
-  static String _truncate(
-    String? text, {
-    int maxLength = 500,
-    bool showAll = false,
-  }) {
-    if (text == null) return 'null';
-    if (showAll) {
-      return text;
+  /// Safely format data as JSON string or raw string
+  static String _formatData(dynamic data) {
+    if (data == null) return 'null';
+    try {
+      if (data is Map || data is List) {
+        return const JsonEncoder.withIndent('  ').convert(data);
+      }
+    } catch (_) {}
+    return data.toString();
+  }
+
+  /// Print long strings in chunks of ~800 characters line-by-line
+  /// to prevent Android Logcat / debugPrint truncation.
+  static void _printLongString(String text, {String prefix = '│ '}) {
+    const int chunkSize = 800;
+    final lines = text.split('\n');
+    for (final line in lines) {
+      if (line.isEmpty) {
+        debugPrint(prefix);
+        continue;
+      }
+      if (line.length <= chunkSize) {
+        debugPrint('$prefix$line');
+      } else {
+        int start = 0;
+        while (start < line.length) {
+          int end = start + chunkSize;
+          if (end > line.length) end = line.length;
+          debugPrint('$prefix${line.substring(start, end)}');
+          start = end;
+        }
+      }
     }
-    if (text.length <= maxLength) return text;
-    return '${text.substring(0, maxLength)}... [truncated]';
   }
 }
