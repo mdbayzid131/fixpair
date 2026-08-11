@@ -14,7 +14,7 @@ class OtpController extends GetxController with WidgetsBindingObserver {
 
   Timer? _timer;
   DateTime? _endTime;
-  final remainingSeconds = 120.obs; // 2 minutes
+  final remainingSeconds = 60.obs; // 1 minute
   final isResendEnabled = false.obs;
 
   @override
@@ -39,8 +39,8 @@ class OtpController extends GetxController with WidgetsBindingObserver {
   }
 
   void startTimer() {
-    _endTime = DateTime.now().add(const Duration(seconds: 120));
-    remainingSeconds.value = 120;
+    _endTime = DateTime.now().add(const Duration(seconds: 60));
+    remainingSeconds.value = 60;
     isResendEnabled.value = false;
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
