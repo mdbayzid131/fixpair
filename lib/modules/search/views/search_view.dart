@@ -56,7 +56,7 @@ class _SearchViewState extends State<SearchView> {
           // 1. Search & Filter Section
           Container(
             color: Colors.white,
-            padding: EdgeInsets.only(bottom: 20.h),
+            padding: EdgeInsets.only(top: 14.h, bottom: 14.h),
             child: Column(
               children: [
                 Padding(
@@ -65,31 +65,39 @@ class _SearchViewState extends State<SearchView> {
                     children: [
                       Expanded(
                         child: Container(
-                          height: 56.h,
+                          height: 46.h,
                           decoration: BoxDecoration(
                             color: const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(16.r),
+                            borderRadius: BorderRadius.circular(12.r),
                           ),
                           child: TextField(
                             controller: controller.searchController,
                             onSubmitted: (_) => controller.fetchConsultants(),
+                            textAlignVertical: TextAlignVertical.center,
+                            style: GoogleFonts.manrope(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF1E293B),
+                            ),
                             decoration: InputDecoration(
+                              isDense: true,
                               hintText: 'Search by names...'.tr,
                               hintStyle: GoogleFonts.manrope(
-                                fontSize: 14.sp,
+                                fontSize: 13.5.sp,
                                 color: const Color(0xFF94A3B8),
                               ),
                               prefixIcon: Icon(
                                 Icons.search_rounded,
                                 color: const Color(0xFF94A3B8),
-                                size: 22.sp,
+                                size: 20.sp,
                               ),
                               suffixIcon: Obx(
                                 () => controller.searchQuery.value.isNotEmpty
                                     ? IconButton(
-                                        icon: const Icon(
+                                        icon: Icon(
                                           Icons.clear_rounded,
-                                          color: Color(0xFF94A3B8),
+                                          color: const Color(0xFF94A3B8),
+                                          size: 18.sp,
                                         ),
                                         onPressed: () {
                                           controller.searchController.clear();
@@ -100,25 +108,26 @@ class _SearchViewState extends State<SearchView> {
                               ),
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(
-                                vertical: 18.h,
+                                horizontal: 12.w,
+                                vertical: 12.h,
                               ),
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(width: 12.w),
+                      SizedBox(width: 10.w),
                       Obx(() {
                         final hasFilter = controller.isFilterApplied.value;
                         return GestureDetector(
                           onTap: () => _showFilterBottomSheet(context),
                           child: Container(
-                            height: 56.h,
-                            width: 56.h,
+                            height: 46.h,
+                            width: 46.h,
                             decoration: BoxDecoration(
                               color: hasFilter
                                   ? const Color(0xFFE0EFFF)
                                   : const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(16.r),
+                              borderRadius: BorderRadius.circular(12.r),
                               border: Border.all(
                                 color: hasFilter
                                     ? const Color(0xFF0066FF)
@@ -131,7 +140,7 @@ class _SearchViewState extends State<SearchView> {
                               color: hasFilter
                                   ? const Color(0xFF0066FF)
                                   : const Color(0xFF64748B),
-                              size: 24.sp,
+                              size: 20.sp,
                             ),
                           ),
                         );
@@ -139,7 +148,7 @@ class _SearchViewState extends State<SearchView> {
                     ],
                   ),
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 12.h),
                 _buildCategoryList(),
               ],
             ),
@@ -214,11 +223,11 @@ class _SearchViewState extends State<SearchView> {
             return GestureDetector(
               onTap: () => controller.selectCategory(cat),
               child: Container(
-                margin: EdgeInsets.only(right: 12.w),
-                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                margin: EdgeInsets.only(right: 8.w),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 7.h),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF0066FF) : Colors.white,
-                  borderRadius: BorderRadius.circular(30.r),
+                  color: isSelected ? const Color(0xFF0066FF) : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
                     color: isSelected
                         ? const Color(0xFF0066FF)
@@ -228,7 +237,7 @@ class _SearchViewState extends State<SearchView> {
                 child: Text(
                   cat,
                   style: GoogleFonts.manrope(
-                    fontSize: 14.sp,
+                    fontSize: 12.5.sp,
                     fontWeight: FontWeight.w700,
                     color: isSelected ? Colors.white : const Color(0xFF475569),
                   ),
