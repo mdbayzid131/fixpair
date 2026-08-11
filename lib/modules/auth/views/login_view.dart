@@ -70,11 +70,11 @@ class LoginView extends GetView<LoginController> {
               ),
 
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 32.h),
+                    SizedBox(height: 28.h),
 
                     // 2. Welcome Section
                     Text(

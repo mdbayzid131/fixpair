@@ -1,6 +1,7 @@
 import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/core/utils/helpers.dart';
+import 'package:fixpair/core/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -47,33 +48,18 @@ class _HistoryViewState extends State<HistoryView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Bookings'.tr,
-          style: GoogleFonts.manrope(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1D293D),
-          ),
-        ),
-        actions: [
-          SizedBox(
-            width: 24.w,
-          ), // Added some padding to balance the title if needed, or just leave empty
-        ],
+      appBar: CustomAppBar.build(
+        title: 'Bookings'.tr,
       ),
       body: Column(
         children: [
           // 1. Toggle Tab Section
           Container(
             color: Colors.white,
-            padding: EdgeInsets.only(bottom: 20.h, top: 10.h),
+            padding: EdgeInsets.only(bottom: 16.h, top: 10.h),
             child: Center(
               child: Container(
-                width: 327.w,
+                margin: EdgeInsets.symmetric(horizontal: 16.w),
                 padding: EdgeInsets.all(4.w),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF1F5F9),
@@ -141,8 +127,8 @@ class _HistoryViewState extends State<HistoryView> {
                   controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: EdgeInsets.symmetric(
-                    horizontal: 24.w,
-                    vertical: 20.h,
+                    horizontal: 16.w,
+                    vertical: 16.h,
                   ),
                   itemCount:
                       bookings.length +

@@ -1,29 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get.dart';
 
 class CustomBackButton extends StatelessWidget {
-  const CustomBackButton({super.key, this.iconSize, this.containerSize});
+  const CustomBackButton({
+    super.key,
+    this.iconSize,
+    this.containerSize,
+    this.onTap,
+  });
+
   final double? iconSize;
   final double? containerSize;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(left: 15.w),
-      child: GestureDetector(
-        onTap: () {
-          Get.back();
-        },
+    final size = containerSize ?? 36.w;
+    return Center(
+      child: InkWell(
+        onTap: onTap ?? () => Get.back(),
+        borderRadius: BorderRadius.circular(size / 2),
         child: Container(
-          height: containerSize ?? 30.w,
-          width: containerSize ?? 30.w,
+          height: size,
+          width: size,
           decoration: BoxDecoration(
-            color: Color(0xffF5F5F5),
+            color: const Color(0xFFF8FAFC),
             shape: BoxShape.circle,
+            border: Border.all(
+              color: const Color(0xFFE2E8F0),
+              width: 1,
+            ),
           ),
-          child: Icon(Icons.arrow_back_ios_new_outlined, size: 20.sp),
+          child: Center(
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: iconSize ?? 16.sp,
+              color: const Color(0xFF1E293B),
+            ),
+          ),
         ),
       ),
     );

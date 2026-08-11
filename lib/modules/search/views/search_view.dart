@@ -1,4 +1,5 @@
 import 'package:fixpair/config/routes/app_pages.dart';
+import 'package:fixpair/core/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -47,18 +48,8 @@ class _SearchViewState extends State<SearchView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Search Consultants'.tr,
-          style: GoogleFonts.manrope(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1D293D),
-          ),
-        ),
+      appBar: CustomAppBar.build(
+        title: 'Search Consultants'.tr,
       ),
       body: Column(
         children: [
@@ -69,7 +60,7 @@ class _SearchViewState extends State<SearchView> {
             child: Column(
               children: [
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
                   child: Row(
                     children: [
                       Expanded(
@@ -148,7 +139,7 @@ class _SearchViewState extends State<SearchView> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20.h),
+                SizedBox(height: 16.h),
                 _buildCategoryList(),
               ],
             ),
@@ -187,7 +178,7 @@ class _SearchViewState extends State<SearchView> {
 
               return ListView.separated(
                 controller: _scrollController,
-                padding: EdgeInsets.all(24.w),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
                 itemCount:
                     controller.consultants.length +
                     (controller.isLoadingMore.value ? 1 : 0),
@@ -215,7 +206,7 @@ class _SearchViewState extends State<SearchView> {
   Widget _buildCategoryList() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Obx(
         () => Row(
           children: controller.categories.map((cat) {

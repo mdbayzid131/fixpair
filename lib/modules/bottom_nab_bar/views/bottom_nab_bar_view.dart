@@ -15,6 +15,7 @@ class BottomNavBarView extends GetView<BottomNavBarController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      extendBody: true,
       body: Obx(
         () => IndexedStack(
           index: controller.currentIndex.value,
@@ -26,24 +27,32 @@ class BottomNavBarView extends GetView<BottomNavBarController> {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          color: Colors.transparent,
+          margin: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 4.h),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 6.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24.r),
+              border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0F172A).withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: const Color(0xFF0066FF).withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.only(top: 8.h, bottom: 6.h),
             child: Obx(
               () => Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildNavItem(
                     icon: Icons.home_outlined,
@@ -90,40 +99,64 @@ class BottomNavBarView extends GetView<BottomNavBarController> {
     required int currentIndex,
   }) {
     final isSelected = index == currentIndex;
-    final activeColor = const Color(0xFF0066FF);
-    final inactiveColor = const Color(0xFF94A3B8);
 
-    return GestureDetector(
-      onTap: () => controller.changeTab(index),
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w),
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => controller.changeTab(index),
+        behavior: HitTestBehavior.opaque,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: EdgeInsets.all(isSelected ? 10.w : 10.w),
+            // Fixed-dimension Capsule with Smooth Color Transition
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              width: 50.w,
+              height: 32.h,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? const Color(0xFFE0EFFF)
+                    ? const Color(0xFF0066FF)
                     : Colors.transparent,
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(16.r),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF0066FF).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : [],
               ),
-              child: Icon(
-                isSelected ? activeIcon : icon,
-                color: isSelected ? activeColor : inactiveColor,
-                size: 24.sp,
+              child: Center(
+                child: AnimatedScale(
+                  scale: isSelected ? 1.05 : 1.0,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutCubic,
+                  child: Icon(
+                    isSelected ? activeIcon : icon,
+                    color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                    size: 22.sp,
+                  ),
+                ),
               ),
             ),
             SizedBox(height: 4.h),
+
+            // Label Text
             Text(
               label,
               style: GoogleFonts.manrope(
-                fontSize: 12.sp,
+                fontSize: 11.sp,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? activeColor : inactiveColor,
+                color: isSelected
+                    ? const Color(0xFF0066FF)
+                    : const Color(0xFF64748B),
+                letterSpacing: 0.2,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:fixpair/core/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -11,26 +12,9 @@ class ConsultationReportView extends GetView<ConsultationSummaryController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.chevron_left_rounded,
-            color: const Color(0xFF1D293D),
-            size: 28.sp,
-          ),
-          onPressed: () => Get.back(),
-        ),
-        centerTitle: true,
-        title: Text(
-          'Consultation Report'.tr,
-          style: GoogleFonts.manrope(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1D293D),
-          ),
-        ),
+      appBar: CustomAppBar.build(
+        title: 'Consultation Report'.tr,
+        showBackButton: true,
       ),
       body: SafeArea(
         child: Obx(() {

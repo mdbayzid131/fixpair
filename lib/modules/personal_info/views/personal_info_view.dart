@@ -1,4 +1,5 @@
 import 'package:fixpair/config/themes/app_theme.dart';
+import 'package:fixpair/core/widgets/custom_appbar.dart';
 import 'package:fixpair/core/widgets/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -22,26 +23,9 @@ class PersonalInfoView extends GetView<PersonalInfoController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _backgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: Get.back,
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: _textColor,
-            size: 20.sp,
-          ),
-        ),
-        title: Text(
-          'Personal Info'.tr,
-          style: GoogleFonts.manrope(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w800,
-            color: _textColor,
-          ),
-        ),
+      appBar: CustomAppBar.build(
+        title: 'Personal Info'.tr,
+        showBackButton: true,
       ),
       body: Obx(() {
         if (controller.isLoading.value) {

@@ -20,22 +20,23 @@ class LaundryHomeScreen extends GetView<HomeController> {
       backgroundColor: const Color(0xFFF8FAFC),
       body: RefreshIndicator(
         onRefresh: controller.onRefresh,
+        color: const Color(0xFF0066FF),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Blue Header Section
+              // 1. Branded Gradient Header
               _buildHeader(),
 
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 32.h),
+                    SizedBox(height: 20.h),
 
-                    // 3. Upcoming Booking
+                    // 2. Upcoming Booking (if any)
                     Obx(() {
                       if (controller.confirmedBookings.isEmpty) {
                         return const SizedBox.shrink();
@@ -63,23 +64,56 @@ class LaundryHomeScreen extends GetView<HomeController> {
                               },
                             ),
                           ),
-                          SizedBox(height: 32.h),
+                          SizedBox(height: 24.h),
                         ],
                       );
                     }),
 
-                    // 4. Recommended Experts
-                    _buildSectionTitle('Recommended Experts'.tr),
-                    SizedBox(height: 12.h),
+                    // 3. Recommended Consultants Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionTitle('Recommended Consultants'.tr),
+                            SizedBox(height: 2.h),
+                            Text(
+                              'Top verified experts for your needs'.tr,
+                              style: GoogleFonts.manrope(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Get.find<BottomNavBarController>().changeTab(1);
+                          },
+                          child: Text(
+                            'See All'.tr,
+                            style: GoogleFonts.manrope(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF0066FF),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.h),
                     Obx(() {
                       if (controller.isLoading.value &&
                           controller.recommendedConsultants.isEmpty) {
                         return const Center(
                           child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 24),
+                            padding: EdgeInsets.symmetric(vertical: 40),
                             child: CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Color(0xFFFF6B00),
+                                Color(0xFF0066FF),
                               ),
                             ),
                           ),
@@ -89,14 +123,24 @@ class LaundryHomeScreen extends GetView<HomeController> {
                       if (controller.recommendedConsultants.isEmpty) {
                         return Center(
                           child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 32.h),
-                            child: Text(
-                              'No recommended consultants found'.tr,
-                              style: GoogleFonts.manrope(
-                                fontSize: 14.sp,
-                                color: const Color(0xFF94A3B8),
-                                fontWeight: FontWeight.w500,
-                              ),
+                            padding: EdgeInsets.symmetric(vertical: 40.h),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.people_outline_rounded,
+                                  size: 48.sp,
+                                  color: const Color(0xFFCBD5E1),
+                                ),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  'No consultants found'.tr,
+                                  style: GoogleFonts.manrope(
+                                    fontSize: 14.sp,
+                                    color: const Color(0xFF94A3B8),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -130,193 +174,156 @@ class LaundryHomeScreen extends GetView<HomeController> {
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.only(top: 60.h, bottom: 30.h),
+      padding: EdgeInsets.only(
+        top: 50.h,
+        bottom: 20.h,
+        left: 16.w,
+        right: 16.w,
+      ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: [Color(0xFF0066FF), Color(0xFF0052D1)],
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(40.r),
-          bottomRight: Radius.circular(40.r),
+          bottomLeft: Radius.circular(28.r),
+          bottomRight: Radius.circular(28.r),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x260066FF),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Obx(() {
-                      final authService = Get.find<AuthService>();
-                      final rawUrl =
-                          authService.user.value?.image ??
-                          authService.user.value?.avatar;
-                      final imageUrl = ApiConstants.getImageUrl(rawUrl);
-
-                      return Container(
-                        width: 48.w,
-                        height: 48.w,
-                        decoration: const BoxDecoration(
-                          color: Color(0x4DFFFFFF),
-                          shape: BoxShape.circle,
+          // Top Row: White Badge Logo + Brand Name & Notification
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(7.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
                         ),
-                        child: ClipOval(
-                          child: imageUrl.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: imageUrl,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => const Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) => Icon(
-                                    Icons.person,
-                                    color: Colors.white,
-                                    size: 28.sp,
-                                  ),
-                                )
-                              : Icon(
-                                  Icons.person,
-                                  color: Colors.white,
-                                  size: 28.sp,
-                                ),
-                        ),
-                      );
-                    }),
-                    SizedBox(width: 12.w),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Good Morning,'.tr,
-                          style: GoogleFonts.manrope(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xCCFFFFFF),
-                          ),
-                        ),
-                        Obx(() {
-                          final authService = Get.find<AuthService>();
-                          final name =
-                              authService.user.value?.name ??
-                              authService.user.value?.firstName ??
-                              'User';
-                          return Text(
-                            name,
-                            style: GoogleFonts.manrope(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          );
-                        }),
                       ],
                     ),
-                  ],
-                ),
-                Obx(
-                  () => Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      InkWell(
-                        onTap: () =>
-                            Get.toNamed(AppRoutes.NOTIFICATIONS)?.then((_) {
-                              controller.checkUnreadNotifications();
-                            }),
-                        borderRadius: BorderRadius.circular(24.r),
-                        child: Container(
-                          padding: EdgeInsets.all(10.w),
-                          decoration: const BoxDecoration(
-                            color: Color(0x33FFFFFF),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.notifications_none_rounded,
-                            color: Colors.white,
-                            size: 22.sp,
-                          ),
-                        ),
-                      ),
-                      if (controller.hasUnreadNotifications.value)
-                        Positioned(
-                          top: 4.h,
-                          right: 4.w,
-                          child: Container(
-                            width: 11.w,
-                            height: 11.w,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEF4444),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 1.5.w,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
+                    child: Image.asset(
+                      'assets/logos/app_logo_without_bg.png',
+                      height: 26.h,
+                      fit: BoxFit.contain,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 30.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Text(
-              'Find your expert\nconsultation today.'.tr,
-              style: GoogleFonts.manrope(
-                fontSize: 28.sp,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                height: 1.2,
-              ),
-            ),
-          ),
-          SizedBox(height: 30.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Container(
-              height: 56.h,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0x0D000000),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                  SizedBox(width: 10.w),
+                  Text(
+                    'Fixpair',
+                    style: GoogleFonts.manrope(
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 0.2,
+                    ),
                   ),
                 ],
               ),
-              child: TextField(
-                readOnly: true,
-                onTap: () {
-                  Get.find<BottomNavBarController>().changeTab(1);
-                },
-                decoration: InputDecoration(
-                  hintText: 'Search for doctors, lawyers...'.tr,
-                  hintStyle: GoogleFonts.manrope(
-                    fontSize: 14.sp,
-                    color: const Color(0xFF94A3B8),
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search_rounded,
-                    color: const Color(0xFF94A3B8),
-                    size: 20.sp,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 18.h),
+
+              // Notification Action
+              Obx(
+                () => Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    InkWell(
+                      onTap: () =>
+                          Get.toNamed(AppRoutes.NOTIFICATIONS)?.then((_) {
+                            controller.checkUnreadNotifications();
+                          }),
+                      borderRadius: BorderRadius.circular(24.r),
+                      child: Container(
+                        padding: EdgeInsets.all(9.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.18),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.25),
+                            width: 1,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.notifications_none_rounded,
+                          color: Colors.white,
+                          size: 22.sp,
+                        ),
+                      ),
+                    ),
+                    if (controller.hasUnreadNotifications.value)
+                      Positioned(
+                        top: 2.h,
+                        right: 2.w,
+                        child: Container(
+                          width: 10.w,
+                          height: 10.w,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF4444),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 1.5.w,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
+            ],
+          ),
+
+          SizedBox(height: 14.h),
+
+          // Subtitle Banner: Expert Advice
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.15),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.verified_rounded,
+                  color: const Color(0xFFFFB800),
+                  size: 20.sp,
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Text(
+                    'Expert advice across Germany. Whenever you need it.'.tr,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFFF1F5F9),
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

@@ -1,4 +1,5 @@
 import 'package:fixpair/core/utils/helpers.dart';
+import 'package:fixpair/core/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -13,22 +14,9 @@ class AddCardView extends GetView<PaymentController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        title: Text(
-          'Add Credit Card',
-          style: GoogleFonts.manrope(
-            fontWeight: FontWeight.w700,
-            fontSize: 18.sp,
-            color: const Color(0xFF0F172A),
-          ),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Color(0xFF0F172A)),
-          onPressed: () => Get.back(),
-        ),
+      appBar: CustomAppBar.build(
+        title: 'Add Credit Card'.tr,
+        showBackButton: true,
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),

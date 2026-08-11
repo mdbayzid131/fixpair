@@ -152,25 +152,31 @@ class HomeController extends GetxController {
   Future<void> fetchRecommendedConsultants() async {
     try {
       isLoading.value = true;
-      final response = await _userRepository.getRecommendedConsultants(
-        consultancyType: 'doctor',
-        name: 'Bayzid',
-      );
+      final response = await _userRepository.getConsultants(limit: 50);
 
       if (response.statusCode == 200) {
-        final List<dynamic> dataList = response.data['data'];
-        final List<UserData> parsedConsultants = [];
-        for (var categoryItem in dataList) {
-          if (categoryItem['consultants'] is List) {
-            for (var consJson in categoryItem['consultants']) {
-              parsedConsultants.add(UserData.fromJson(consJson));
+        final consultantResponse = ConsultantResponseModel.fromJson(
+          response.data,
+        );
+        if (consultantResponse.data != null &&
+            consultantResponse.data!.isNotEmpty) {
+          recommendedConsultants.value = consultantResponse.data!;
+        } else {
+          // Fallback if data is in a different format
+          final List<dynamic> dataList = response.data['data'] is List
+              ? response.data['data']
+              : [];
+          final List<UserData> parsed = [];
+          for (var item in dataList) {
+            if (item is Map<String, dynamic>) {
+              parsed.add(UserData.fromJson(item));
             }
           }
+          recommendedConsultants.value = parsed;
         }
-        recommendedConsultants.value = parsedConsultants;
       }
     } catch (e) {
-      Helpers.showDebugLog('Error fetching recommended consultants: $e');
+      Helpers.showDebugLog('Error fetching all consultants: $e');
     } finally {
       isLoading.value = false;
     }

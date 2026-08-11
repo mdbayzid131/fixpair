@@ -1,3 +1,4 @@
+import 'package:fixpair/core/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -14,26 +15,9 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: const Color(0xFF1D293D),
-            size: 20.sp,
-          ),
-          onPressed: () => Get.back(),
-        ),
-        title: Text(
-          'Change Password',
-          style: GoogleFonts.manrope(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1D293D),
-          ),
-        ),
+      appBar: CustomAppBar.build(
+        title: 'Change Password'.tr,
+        showBackButton: true,
       ),
       body: SingleChildScrollView(
         child: Form(

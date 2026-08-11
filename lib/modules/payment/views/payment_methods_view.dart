@@ -1,3 +1,4 @@
+import 'package:fixpair/core/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -12,22 +13,9 @@ class PaymentMethodsView extends GetView<PaymentController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        title: Text(
-          'Payment Methods',
-          style: GoogleFonts.manrope(
-            fontWeight: FontWeight.w700,
-            fontSize: 18.sp,
-            color: const Color(0xFF0F172A),
-          ),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Color(0xFF0F172A)),
-          onPressed: () => Get.back(),
-        ),
+      appBar: CustomAppBar.build(
+        title: 'Payment Methods'.tr,
+        showBackButton: true,
       ),
       body: Obx(() {
         if (controller.isLoading.value && controller.paymentMethods.isEmpty) {

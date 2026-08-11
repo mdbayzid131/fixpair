@@ -10,6 +10,7 @@ class RegisterController extends GetxController {
   final addressController = TextEditingController();
   final nameController = TextEditingController();
   final emailController = TextEditingController();
+  final dobController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
@@ -17,7 +18,10 @@ class RegisterController extends GetxController {
   final isLoading = false.obs;
   final isPasswordVisible = false.obs;
   final isConfirmPasswordVisible = false.obs;
-  final agreeToTerms = false.obs; // Checkbox for terms and conditions
+  final agreeToTerms = false.obs; // Checkbox for terms, disclaimer, and privacy
+  final isAgeConfirmed = false.obs; // 18+ Age confirmation checkbox
+  final selectedDob = Rxn<DateTime>();
+  final dobError = ''.obs;
 
   final passwordFocusNode = FocusNode();
   final isPasswordFocused = false.obs;
@@ -54,12 +58,58 @@ class RegisterController extends GetxController {
     );
   }
 
+  Future<void> pickDateOfBirth(BuildContext context) async {
+    final now = DateTime.now();
+    final initialDate = selectedDob.value ?? DateTime(now.year - 18, now.month, now.day);
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1920),
+      lastDate: now,
+      helpText: 'Select Date of Birth (Must be 18+)'.tr,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF0066FF),
+              onPrimary: Colors.white,
+              onSurface: Color(0xFF1D293D),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      int age = now.year - pickedDate.year;
+      if (now.month < pickedDate.month ||
+          (now.month == pickedDate.month && now.day < pickedDate.day)) {
+        age--;
+      }
+
+      if (age < 18) {
+        selectedDob.value = null;
+        dobController.clear();
+        isAgeConfirmed.value = false;
+        dobError.value = 'You must be at least 18 years old to register'.tr;
+      } else {
+        selectedDob.value = pickedDate;
+        dobController.text =
+            '${pickedDate.day.toString().padLeft(2, '0')}.${pickedDate.month.toString().padLeft(2, '0')}.${pickedDate.year}';
+        isAgeConfirmed.value = true;
+        dobError.value = '';
+      }
+    }
+  }
+
   @override
   void onClose() {
     passwordFocusNode.dispose();
     addressController.dispose();
     nameController.dispose();
     emailController.dispose();
+    dobController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.onClose();
@@ -75,6 +125,18 @@ class RegisterController extends GetxController {
 
   Future<void> register() async {
     if (!formKey.currentState!.validate()) return;
+
+    if (selectedDob.value == null || !isAgeConfirmed.value) {
+      dobError.value = 'You must be at least 18 years old to register'.tr;
+      return;
+    }
+
+    if (!agreeToTerms.value) {
+      Helpers.showError(
+        'Please accept the Terms & Conditions and Liability Disclaimer'.tr,
+      );
+      return;
+    }
 
     try {
       isLoading.value = true;

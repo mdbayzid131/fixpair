@@ -1,3 +1,4 @@
+import 'package:fixpair/core/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,44 +15,24 @@ class ProfileView extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Profile'.tr,
-          style: GoogleFonts.manrope(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1D293D),
-          ),
-        ),
-        // actions: [
-        //   IconButton(
-        //     onPressed: () {},
-        //     icon: Icon(
-        //       Icons.settings_outlined,
-        //       color: const Color(0xFF64748B),
-        //       size: 24.sp,
-        //     ),
-        //   ),
-        //   SizedBox(width: 8.w),
-        // ],
+      appBar: CustomAppBar.build(
+        title: 'Profile'.tr,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(24.w),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         child: Column(
           children: [
             // 1. User Info Card
             _buildUserInfoCard(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
 
             // 2. Menu Options Card
             _buildMenuCard(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
 
             // 3. Log Out Card
             _buildLogoutCard(context),
+            SizedBox(height: 80.h), // Safe spacing for bottom nav
           ],
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
+import 'package:fixpair/core/widgets/custom_appbar.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,29 +16,12 @@ class ConsultantBookingView extends GetView<ConsultantBookingController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.chevron_left_rounded,
-            color: const Color(0xFF1D293D),
-            size: 28.sp,
-          ),
-          onPressed: () => Get.back(),
-        ),
-        centerTitle: true,
-        title: Text(
-          'Select Option'.tr,
-          style: GoogleFonts.manrope(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1D293D),
-          ),
-        ),
+      appBar: CustomAppBar.build(
+        title: 'Select Option'.tr,
+        showBackButton: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

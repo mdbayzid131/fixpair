@@ -1,4 +1,5 @@
 import 'package:fixpair/config/constants/api_constants.dart';
+import 'package:fixpair/core/widgets/custom_appbar.dart';
 import 'package:fixpair/data/models/review_model.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
@@ -120,25 +121,9 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFF1D293D),
-          ),
-          onPressed: () => Get.back(),
-        ),
-        title: Text(
-          'Reviews & Ratings'.tr,
-          style: GoogleFonts.manrope(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1D293D),
-          ),
-        ),
+      appBar: CustomAppBar.build(
+        title: 'Reviews & Ratings'.tr,
+        showBackButton: true,
       ),
       body: RefreshIndicator(
         onRefresh: () async {

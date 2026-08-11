@@ -72,11 +72,11 @@ class RegisterView extends GetView<RegisterController> {
               ),
 
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 32.h),
+                    SizedBox(height: 28.h),
 
                     // 2. Create Section
                     Text(
@@ -130,6 +130,65 @@ class RegisterView extends GetView<RegisterController> {
                         size: 20.sp,
                       ),
                     ),
+                    SizedBox(height: 16.h),
+
+                    // Date of Birth (Must be 18+)
+                    GestureDetector(
+                      onTap: () => controller.pickDateOfBirth(context),
+                      child: AbsorbPointer(
+                        child: CustomTextField(
+                          controller: controller.dobController,
+                          hintText: 'Date of Birth (Must be 18+)'.tr,
+                          label: '',
+                          isLabelVisible: false,
+                          fillColor: const Color(0xFFF8FAFC),
+                          prefixIcon: Icon(
+                            Icons.cake_outlined,
+                            color: const Color(0xFF9CA3AF),
+                            size: 20.sp,
+                          ),
+                          suffixIcon: Icon(
+                            Icons.calendar_today_rounded,
+                            color: const Color(0xFF9CA3AF),
+                            size: 18.sp,
+                          ),
+                          validator: (v) {
+                            if (v == null || v.isEmpty) {
+                              return 'Please select your date of birth'.tr;
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ),
+                    Obx(() {
+                      if (controller.dobError.value.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: EdgeInsets.only(top: 6.h, left: 4.w),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline_rounded,
+                              size: 14.sp,
+                              color: const Color(0xFFEF4444),
+                            ),
+                            SizedBox(width: 4.w),
+                            Expanded(
+                              child: Text(
+                                controller.dobError.value,
+                                style: GoogleFonts.manrope(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFFEF4444),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
                     SizedBox(height: 16.h),
 
                     Obx(
@@ -294,20 +353,64 @@ class RegisterView extends GetView<RegisterController> {
                     ),
                     SizedBox(height: 16.h),
 
-                    // 5. Terms & Conditions Row
+                    // 5a. Age 18+ Confirmation Checkbox
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Obx(
-                          () => Checkbox(
-                            value: controller.agreeToTerms.value,
-                            onChanged: (v) =>
-                                controller.agreeToTerms.value = v ?? false,
-                            activeColor: const Color(0xFFFF6B00),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4.r),
+                          () => SizedBox(
+                            width: 24.w,
+                            height: 24.w,
+                            child: Checkbox(
+                              value: controller.isAgeConfirmed.value,
+                              onChanged: (v) =>
+                                  controller.isAgeConfirmed.value = v ?? false,
+                              activeColor: const Color(0xFFFF6B00),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4.r),
+                              ),
                             ),
                           ),
                         ),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => controller.isAgeConfirmed.value =
+                                !controller.isAgeConfirmed.value,
+                            child: Text(
+                              'I confirm that I am at least 18 years old.'.tr,
+                              style: GoogleFonts.manrope(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF374151),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 12.h),
+
+                    // 5b. Terms & Conditions + Liability Disclaimer + Privacy Policy
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Obx(
+                          () => SizedBox(
+                            width: 24.w,
+                            height: 24.w,
+                            child: Checkbox(
+                              value: controller.agreeToTerms.value,
+                              onChanged: (v) =>
+                                  controller.agreeToTerms.value = v ?? false,
+                              activeColor: const Color(0xFFFF6B00),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4.r),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
                         Expanded(
                           child: RichText(
                             text: TextSpan(
@@ -319,6 +422,18 @@ class RegisterView extends GetView<RegisterController> {
                                 TextSpan(text: 'I agree to the '.tr),
                                 TextSpan(
                                   text: 'Terms & Conditions'.tr,
+                                  style: const TextStyle(
+                                    color: Color(0xFF0066FF),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      Get.toNamed(AppRoutes.TERMS_CONDITIONS);
+                                    },
+                                ),
+                                const TextSpan(text: ', '),
+                                TextSpan(
+                                  text: 'Liability Disclaimer'.tr,
                                   style: const TextStyle(
                                     color: Color(0xFF0066FF),
                                     fontWeight: FontWeight.w700,
@@ -353,7 +468,8 @@ class RegisterView extends GetView<RegisterController> {
                     Obx(
                       () => CustomElevatedButton(
                         label: 'Sign Up'.tr,
-                        onPressed: controller.agreeToTerms.value
+                        onPressed: (controller.agreeToTerms.value &&
+                                controller.isAgeConfirmed.value)
                             ? controller.register
                             : null,
                         isLoading: controller.isLoading.value,

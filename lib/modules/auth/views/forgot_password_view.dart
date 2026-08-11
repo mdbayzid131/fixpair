@@ -88,11 +88,11 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
               ),
 
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 48.h),
+                    SizedBox(height: 36.h),
 
                     // 2. Title Section
                     Text(
