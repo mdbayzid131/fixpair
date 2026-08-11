@@ -215,7 +215,7 @@ class OnboardingView extends GetView<OnboardingController> {
                 _buildWelcomeFeature(
                   icon: Icons.verified_user_rounded,
                   title: 'Secure and Confidential',
-                  desc: 'Protected end-to-end stripe payments.',
+                  desc: 'Protected end-to-end encrypted payments.',
                 ),
               ],
             ),
@@ -726,7 +726,7 @@ class OnboardingView extends GetView<OnboardingController> {
     return _buildSlideContainer(
       title: 'Safe & Fast Payments',
       description:
-          'Payments are processed securely via Stripe. Add your credit card and only get charged for the minutes you interact with the consultant.',
+          'Payments are processed with bank-grade encryption. Add your credit card and only get charged for the minutes you interact with the consultant.',
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

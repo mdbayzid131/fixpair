@@ -808,7 +808,7 @@ class PaymentMethodsView extends GetView<PaymentController> {
               const Icon(Icons.add_card_rounded, color: Colors.white),
               SizedBox(width: 10.w),
               Text(
-                'Add New Payment Card',
+                'Add Credit Card',
                 style: GoogleFonts.manrope(
                   fontSize: 16.sp,
                   color: Colors.white,
@@ -826,7 +826,7 @@ class PaymentMethodsView extends GetView<PaymentController> {
     return Column(
       children: [
         Text(
-          'SUPPORTED PAYMENT NETWORKS',
+          'ACCEPTED CREDIT CARDS',
           style: GoogleFonts.manrope(
             fontSize: 11.sp,
             fontWeight: FontWeight.w700,
@@ -844,7 +844,7 @@ class PaymentMethodsView extends GetView<PaymentController> {
             SizedBox(width: 8.w),
             _buildMiniBadge('AMEX', const Color(0xFF006FCF)),
             SizedBox(width: 8.w),
-            _buildMiniBadge('STRIPE', const Color(0xFF635BFF)),
+            _buildMiniBadge('DISCOVER', const Color(0xFFE65100)),
           ],
         ),
       ],

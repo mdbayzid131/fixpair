@@ -17,7 +17,7 @@ class AddCardView extends GetView<PaymentController> {
         backgroundColor: Colors.white,
         elevation: 0.5,
         title: Text(
-          'Add Payment Method',
+          'Add Credit Card',
           style: GoogleFonts.manrope(
             fontWeight: FontWeight.w700,
             fontSize: 18.sp,
@@ -41,17 +41,34 @@ class AddCardView extends GetView<PaymentController> {
 
             SizedBox(height: 28.h),
 
-            Text(
-              'Card Details',
-              style: GoogleFonts.manrope(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF0F172A),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Card Details',
+                  style: GoogleFonts.manrope(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                // Accepted Providers mini badge row
+                Row(
+                  children: [
+                    _buildProviderPill('VISA'),
+                    SizedBox(width: 4.w),
+                    _buildProviderPill('MC'),
+                    SizedBox(width: 4.w),
+                    _buildProviderPill('AMEX'),
+                    SizedBox(width: 4.w),
+                    _buildProviderPill('DISC'),
+                  ],
+                ),
+              ],
             ),
             SizedBox(height: 6.h),
             Text(
-              'Enter your credit or debit card details below for instant, encrypted transactions.',
+              'Enter your credit or debit card details below. We accept Visa, Mastercard, American Express, and Discover.',
               style: GoogleFonts.manrope(
                 fontSize: 13.sp,
                 color: const Color(0xFF64748B),
@@ -190,7 +207,7 @@ class AddCardView extends GetView<PaymentController> {
                     ),
                     SizedBox(width: 8.w),
                     Text(
-                      '256-Bit SSL Encrypted • Powered by Stripe',
+                      '256-Bit SSL Encrypted • PCI-DSS Compliant',
                       style: GoogleFonts.manrope(
                         fontSize: 12.sp,
                         color: const Color(0xFF475569),
@@ -454,6 +471,25 @@ class AddCardView extends GetView<PaymentController> {
             color: Colors.white24,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProviderPill(String text) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(4.r),
+        border: Border.all(color: const Color(0xFFCBD5E1)),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.manrope(
+          fontSize: 9.sp,
+          fontWeight: FontWeight.w800,
+          color: const Color(0xFF475569),
+        ),
       ),
     );
   }
