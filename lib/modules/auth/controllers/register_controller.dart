@@ -19,8 +19,44 @@ class RegisterController extends GetxController {
   final isConfirmPasswordVisible = false.obs;
   final agreeToTerms = false.obs; // Checkbox for terms and conditions
 
+  final passwordFocusNode = FocusNode();
+  final isPasswordFocused = false.obs;
+
+  // Password rules
+  final hasMinLength = false.obs;
+  final hasUppercase = false.obs;
+  final hasLowercase = false.obs;
+  final hasDigit = false.obs;
+  final hasSpecial = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    passwordFocusNode.addListener(() {
+      isPasswordFocused.value = passwordFocusNode.hasFocus;
+    });
+  }
+
+  bool get areAllPasswordRulesMet =>
+      hasMinLength.value &&
+      hasUppercase.value &&
+      hasLowercase.value &&
+      hasDigit.value &&
+      hasSpecial.value;
+
+  void validatePasswordRules(String text) {
+    hasMinLength.value = text.length >= 8;
+    hasUppercase.value = text.contains(RegExp(r'[A-Z]'));
+    hasLowercase.value = text.contains(RegExp(r'[a-z]'));
+    hasDigit.value = text.contains(RegExp(r'[0-9]'));
+    hasSpecial.value = text.contains(
+      RegExp(r'[!@#\$&*~`%\^\(\)\-_=\+\[\{\]\}\|;:\x27",<\.>\/\?]'),
+    );
+  }
+
   @override
   void onClose() {
+    passwordFocusNode.dispose();
     addressController.dispose();
     nameController.dispose();
     emailController.dispose();

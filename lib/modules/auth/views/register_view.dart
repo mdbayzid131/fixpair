@@ -135,7 +135,9 @@ class RegisterView extends GetView<RegisterController> {
                     Obx(
                       () => CustomTextField(
                         controller: controller.passwordController,
+                        focusNode: controller.passwordFocusNode,
                         hintText: 'Password'.tr,
+                        onChanged: controller.validatePasswordRules,
                         obscureText: !controller.isPasswordVisible.value,
                         label: '',
                         isLabelVisible: false,
@@ -167,6 +169,96 @@ class RegisterView extends GetView<RegisterController> {
                         },
                       ),
                     ),
+
+                    // Compact Animated Password Requirements Hint Container
+                    Obx(() {
+                      final showHints =
+                          (controller.isPasswordFocused.value ||
+                              controller.passwordController.text.isNotEmpty) &&
+                          !controller.areAllPasswordRulesMet;
+
+                      return AnimatedSize(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOut,
+                        child: showHints
+                            ? Container(
+                                width: double.infinity,
+                                margin: EdgeInsets.only(top: 8.h, bottom: 4.h),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 10.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(10.r),
+                                  border: Border.all(
+                                    color: const Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Password must contain:'.tr,
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 11.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF475569),
+                                      ),
+                                    ),
+                                    SizedBox(height: 6.h),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _buildRequirementRow(
+                                                controller.hasMinLength.value,
+                                                'At least 8 characters'.tr,
+                                              ),
+                                              SizedBox(height: 4.h),
+                                              _buildRequirementRow(
+                                                controller.hasUppercase.value,
+                                                'One uppercase letter'.tr,
+                                              ),
+                                              SizedBox(height: 4.h),
+                                              _buildRequirementRow(
+                                                controller.hasSpecial.value,
+                                                'One special character'.tr,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _buildRequirementRow(
+                                                controller.hasLowercase.value,
+                                                'One lowercase letter'.tr,
+                                              ),
+                                              SizedBox(height: 4.h),
+                                              _buildRequirementRow(
+                                                controller.hasDigit.value,
+                                                'One number'.tr,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                      );
+                    }),
                     SizedBox(height: 16.h),
 
                     Obx(
@@ -397,6 +489,34 @@ class RegisterView extends GetView<RegisterController> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildRequirementRow(bool isMet, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          isMet
+              ? Icons.check_circle_rounded
+              : Icons.radio_button_unchecked_rounded,
+          color: isMet ? const Color(0xFF10B981) : const Color(0xFF94A3B8),
+          size: 13.sp,
+        ),
+        SizedBox(width: 6.w),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.manrope(
+              fontSize: 11.sp,
+              fontWeight: isMet ? FontWeight.w600 : FontWeight.w400,
+              color: isMet ? const Color(0xFF10B981) : const Color(0xFF64748B),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
