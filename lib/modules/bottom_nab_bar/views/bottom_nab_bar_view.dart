@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -27,62 +28,101 @@ class BottomNavBarView extends GetView<BottomNavBarController> {
           ],
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          color: Colors.transparent,
-          margin: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 4.h),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 6.h),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24.r),
-              border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF0F172A).withOpacity(0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white.withOpacity(0.0),
+              Colors.white.withOpacity(0.15),
+              Colors.white.withOpacity(0.45),
+              Colors.white.withOpacity(0.75),
+            ],
+            stops: const [0.0, 0.35, 0.7, 1.0],
+          ),
+        ),
+        child: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: SafeArea(
+              top: false,
+              child: Container(
+                margin: EdgeInsets.only(
+                  left: 16.w,
+                  right: 16.w,
+                  top: 6.h,
+                  bottom: 6.h,
                 ),
-                BoxShadow(
-                  color: const Color(0xFF0066FF).withOpacity(0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF0F172A).withOpacity(0.07),
+                      blurRadius: 18,
+                      offset: const Offset(0, 6),
+                    ),
+                    BoxShadow(
+                      color: const Color(0xFF0066FF).withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Obx(
-              () => Row(
-                children: [
-                  _buildNavItem(
-                    icon: Icons.home_outlined,
-                    activeIcon: Icons.home_rounded,
-                    label: 'Home'.tr,
-                    index: 0,
-                    currentIndex: controller.currentIndex.value,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24.r),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 4.w,
+                        vertical: 6.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.92),
+                        borderRadius: BorderRadius.circular(24.r),
+                        border: Border.all(
+                          color: const Color(0xFFE2E8F0).withOpacity(0.85),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Obx(
+                        () => Row(
+                          children: [
+                            _buildNavItem(
+                              icon: Icons.home_outlined,
+                              activeIcon: Icons.home_rounded,
+                              label: 'Home'.tr,
+                              index: 0,
+                              currentIndex: controller.currentIndex.value,
+                            ),
+                            _buildNavItem(
+                              icon: Icons.search_rounded,
+                              activeIcon: Icons.search_rounded,
+                              label: 'Search'.tr,
+                              index: 1,
+                              currentIndex: controller.currentIndex.value,
+                            ),
+                            _buildNavItem(
+                              icon: Icons.calendar_month_outlined,
+                              activeIcon: Icons.calendar_month_rounded,
+                              label: 'Bookings'.tr,
+                              index: 2,
+                              currentIndex: controller.currentIndex.value,
+                            ),
+                            _buildNavItem(
+                              icon: Icons.person_outline_rounded,
+                              activeIcon: Icons.person_rounded,
+                              label: 'Profile'.tr,
+                              index: 3,
+                              currentIndex: controller.currentIndex.value,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                  _buildNavItem(
-                    icon: Icons.search_rounded,
-                    activeIcon: Icons.search_rounded,
-                    label: 'Search'.tr,
-                    index: 1,
-                    currentIndex: controller.currentIndex.value,
-                  ),
-                  _buildNavItem(
-                    icon: Icons.calendar_month_outlined,
-                    activeIcon: Icons.calendar_month_rounded,
-                    label: 'Bookings'.tr,
-                    index: 2,
-                    currentIndex: controller.currentIndex.value,
-                  ),
-                  _buildNavItem(
-                    icon: Icons.person_outline_rounded,
-                    activeIcon: Icons.person_rounded,
-                    label: 'Profile'.tr,
-                    index: 3,
-                    currentIndex: controller.currentIndex.value,
-                  ),
-                ],
+                ),
               ),
             ),
           ),
