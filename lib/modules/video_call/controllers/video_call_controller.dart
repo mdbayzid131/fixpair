@@ -70,13 +70,7 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
     }
 
     initAgora();
-
-    if (booking.id != null &&
-        (booking.consultant == null ||
-         booking.consultant?.name == null ||
-         booking.consultant?.name == 'A user')) {
-      _fetchRealBookingDetails();
-    }
+    _fetchRealBookingDetails();
   }
 
   void updatePipPosition(double dx, double dy) {
@@ -541,12 +535,11 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
 
   Future<void> _fetchRealBookingDetails() async {
     try {
-      if (booking.id != null) {
-        final realBooking = await _userRepository.getBookingById(booking.id!);
-        if (realBooking != null) {
-          booking = realBooking;
-          bookingRx.value = realBooking;
-        }
+      final bId = booking.id ?? '';
+      final realBooking = await _userRepository.getBookingById(bId);
+      if (realBooking != null) {
+        booking = realBooking;
+        bookingRx.value = realBooking;
       }
     } catch (e) {
       AppLogger.debug('Error updating video call booking details: $e');

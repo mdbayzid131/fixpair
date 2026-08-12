@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/core/utils/logger.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
@@ -19,42 +21,221 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   AppLogger.debug('Background Message: ${message.messageId}');
   AppLogger.debug('Background Data: ${message.data}');
 
-  if (message.data['type'] == 'INCOMING_CALL') {
-    final sessionId = message.data['sessionId'];
-    final token = message.data['token'];
-    final channelName = message.data['channelName'] ?? sessionId;
+  // Handle incoming call notifications in background/terminated state
+  Map<String, dynamic> rawData = Map<String, dynamic>.from(message.data);
+  if (rawData['data'] != null) {
+    final subData = rawData['data'];
+    if (subData is Map) {
+      rawData.addAll(Map<String, dynamic>.from(subData));
+    } else if (subData is String && subData.trim().startsWith('{')) {
+      try {
+        final dec = jsonDecode(subData);
+        if (dec is Map) rawData.addAll(Map<String, dynamic>.from(dec));
+      } catch (_) {}
+    }
+  }
 
-    // Robust parsing of caller details and booking ID
-    final idKeys = ['bookingId', 'booking_id', 'booking', 'consultationId', 'consultation_id', 'id'];
+  final type = (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'])
+      ?.toString()
+      .toUpperCase();
+
+  if (type == 'INCOMING_CALL' ||
+      type == 'CALL' ||
+      type == 'VIDEO_CALL' ||
+      type == 'CALL_INCOMING') {
+    final sessionId = rawData['sessionId']?.toString() ??
+        rawData['session_id']?.toString() ??
+        rawData['callId']?.toString() ??
+        rawData['call_id']?.toString() ??
+        rawData['id']?.toString();
+
+    final token = rawData['token']?.toString() ??
+        rawData['agoraToken']?.toString() ??
+        rawData['agora_token']?.toString() ??
+        rawData['rtcToken']?.toString() ??
+        rawData['rtc_token']?.toString();
+
+    final channelName = rawData['channelName']?.toString() ??
+        rawData['channel_name']?.toString() ??
+        rawData['channel']?.toString() ??
+        sessionId;
+
+    // Robust parsing of booking ID
+    final idKeys = [
+      'bookingId',
+      'booking_id',
+      'booking',
+      'consultationId',
+      'consultation_id',
+      'consultation'
+    ];
     String bookingId = '';
     for (var key in idKeys) {
-      final val = message.data[key]?.toString();
+      final val = rawData[key]?.toString();
       if (val != null && val.isNotEmpty) {
         bookingId = val;
         break;
       }
     }
 
-    final nameKeys = ['consultantName', 'consultant_name', 'senderName', 'sender_name', 'name', 'displayName', 'callerName', 'caller_name'];
-    String callerName = 'Consultant';
+    bool isValidName(String? n) {
+      if (n == null) return false;
+      final clean = n.trim().toLowerCase();
+      return clean.isNotEmpty &&
+          clean != 'a user' &&
+          clean != 'user' &&
+          clean != 'notification' &&
+          clean != 'fixpair' &&
+          clean != 'fixpair notification' &&
+          clean != 'incoming call' &&
+          clean != 'video call' &&
+          clean != 'call' &&
+          clean != 'consultant' &&
+          clean != 'null' &&
+          clean != 'undefined';
+    }
+
+    String callerName = '';
+    String callerAvatar = '';
+
+    // 1. Check direct keys
+    final nameKeys = [
+      'consultantName',
+      'consultant_name',
+      'senderName',
+      'sender_name',
+      'expertName',
+      'expert_name',
+      'callerName',
+      'caller_name',
+      'name',
+      'displayName',
+      'display_name',
+      'userName',
+      'user_name',
+    ];
     for (var key in nameKeys) {
-      final val = message.data[key]?.toString();
-      if (val != null && val.isNotEmpty && val.toLowerCase() != 'a user' && val.toLowerCase() != 'user') {
-        callerName = val;
+      final val = rawData[key]?.toString().trim();
+      if (isValidName(val)) {
+        callerName = val!;
         break;
       }
     }
-    if (callerName == 'Consultant') {
-      callerName = message.data['callerName']?.toString() ?? message.data['caller_name']?.toString() ?? 'Consultant';
+
+    // 2. Check first name + last name
+    if (callerName.isEmpty) {
+      final fn = rawData['consultantFirstName'] ??
+          rawData['consultant_first_name'] ??
+          rawData['senderFirstName'] ??
+          rawData['sender_first_name'] ??
+          rawData['firstName'] ??
+          rawData['first_name'];
+      final ln = rawData['consultantLastName'] ??
+          rawData['consultant_last_name'] ??
+          rawData['senderLastName'] ??
+          rawData['sender_last_name'] ??
+          rawData['lastName'] ??
+          rawData['last_name'];
+      if (isValidName(fn?.toString())) {
+        callerName = '$fn ${ln ?? ''}'.trim();
+      }
     }
 
-    final avatarKeys = ['consultantAvatar', 'consultant_avatar', 'senderAvatar', 'sender_avatar', 'avatar', 'image', 'callerAvatar', 'caller_avatar'];
-    String callerAvatar = '';
-    for (var key in avatarKeys) {
-      final val = message.data[key]?.toString();
-      if (val != null && val.isNotEmpty) {
-        callerAvatar = val;
-        break;
+    // 3. Check nested JSON objects (consultant, sender, caller, booking, user, data)
+    if (callerName.isEmpty) {
+      for (var objKey in ['consultant', 'sender', 'caller', 'user', 'expert', 'booking']) {
+        final raw = rawData[objKey];
+        if (raw != null) {
+          Map<String, dynamic>? map;
+          if (raw is Map) {
+            map = Map<String, dynamic>.from(raw);
+          } else if (raw is String && raw.trim().startsWith('{')) {
+            try {
+              final dec = jsonDecode(raw);
+              if (dec is Map) map = Map<String, dynamic>.from(dec);
+            } catch (_) {}
+          }
+          if (map != null) {
+            final n = map['name'] ??
+                map['displayName'] ??
+                map['consultantName'] ??
+                map['senderName'] ??
+                map['fullName'] ??
+                map['full_name'];
+            if (isValidName(n?.toString())) {
+              callerName = n.toString().trim();
+            } else {
+              final f = map['firstName'] ?? map['first_name'];
+              final l = map['lastName'] ?? map['last_name'];
+              if (isValidName(f?.toString())) {
+                callerName = '$f ${l ?? ''}'.trim();
+              }
+            }
+            if (callerAvatar.isEmpty) {
+              final av = map['avatar'] ??
+                  map['image'] ??
+                  map['photo'] ??
+                  map['profilePic'] ??
+                  map['avatarUrl'] ??
+                  map['avatar_url'];
+              if (av != null && av.toString().isNotEmpty && av.toString() != 'null') {
+                callerAvatar = ApiConstants.getImageUrl(av.toString());
+              }
+            }
+            if (callerName.isNotEmpty) break;
+          }
+        }
+      }
+    }
+
+    // 4. Check notification body for caller name (e.g. "Dr. Alex is calling you")
+    if (callerName.isEmpty) {
+      final body = message.notification?.body?.trim();
+      if (body != null && body.isNotEmpty) {
+        final match = RegExp(
+          r'^(.+?)\s+(is calling|calling|sent you a call)',
+          caseSensitive: false,
+        ).firstMatch(body);
+        if (match != null) {
+          final extracted = match.group(1)?.trim();
+          if (isValidName(extracted)) {
+            callerName = extracted!;
+          }
+        }
+      }
+    }
+
+    // 5. Default fallback
+    if (callerName.isEmpty) {
+      callerName = 'Fixpair Consultant';
+    }
+
+    // Extract Avatar URL
+    if (callerAvatar.isEmpty) {
+      final avatarKeys = [
+        'consultantAvatar',
+        'consultant_avatar',
+        'consultantImage',
+        'consultant_image',
+        'senderAvatar',
+        'sender_avatar',
+        'senderImage',
+        'sender_image',
+        'callerAvatar',
+        'caller_avatar',
+        'avatar',
+        'image',
+        'photo',
+        'profilePic',
+        'avatarUrl',
+        'avatar_url',
+      ];
+      for (var key in avatarKeys) {
+        final val = rawData[key]?.toString();
+        if (val != null && val.isNotEmpty && val != 'null') {
+          callerAvatar = ApiConstants.getImageUrl(val);
+          break;
+        }
       }
     }
 
@@ -64,9 +245,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         nameCaller: callerName,
         appName: 'Fixpair',
         avatar: callerAvatar,
-        handle: 'Incoming Video Consultation',
+        handle: 'Video Consultation',
         type: 1, // 0: audio, 1: video
-        duration: 30000,
+        duration: 35000,
         extra: <String, dynamic>{
           'sessionId': sessionId,
           'token': token,
@@ -75,11 +256,17 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
           'callerAvatar': callerAvatar,
           'bookingId': bookingId,
         },
+        missedCallNotification: const NotificationParams(
+          showNotification: false,
+          isShowCallback: false,
+        ),
         android: const AndroidParams(
           isCustomNotification: true,
           backgroundColor: '#0F172A',
           incomingCallNotificationChannelName: "Incoming Call",
           isShowLogo: true,
+          isShowFullLockedScreen: true,
+          isImportant: true,
           ringtonePath: 'system_ringtone_default',
           textAccept: 'Accept',
           textDecline: 'Decline',

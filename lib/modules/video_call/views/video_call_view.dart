@@ -254,10 +254,9 @@ class VideoCallView extends GetView<VideoCallController> {
                             ),
                             errorWidget: (context, url, error) => Center(
                               child: Text(
-                                booking.consultant?.name
-                                        ?.substring(0, 1)
-                                        .toUpperCase() ??
-                                    'C',
+                                _getValidConsultantName(
+                                  booking.consultant?.name,
+                                ).substring(0, 1).toUpperCase(),
                                 style: GoogleFonts.manrope(
                                   fontSize: 36.sp,
                                   fontWeight: FontWeight.bold,
@@ -268,10 +267,9 @@ class VideoCallView extends GetView<VideoCallController> {
                           )
                         : Center(
                             child: Text(
-                              booking.consultant?.name
-                                      ?.substring(0, 1)
-                                      .toUpperCase() ??
-                                  'C',
+                              _getValidConsultantName(
+                                booking.consultant?.name,
+                              ).substring(0, 1).toUpperCase(),
                               style: GoogleFonts.manrope(
                                 fontSize: 36.sp,
                                 fontWeight: FontWeight.bold,
@@ -301,7 +299,7 @@ class VideoCallView extends GetView<VideoCallController> {
             ),
             SizedBox(height: 24.h),
             Text(
-              (booking.consultant?.name ?? 'Consultant'.tr) + ' turned camera off'.tr,
+              '${_getValidConsultantName(booking.consultant?.name)} ${'turned camera off'.tr}',
               style: GoogleFonts.manrope(
                 color: Colors.white,
                 fontSize: 16.sp,
@@ -321,6 +319,21 @@ class VideoCallView extends GetView<VideoCallController> {
         );
       }),
     );
+  }
+
+  String _getValidConsultantName(String? name) {
+    if (name == null) return 'Consultant'.tr;
+    final n = name.trim().toLowerCase();
+    if (n.isEmpty ||
+        n == 'a user' ||
+        n == 'user' ||
+        n == 'notification' ||
+        n == 'null' ||
+        n == 'undefined' ||
+        n == 'fixpair') {
+      return 'Consultant'.tr;
+    }
+    return name.trim();
   }
 
   Widget _buildTopOverlay() {
@@ -398,10 +411,11 @@ class VideoCallView extends GetView<VideoCallController> {
         // Consultant Info
         Obx(() {
           final booking = controller.bookingRx.value ?? controller.booking;
+          final consultantName = _getValidConsultantName(booking.consultant?.name);
           return Column(
             children: [
               Text(
-                booking.consultant?.name ?? 'Consultant',
+                consultantName,
                 style: GoogleFonts.manrope(
                   color: Colors.white,
                   fontSize: 16.sp,
