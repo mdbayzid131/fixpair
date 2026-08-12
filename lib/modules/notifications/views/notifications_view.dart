@@ -66,7 +66,7 @@ class _NotificationsViewState extends State<NotificationsView> {
         if (controller.isLoading.value && controller.notifications.isEmpty) {
           return const Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF6B00)),
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0066FF)),
             ),
           );
         }
@@ -85,6 +85,8 @@ class _NotificationsViewState extends State<NotificationsView> {
         }
 
         return RefreshIndicator(
+          color: const Color(0xFF0066FF),
+          backgroundColor: Colors.white,
           onRefresh: controller.onRefresh,
           child: ListView.separated(
             controller: _scrollController,
@@ -100,7 +102,7 @@ class _NotificationsViewState extends State<NotificationsView> {
                     padding: EdgeInsets.all(16.0),
                     child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        Color(0xFFFF6B00),
+                        Color(0xFF0066FF),
                       ),
                     ),
                   ),

@@ -11,172 +11,184 @@ import 'package:fixpair/config/constants/api_constants.dart';
 import '../../../config/routes/app_pages.dart';
 import 'package:fixpair/modules/bottom_nab_bar/controllers/bottom_nab_bar.dart';
 
+import 'package:flutter/services.dart';
+
 class LaundryHomeScreen extends GetView<HomeController> {
   const LaundryHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: RefreshIndicator(
-        onRefresh: controller.onRefresh,
-        color: const Color(0xFF0066FF),
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Branded Gradient Header
-              _buildHeader(),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        body: Column(
+          children: [
+            // 1. Branded Gradient Header (Fixed at top, protecting the status bar)
+            _buildHeader(context),
 
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 20.h),
-
-                    // 2. Upcoming Booking (if any)
-                    Obx(() {
-                      if (controller.confirmedBookings.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSectionTitle('Upcoming Booking'.tr),
-                          SizedBox(height: 12.h),
-                          SizedBox(
-                            height: 190.h,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: controller.confirmedBookings.length,
-                              itemBuilder: (context, index) {
-                                final booking =
-                                    controller.confirmedBookings[index];
-                                return Padding(
-                                  padding: EdgeInsets.only(right: 16.w),
-                                  child: SizedBox(
-                                    width: 320.w,
-                                    child: _buildUpcomingBooking(booking),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          SizedBox(height: 24.h),
-                        ],
-                      );
-                    }),
-
-                    // 3. Recommended Consultants Header
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
+            // 2. Scrollable Body Content
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.onRefresh,
+                color: const Color(0xFF0066FF),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildSectionTitle('Recommended Consultants'.tr),
-                            SizedBox(height: 2.h),
-                            Text(
-                              'Top verified experts for your needs'.tr,
-                              style: GoogleFonts.manrope(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF64748B),
-                              ),
-                            ),
-                          ],
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Get.find<BottomNavBarController>().changeTab(1);
-                          },
-                          child: Text(
-                            'See All'.tr,
-                            style: GoogleFonts.manrope(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF0066FF),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16.h),
-                    Obx(() {
-                      if (controller.isLoading.value &&
-                          controller.recommendedConsultants.isEmpty) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 40),
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Color(0xFF0066FF),
-                              ),
-                            ),
-                          ),
-                        );
-                      }
+                        SizedBox(height: 16.h),
 
-                      if (controller.recommendedConsultants.isEmpty) {
-                        return Center(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 40.h),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.people_outline_rounded,
-                                  size: 48.sp,
-                                  color: const Color(0xFFCBD5E1),
+                        // 2. Upcoming Booking (if any)
+                        Obx(() {
+                          if (controller.confirmedBookings.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildSectionTitle('Upcoming Booking'.tr),
+                              SizedBox(height: 12.h),
+                              SizedBox(
+                                height: 190.h,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: controller.confirmedBookings.length,
+                                  itemBuilder: (context, index) {
+                                    final booking =
+                                        controller.confirmedBookings[index];
+                                    return Padding(
+                                      padding: EdgeInsets.only(right: 16.w),
+                                      child: SizedBox(
+                                        width: 320.w,
+                                        child: _buildUpcomingBooking(booking),
+                                      ),
+                                    );
+                                  },
                                 ),
-                                SizedBox(height: 8.h),
+                              ),
+                              SizedBox(height: 24.h),
+                            ],
+                          );
+                        }),
+
+                        // 3. Recommended Consultants Header
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildSectionTitle('Recommended Consultants'.tr),
+                                SizedBox(height: 2.h),
                                 Text(
-                                  'No consultants found'.tr,
+                                  'Top verified experts for your needs'.tr,
                                   style: GoogleFonts.manrope(
-                                    fontSize: 14.sp,
-                                    color: const Color(0xFF94A3B8),
+                                    fontSize: 12.sp,
                                     fontWeight: FontWeight.w500,
+                                    color: const Color(0xFF64748B),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        );
-                      }
+                            GestureDetector(
+                              onTap: () {
+                                Get.find<BottomNavBarController>().changeTab(1);
+                              },
+                              child: Text(
+                                'See All'.tr,
+                                style: GoogleFonts.manrope(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF0066FF),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 16.h),
 
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: controller.recommendedConsultants.length,
-                        itemBuilder: (context, index) {
-                          final consultant =
-                              controller.recommendedConsultants[index];
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 16.h),
-                            child: _buildExpertCard(consultant),
+                        // 4. Consultants List
+                        Obx(() {
+                          if (controller.isLoading.value &&
+                              controller.recommendedConsultants.isEmpty) {
+                            return SizedBox(
+                              height: 200.h,
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  color: Color(0xFF0066FF),
+                                ),
+                              ),
+                            );
+                          }
+
+                          if (controller.recommendedConsultants.isEmpty) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 40.h),
+                              child: Center(
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.person_search_outlined,
+                                      size: 48.sp,
+                                      color: const Color(0xFF94A3B8),
+                                    ),
+                                    SizedBox(height: 12.h),
+                                    Text(
+                                      'No recommended consultants found'.tr,
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: controller.recommendedConsultants.length,
+                            itemBuilder: (context, index) {
+                              final consultant =
+                                  controller.recommendedConsultants[index];
+                              return Padding(
+                                padding: EdgeInsets.only(bottom: 16.h),
+                                child: _buildExpertCard(consultant),
+                              );
+                            },
                           );
-                        },
-                      );
-                    }),
-                    SizedBox(height: 100.h), // Spacing for navbar
-                  ],
+                        }),
+                        SizedBox(height: 100.h), // Spacing for navbar
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.only(
-        top: 50.h,
-        bottom: 20.h,
+        top: topPadding > 0 ? topPadding + 8.h : 44.h,
+        bottom: 16.h,
         left: 16.w,
         right: 16.w,
       ),
@@ -187,8 +199,8 @@ class LaundryHomeScreen extends GetView<HomeController> {
           colors: [Color(0xFF0066FF), Color(0xFF0052D1)],
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28.r),
-          bottomRight: Radius.circular(28.r),
+          bottomLeft: Radius.circular(24.r),
+          bottomRight: Radius.circular(24.r),
         ),
         boxShadow: [
           BoxShadow(

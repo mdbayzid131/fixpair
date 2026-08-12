@@ -156,56 +156,71 @@ class _SearchViewState extends State<SearchView> {
 
           // 2. Expert List
           Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value &&
-                  controller.consultants.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
-              }
+            child: RefreshIndicator(
+              color: const Color(0xFF0066FF),
+              backgroundColor: Colors.white,
+              onRefresh: () => controller.fetchConsultants(),
+              child: Obx(() {
+                if (controller.isLoading.value &&
+                    controller.consultants.isEmpty) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF0066FF)),
+                  );
+                }
 
-              if (controller.consultants.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.search_off_rounded,
-                        size: 64.sp,
-                        color: Colors.grey,
+                if (controller.consultants.isEmpty) {
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Container(
+                      height: 400.h,
+                      alignment: Alignment.center,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off_rounded,
+                            size: 64.sp,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 16.h),
+                          Text(
+                            'No consultants found'.tr,
+                            style: GoogleFonts.manrope(
+                              fontSize: 16.sp,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        'No consultants found'.tr,
-                        style: GoogleFonts.manrope(
-                          fontSize: 16.sp,
-                          color: Colors.grey,
+                    ),
+                  );
+                }
+
+                return ListView.separated(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                  itemCount:
+                      controller.consultants.length +
+                      (controller.isLoadingMore.value ? 1 : 0),
+                  separatorBuilder: (context, index) => SizedBox(height: 16.h),
+                  itemBuilder: (context, index) {
+                    if (index == controller.consultants.length) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF0066FF),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      );
+                    }
+                    final expert = controller.consultants[index];
+                    return _buildExpertCard(expert);
+                  },
                 );
-              }
-
-              return ListView.separated(
-                controller: _scrollController,
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-                itemCount:
-                    controller.consultants.length +
-                    (controller.isLoadingMore.value ? 1 : 0),
-                separatorBuilder: (context, index) => SizedBox(height: 16.h),
-                itemBuilder: (context, index) {
-                  if (index == controller.consultants.length) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  }
-                  final expert = controller.consultants[index];
-                  return _buildExpertCard(expert);
-                },
-              );
-            }),
+              }),
+            ),
           ),
         ],
       ),

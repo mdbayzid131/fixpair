@@ -18,22 +18,28 @@ class ProfileView extends GetView<ProfileController> {
       appBar: CustomAppBar.build(
         title: 'Profile'.tr,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-        child: Column(
-          children: [
-            // 1. User Info Card
-            _buildUserInfoCard(),
-            SizedBox(height: 16.h),
+      body: RefreshIndicator(
+        color: const Color(0xFF0066FF),
+        backgroundColor: Colors.white,
+        onRefresh: controller.fetchProfile,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          child: Column(
+            children: [
+              // 1. User Info Card
+              _buildUserInfoCard(),
+              SizedBox(height: 16.h),
 
-            // 2. Menu Options Card
-            _buildMenuCard(),
-            SizedBox(height: 16.h),
+              // 2. Menu Options Card
+              _buildMenuCard(),
+              SizedBox(height: 16.h),
 
-            // 3. Log Out Card
-            _buildLogoutCard(context),
-            SizedBox(height: 80.h), // Safe spacing for bottom nav
-          ],
+              // 3. Log Out Card
+              _buildLogoutCard(context),
+              SizedBox(height: 80.h), // Safe spacing for bottom nav
+            ],
+          ),
         ),
       ),
     );
@@ -49,7 +55,9 @@ class ProfileView extends GetView<ProfileController> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(24.r),
           ),
-          child: const Center(child: CircularProgressIndicator()),
+          child: const Center(
+            child: CircularProgressIndicator(color: Color(0xFF0066FF)),
+          ),
         );
       }
 

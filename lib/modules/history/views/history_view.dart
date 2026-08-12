@@ -79,12 +79,16 @@ class _HistoryViewState extends State<HistoryView> {
 
           Expanded(
             child: RefreshIndicator(
+              color: const Color(0xFF0066FF),
+              backgroundColor: Colors.white,
               onRefresh: controller.fetchMyBookings,
               child: Obx(() {
                 if (controller.isLoading.value &&
                     controller.upcomingBookings.isEmpty &&
                     controller.pastBookings.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF0066FF)),
+                  );
                 }
 
                 final bookings = controller.selectedTab.value == 0
@@ -136,7 +140,9 @@ class _HistoryViewState extends State<HistoryView> {
                   separatorBuilder: (context, index) => SizedBox(height: 16.h),
                   itemBuilder: (context, index) {
                     if (index >= bookings.length) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(
+                        child: CircularProgressIndicator(color: Color(0xFF0066FF)),
+                      );
                     }
                     final booking = bookings[index];
                     return _buildBookingCard(booking);

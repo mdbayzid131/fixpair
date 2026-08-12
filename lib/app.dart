@@ -19,11 +19,18 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-            appBarTheme: AppBarTheme(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF0066FF),
+              primary: const Color(0xFF0066FF),
+            ),
+            progressIndicatorTheme: const ProgressIndicatorThemeData(
+              color: Color(0xFF0066FF),
+            ),
+            appBarTheme: const AppBarTheme(
               backgroundColor: Color(0xffffffff),
               scrolledUnderElevation: 0,
             ),
-            scaffoldBackgroundColor: Color(0xffffffff),
+            scaffoldBackgroundColor: const Color(0xffffffff),
           ),
           initialRoute: AppRoutes.SPLASH,
           getPages: pages,

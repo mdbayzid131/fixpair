@@ -20,12 +20,13 @@ class PaymentMethodsView extends GetView<PaymentController> {
       body: Obx(() {
         if (controller.isLoading.value && controller.paymentMethods.isEmpty) {
           return const Center(
-            child: CircularProgressIndicator(color: Color(0xFF2563EB)),
+            child: CircularProgressIndicator(color: Color(0xFF0066FF)),
           );
         }
 
         return RefreshIndicator(
-          color: const Color(0xFF2563EB),
+          color: const Color(0xFF0066FF),
+          backgroundColor: Colors.white,
           onRefresh: controller.fetchPaymentMethods,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),

@@ -126,6 +126,8 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
         showBackButton: true,
       ),
       body: RefreshIndicator(
+        color: const Color(0xFF0066FF),
+        backgroundColor: Colors.white,
         onRefresh: () async {
           await _fetchStats();
           await _fetchReviews();
@@ -139,7 +141,9 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
             // List of reviews
             if (_isLoading && _reviewsList.isEmpty)
               const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(
+                  child: CircularProgressIndicator(color: Color(0xFF0066FF)),
+                ),
               )
             else if (_reviewsList.isEmpty)
               SliverFillRemaining(
@@ -172,10 +176,12 @@ class _SeeAllReviewsViewState extends State<SeeAllReviewsView> {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       if (index >= _reviewsList.length) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16.h),
-                          child: const Center(
-                            child: CircularProgressIndicator(),
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF0066FF),
+                            ),
                           ),
                         );
                       }
