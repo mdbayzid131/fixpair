@@ -99,8 +99,8 @@ class ContactSupportView extends GetView<LegalFAQController> {
                                 );
                               } else {
                                 Get.snackbar(
-                                  'Error',
-                                  'Could not open mail client',
+                                  'Error'.tr,
+                                  'Could not open mail client'.tr,
                                 );
                               }
                             },
@@ -135,8 +135,8 @@ class ContactSupportView extends GetView<LegalFAQController> {
                                 );
                               } else {
                                 Get.snackbar(
-                                  'Error',
-                                  'Could not open phone dialer',
+                                  'Error'.tr,
+                                  'Could not open phone dialer'.tr,
                                 );
                               }
                             },

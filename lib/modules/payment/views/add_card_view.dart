@@ -126,10 +126,10 @@ class AddCardView extends GetView<PaymentController> {
                             controller.isLoading.value = false;
                             Helpers.showDebugLog('Stripe Error: $e');
                             Get.snackbar(
-                              'Card Validation Error',
+                              'Card Validation Error'.tr,
                               e.toString().contains('canceled')
-                                  ? 'Card creation canceled'
-                                  : 'Please check your card details and try again',
+                                  ? 'Card creation canceled'.tr
+                                  : 'Please check your card details and try again'.tr,
                               snackPosition: SnackPosition.BOTTOM,
                               backgroundColor: Colors.red.withValues(alpha: 0.9),
                               colorText: Colors.white,

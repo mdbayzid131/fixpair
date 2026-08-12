@@ -318,100 +318,124 @@ class ScheduleBookingView extends GetView<ScheduleBookingController> {
   }
 
   Widget _buildTimeGrid() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 10.w,
-        mainAxisSpacing: 10.h,
-        childAspectRatio: 2.3,
-      ),
-      itemCount: controller.times.length,
-      itemBuilder: (context, index) {
-        final time = controller.times[index];
-        return Obx(() {
-          final selectedStartIdx = controller.selectedTimeIndex.value;
-          final durationSlots = controller.selectedDurationMinutes.value ~/ 30;
-          final isSelected = selectedStartIdx != -1 &&
-              index >= selectedStartIdx &&
-              index < selectedStartIdx + durationSlots;
-
-          final dateIndex = controller.selectedDateIndex.value;
-          final bool isBooked;
-          if (dateIndex >= 0 && dateIndex < controller.dates.length) {
-            final selectedDateKey = controller.dates[dateIndex]['fullDate'];
-            final slots = controller.slotsByDate[selectedDateKey] ?? [];
-            isBooked = index < slots.length && slots[index].isBooked == true;
-          } else {
-            isBooked = false;
-          }
-
-          return GestureDetector(
-            onTap: isBooked
-                ? () => Helpers.showWarning('This time slot is already booked.'.tr)
-                : () => controller.selectStartTime(index),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              decoration: BoxDecoration(
-                color: isBooked
-                    ? const Color(0xFFF1F5F9)
-                    : (isSelected ? const Color(0xFF0066FF) : Colors.white),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: isBooked
-                      ? const Color(0xFFE2E8F0)
-                      : (isSelected
-                            ? const Color(0xFF0066FF)
-                            : const Color(0xFFE2E8F0)),
-                  width: 1.5,
-                ),
-              ),
-              child: Center(
-                child: isBooked
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            _formatToAmPm(time),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.manrope(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF94A3B8),
-                              decoration: TextDecoration.lineThrough,
-                            ),
-                          ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            'Booked'.tr,
-                            style: GoogleFonts.manrope(
-                              fontSize: 9.sp,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFFEF4444),
-                            ),
-                          ),
-                        ],
-                      )
-                    : Text(
-                        _formatToAmPm(time),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.manrope(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w700,
-                          color: isSelected
-                              ? Colors.white
-                              : const Color(0xFF334155),
-                        ),
-                      ),
+    return Obx(() {
+      if (controller.times.isEmpty) {
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(vertical: 32.h, horizontal: 16.w),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Center(
+            child: Text(
+              'No available slots found'.tr,
+              style: GoogleFonts.manrope(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF94A3B8),
               ),
             ),
-          );
-        });
-      },
-    );
+          ),
+        );
+      }
+
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 10.w,
+          mainAxisSpacing: 10.h,
+          childAspectRatio: 2.3,
+        ),
+        itemCount: controller.times.length,
+        itemBuilder: (context, index) {
+          final time = controller.times[index];
+          return Obx(() {
+            final selectedStartIdx = controller.selectedTimeIndex.value;
+            final durationSlots = controller.selectedDurationMinutes.value ~/ 30;
+            final isSelected = selectedStartIdx != -1 &&
+                index >= selectedStartIdx &&
+                index < selectedStartIdx + durationSlots;
+
+            final dateIndex = controller.selectedDateIndex.value;
+            final bool isBooked;
+            if (dateIndex >= 0 && dateIndex < controller.dates.length) {
+              final selectedDateKey = controller.dates[dateIndex]['fullDate'];
+              final slots = controller.slotsByDate[selectedDateKey] ?? [];
+              isBooked = index < slots.length && slots[index].isBooked == true;
+            } else {
+              isBooked = false;
+            }
+
+            return GestureDetector(
+              onTap: isBooked
+                  ? () => Helpers.showWarning('This time slot is already booked.'.tr)
+                  : () => controller.selectStartTime(index),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: isBooked
+                      ? const Color(0xFFF1F5F9)
+                      : (isSelected ? const Color(0xFF0066FF) : Colors.white),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: isBooked
+                        ? const Color(0xFFE2E8F0)
+                        : (isSelected
+                              ? const Color(0xFF0066FF)
+                              : const Color(0xFFE2E8F0)),
+                    width: 1.5,
+                  ),
+                ),
+                child: Center(
+                  child: isBooked
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _formatToAmPm(time),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.manrope(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF94A3B8),
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              'Booked'.tr,
+                              style: GoogleFonts.manrope(
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFFEF4444),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          _formatToAmPm(time),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.manrope(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                            color: isSelected
+                                ? Colors.white
+                                : const Color(0xFF334155),
+                          ),
+                        ),
+                ),
+              ),
+            );
+          });
+        },
+      );
+    });
   }
 
   Widget _buildDurationSelector() {

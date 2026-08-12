@@ -91,7 +91,7 @@ class ConsultationSummaryController extends GetxController {
   Future<void> submitReview() async {
     if (booking == null || booking!.id == null) {
       Helpers.showCustomSnackBar(
-        'Invalid booking details',
+        'Invalid booking details'.tr,
         type: SnackBarType.error,
         useGetxSnackbar: false,
       );
@@ -99,7 +99,7 @@ class ConsultationSummaryController extends GetxController {
     }
     if (rating.value == 0) {
       Helpers.showCustomSnackBar(
-        'Please select a star rating first',
+        'Please select a star rating first'.tr,
         type: SnackBarType.warning,
         useGetxSnackbar: false,
       );
@@ -108,7 +108,7 @@ class ConsultationSummaryController extends GetxController {
 
     try {
       isSubmittingReview.value = true;
-      Helpers.showLoadingDialog(message: 'Submitting review...');
+      Helpers.showLoadingDialog(message: 'Submitting review...'.tr);
 
       final response = await _userRepository.postReview(
         consultationId: booking!.id!,
@@ -119,7 +119,7 @@ class ConsultationSummaryController extends GetxController {
       Helpers.hideLoadingDialog();
       if (response.statusCode == 200 || response.statusCode == 201) {
         Helpers.showCustomSnackBar(
-          'Thank you for your feedback!',
+          'Thank you for your feedback!'.tr,
           type: SnackBarType.success,
           useGetxSnackbar: false,
         );
@@ -129,7 +129,7 @@ class ConsultationSummaryController extends GetxController {
       Helpers.hideLoadingDialog();
       Helpers.showDebugLog('Error submitting review: $e');
       Helpers.showCustomSnackBar(
-        'Failed to submit review',
+        'Failed to submit review'.tr,
         type: SnackBarType.error,
         useGetxSnackbar: false,
       );
@@ -142,7 +142,7 @@ class ConsultationSummaryController extends GetxController {
     final invoice = invoiceData.value;
     if (invoice == null) {
       Helpers.showCustomSnackBar(
-        'Invoice details not loaded yet',
+        'Invoice details not loaded yet'.tr,
         type: SnackBarType.error,
         useGetxSnackbar: false,
       );
@@ -364,7 +364,7 @@ class ConsultationSummaryController extends GetxController {
       );
     } catch (e) {
       Helpers.showCustomSnackBar(
-        'Failed to generate PDF invoice preview',
+        'Failed to generate PDF invoice preview'.tr,
         type: SnackBarType.error,
         useGetxSnackbar: false,
       );

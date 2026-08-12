@@ -453,9 +453,9 @@ class AuthService extends GetxService {
               ),
               const SizedBox(height: 24),
               // Title
-              const Text(
-                'Insufficient Balance',
-                style: TextStyle(
+              Text(
+                'Insufficient Balance'.tr,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -465,9 +465,9 @@ class AuthService extends GetxService {
               ),
               const SizedBox(height: 12),
               // Description
-              const Text(
-                'You do not have enough balance for this consultation. Please top up your wallet to join the call.',
-                style: TextStyle(
+              Text(
+                'You do not have enough balance for this consultation. Please top up your wallet to join the call.'.tr,
+                style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFF94A3B8), // Slate 400
                   height: 1.5,
@@ -487,9 +487,9 @@ class AuthService extends GetxService {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(
+                      child: Text(
+                        'Cancel'.tr,
+                        style: const TextStyle(
                           color: Color(0xFF94A3B8),
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -511,9 +511,9 @@ class AuthService extends GetxService {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Top Up',
-                        style: TextStyle(
+                      child: Text(
+                        'Top Up'.tr,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -568,8 +568,8 @@ class AuthService extends GetxService {
         showPaymentRequiredDialog();
       } else {
         Get.snackbar(
-          'Error',
-          response.statusMessage ?? 'Failed to join video session',
+          'Error'.tr,
+          response.statusMessage ?? 'Failed to join video session'.tr,
           backgroundColor: const Color(0xFF0F172A).withOpacity(0.9),
           colorText: Colors.white,
         );
@@ -705,9 +705,9 @@ class AuthService extends GetxService {
               ),
               const SizedBox(height: 8),
               // Call Subtitle
-              const Text(
-                'Incoming Video Consultation...',
-                style: TextStyle(
+              Text(
+                'Incoming Video Consultation...'.tr,
+                style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFF94A3B8), // Slate 400
                   fontWeight: FontWeight.w500,
@@ -765,9 +765,9 @@ class AuthService extends GetxService {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Decline',
-                          style: TextStyle(
+                        Text(
+                          'Decline'.tr,
+                          style: const TextStyle(
                             color: Color(0xFFEF4444),
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
@@ -844,9 +844,9 @@ class AuthService extends GetxService {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Accept',
-                          style: TextStyle(
+                        Text(
+                          'Accept'.tr,
+                          style: const TextStyle(
                             color: Color(0xFF22C55E),
                             fontWeight: FontWeight.w600,
                             fontSize: 12,

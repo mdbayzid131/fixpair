@@ -89,14 +89,14 @@ class HomeController extends GetxController {
           Get.find<AuthService>().showPaymentRequiredDialog();
         } else {
           Get.snackbar(
-            'Error',
-            joinResponse.statusMessage ?? 'Failed to join video call',
+            'Error'.tr,
+            joinResponse.statusMessage ?? 'Failed to join video call'.tr,
           );
         }
       }
     } catch (e) {
       Helpers.showDebugLog('Error starting video call: $e');
-      Get.snackbar('Error', 'Could not start video call. Please try again.');
+      Get.snackbar('Error'.tr, 'Could not start video call. Please try again.'.tr);
     } finally {
       isLoading.value = false;
     }
@@ -105,19 +105,19 @@ class HomeController extends GetxController {
   void _showPaymentRequiredDialog() {
     Get.dialog(
       AlertDialog(
-        title: const Text('Payment Method Required'),
-        content: const Text(
-          'You need to add a payment method before you can start a video consultation.',
+        title: Text('Payment Method Required'.tr),
+        content: Text(
+          'You need to add a payment method before you can start a video consultation.'.tr,
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(onPressed: () => Get.back(), child: Text('Cancel'.tr)),
           ElevatedButton(
             onPressed: () {
               Get.back();
               // Navigate to Payment Setup
               Get.toNamed(AppRoutes.ADD_CARD);
             },
-            child: const Text('Add Card'),
+            child: Text('Add Card'.tr),
           ),
         ],
       ),

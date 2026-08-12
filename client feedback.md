@@ -2,8 +2,8 @@
 
 ## 📊 Summary
 - **Total Tasks:** 13
-- **Completed (Frontend):** 9 ✅
-- **Pending (Frontend):** 2 ⏳
+- **Completed (Frontend):** 10 ✅
+- **Pending (Frontend):** 1 ⏳
 - **Backend / Credentials Needed:** 2 ⚠️
 
 ---
@@ -19,7 +19,7 @@
 7. **✅ [DONE]** Among the accepted payment methods, Stripe is also listed. That needs to be removed.
 8. **✅ [DONE]** Additionally, the confirmation of the general terms and conditions and the liability disclaimer is missing.
 9. **✅ [DONE]** In the "Home" tab, all consultants should be listed.
-10. **⏳ [PENDING]** The default language should be the current language set on the iPhone.
+10. **✅ [DONE]** The default language should be the current language set on the iPhone.
 11. **✅ [DONE]** Can the four tabs at the bottom (Home, Search, Bookings, and Profile) be designed a bit differently? More visually appealing or with a different design? It looks so plain.
 12. **✅ [DONE]** In the "Home" tab, or generally on the start page, the Fixpair logo and the lettering with the subtitle are missing.
 13. **⚠️ [BACKEND]** In the email you receive, the title says "Live Consultant." That must say Fixpair. Also, at the bottom where it says "All Rights Reserved," it says Live Consultant. Additionally, the email should initially be in German, not in English. *(Requires backend email service update)*

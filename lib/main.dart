@@ -37,7 +37,7 @@ void main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await GetStorage.init();
 
-  // Load saved language
+  // Load saved language, default to English ('en_US')
   final savedLang = await StorageService.getString(StorageConstants.language);
   Locale initialLocale;
   if (savedLang == 'de') {

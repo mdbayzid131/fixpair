@@ -128,18 +128,18 @@ class BookingDetailsController extends GetxController {
   void _showPaymentRequiredDialog() {
     Get.dialog(
       AlertDialog(
-        title: const Text('Payment Method Required'),
-        content: const Text(
-          'You need to add a payment method before you can start a video consultation.',
+        title: Text('Payment Method Required'.tr),
+        content: Text(
+          'You need to add a payment method before you can start a video consultation.'.tr,
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          TextButton(onPressed: () => Get.back(), child: Text('Cancel'.tr)),
           ElevatedButton(
             onPressed: () {
               Get.back();
               Get.toNamed(AppRoutes.ADD_CARD);
             },
-            child: const Text('Add Card'),
+            child: Text('Add Card'.tr),
           ),
         ],
       ),

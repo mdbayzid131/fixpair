@@ -71,7 +71,7 @@ class PersonalInfoController extends GetxController {
 
   Future<void> saveChanges() async {
     if (firstNameController.text.isEmpty) {
-      Helpers.showError('First name cannot be empty');
+      Helpers.showError('First name cannot be empty'.tr);
       return;
     }
 
@@ -100,7 +100,7 @@ class PersonalInfoController extends GetxController {
       Helpers.hideLoadingDialog();
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Helpers.showSuccess('Profile updated successfully');
+        Helpers.showSuccess('Profile updated successfully'.tr);
         pickedImage.value = null; // Clear picked image after success
         await fetchProfile(); // Refresh local profile
 
@@ -133,8 +133,8 @@ class PersonalInfoController extends GetxController {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Select Image Source',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'Select Image Source'.tr,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             Row(
@@ -142,7 +142,7 @@ class PersonalInfoController extends GetxController {
               children: [
                 _buildSourceOption(
                   icon: Icons.camera_alt,
-                  label: 'Camera',
+                  label: 'Camera'.tr,
                   onTap: () {
                     Get.back();
                     pickImage(ImageSource.camera);
@@ -150,7 +150,7 @@ class PersonalInfoController extends GetxController {
                 ),
                 _buildSourceOption(
                   icon: Icons.photo_library,
-                  label: 'Gallery',
+                  label: 'Gallery'.tr,
                   onTap: () {
                     Get.back();
                     pickImage(ImageSource.gallery);

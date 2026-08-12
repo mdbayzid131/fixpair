@@ -37,14 +37,14 @@ class PaymentController extends GetxController {
       await _userRepository.createStripeCustomer();
 
       Get.snackbar(
-        'Processing',
-        'Adding your card...',
+        'Processing'.tr,
+        'Adding your card...'.tr,
         showProgressIndicator: true,
         snackPosition: SnackPosition.BOTTOM,
       );
     } catch (e) {
       Helpers.showDebugLog('Error adding payment method: $e');
-      Get.snackbar('Error', 'Failed to add card: $e');
+      Get.snackbar('Error'.tr, '${'Failed to add card'.tr}: $e');
     } finally {
       isLoading.value = false;
     }
@@ -61,8 +61,8 @@ class PaymentController extends GetxController {
         await fetchPaymentMethods();
         Get.back(); // Navigate back from AddCardView screen first
         Get.snackbar(
-          'Success',
-          'Card added successfully',
+          'Success'.tr,
+          'Card added successfully'.tr,
           snackPosition: SnackPosition.BOTTOM,
           margin: const EdgeInsets.all(16),
           borderRadius: 12,
@@ -72,7 +72,7 @@ class PaymentController extends GetxController {
       }
     } catch (e) {
       Helpers.showDebugLog('Error attaching method: $e');
-      Get.snackbar('Error', 'Failed to link card to profile');
+      Get.snackbar('Error'.tr, 'Failed to link card to profile'.tr);
     } finally {
       isLoading.value = false;
     }
@@ -85,12 +85,12 @@ class PaymentController extends GetxController {
         paymentMethodId,
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar('Success', 'Default payment method updated');
+        Get.snackbar('Success'.tr, 'Default payment method updated'.tr);
         fetchPaymentMethods();
       }
     } catch (e) {
       Helpers.showDebugLog('Error setting default card: $e');
-      Get.snackbar('Error', 'Failed to update default card');
+      Get.snackbar('Error'.tr, 'Failed to update default card'.tr);
     } finally {
       isLoading.value = false;
     }

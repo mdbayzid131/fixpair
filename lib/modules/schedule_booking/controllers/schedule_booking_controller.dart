@@ -94,10 +94,17 @@ class ScheduleBookingController extends GetxController {
       return false;
     }
     final s1 = _parseTime(start1);
-    final e1 = _parseTime(end1);
+    var e1 = _parseTime(end1);
     final s2 = _parseTime(start2);
-    final e2 = _parseTime(end2);
+    var e2 = _parseTime(end2);
     if (s1 == null || e1 == null || s2 == null || e2 == null) return false;
+
+    if (e1.isBefore(s1) || e1.isAtSameMomentAs(s1)) {
+      e1 = e1.add(const Duration(days: 1));
+    }
+    if (e2.isBefore(s2) || e2.isAtSameMomentAs(s2)) {
+      e2 = e2.add(const Duration(days: 1));
+    }
     return s1.isBefore(e2) && s2.isBefore(e1);
   }
 
@@ -127,6 +134,16 @@ class ScheduleBookingController extends GetxController {
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 
+  List<String> _generatePossibleTimes() {
+    final List<String> possible = [];
+    for (int hour = 0; hour < 24; hour++) {
+      final h = hour.toString().padLeft(2, '0');
+      possible.add('$h:00');
+      possible.add('$h:30');
+    }
+    return possible;
+  }
+
   void _generateAndOrganizeSlots(
     String queryDateKey,
     List<SlotModel> unavailableSlots,
@@ -151,32 +168,7 @@ class ScheduleBookingController extends GetxController {
     final today = DateTime.now();
     final todayStart = DateTime(today.year, today.month, today.day);
 
-    final List<String> possibleTimes = [
-      '08:00',
-      '08:30',
-      '09:00',
-      '09:30',
-      '10:00',
-      '10:30',
-      '11:00',
-      '11:30',
-      '12:00',
-      '12:30',
-      '13:00',
-      '13:30',
-      '14:00',
-      '14:30',
-      '15:00',
-      '15:30',
-      '16:00',
-      '16:30',
-      '17:00',
-      '17:30',
-      '18:00',
-      '18:30',
-      '19:00',
-      '19:30',
-    ];
+    final List<String> possibleTimes = _generatePossibleTimes();
 
     for (var day = 1; day <= totalDays; day++) {
       final currentDate = DateTime(year, month, day);
@@ -346,32 +338,7 @@ class ScheduleBookingController extends GetxController {
     final today = DateTime.now();
     final isToday = dateKey == DateFormat('yyyy-MM-dd').format(today);
 
-    final List<String> possibleTimes = [
-      '08:00',
-      '08:30',
-      '09:00',
-      '09:30',
-      '10:00',
-      '10:30',
-      '11:00',
-      '11:30',
-      '12:00',
-      '12:30',
-      '13:00',
-      '13:30',
-      '14:00',
-      '14:30',
-      '15:00',
-      '15:30',
-      '16:00',
-      '16:30',
-      '17:00',
-      '17:30',
-      '18:00',
-      '18:30',
-      '19:00',
-      '19:30',
-    ];
+    final List<String> possibleTimes = _generatePossibleTimes();
 
     final List<SlotModel> dayUnavailable = unavailableSlots;
 
@@ -444,7 +411,7 @@ class ScheduleBookingController extends GetxController {
     if (index >= 0 && index < slots.length) {
       final slot = slots[index];
       if (slot.isBooked == true) {
-        Helpers.showWarning('This time slot is already booked.');
+        Helpers.showWarning('This time slot is already booked.'.tr);
         return;
       }
       selectedTimeIndex.value = index;
@@ -482,14 +449,7 @@ class ScheduleBookingController extends GetxController {
         ),
       );
 
-      final parsedEnd = _parseTime(endTime);
-      final parsedMax = _parseTime('20:00');
-      final isExceeding =
-          parsedEnd != null &&
-          parsedMax != null &&
-          parsedEnd.isAfter(parsedMax);
-
-      final isEnabled = !isUnavailable && !isBooked && !isExceeding;
+      final isEnabled = !isUnavailable && !isBooked;
 
       String label = '';
       if (duration == 30) label = '30 Min';
