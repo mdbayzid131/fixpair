@@ -15,7 +15,7 @@ class ProfileController extends GetxController {
 
   final isLoading = false.obs;
   final user = Rxn<UserData>();
-  final currentLanguage = 'en'.obs;
+  final currentLanguage = 'de'.obs;
 
   @override
   void onInit() {
@@ -26,7 +26,7 @@ class ProfileController extends GetxController {
 
   Future<void> loadCurrentLanguage() async {
     final lang = await StorageService.getString(StorageConstants.language);
-    currentLanguage.value = lang.isNotEmpty ? lang : 'en';
+    currentLanguage.value = lang.isNotEmpty ? lang : 'de';
   }
 
   Future<void> setLanguage(String languageCode) async {

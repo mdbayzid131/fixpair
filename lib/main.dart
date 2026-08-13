@@ -37,13 +37,13 @@ void main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await GetStorage.init();
 
-  // Load saved language, default to English ('en_US')
+  // Load saved language, default to German ('de_DE')
   final savedLang = await StorageService.getString(StorageConstants.language);
   Locale initialLocale;
-  if (savedLang == 'de') {
-    initialLocale = const Locale('de', 'DE');
-  } else {
+  if (savedLang == 'en') {
     initialLocale = const Locale('en', 'US');
+  } else {
+    initialLocale = const Locale('de', 'DE');
   }
 
   Get.put<AppLockService>(AppLockService(), permanent: true);

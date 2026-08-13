@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
           initialBinding: InitialBinding(),
           translations: AppTranslations(),
           locale: initialLocale,
-          fallbackLocale: const Locale('en', 'US'),
+          fallbackLocale: const Locale('de', 'DE'),
         );
       },
     );
