@@ -1,1 +1,0 @@
-entropy@Betopias-Mac-mini-76 fixpair % gh auth login
