@@ -59,7 +59,8 @@ class LaundryHomeScreen extends GetView<HomeController> {
                                 height: 190.h,
                                 child: ListView.builder(
                                   scrollDirection: Axis.horizontal,
-                                  itemCount: controller.confirmedBookings.length,
+                                  itemCount:
+                                      controller.confirmedBookings.length,
                                   itemBuilder: (context, index) {
                                     final booking =
                                         controller.confirmedBookings[index];
@@ -86,7 +87,9 @@ class LaundryHomeScreen extends GetView<HomeController> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildSectionTitle('Recommended Consultants'.tr),
+                                _buildSectionTitle(
+                                  'Recommended Consultants'.tr,
+                                ),
                                 SizedBox(height: 2.h),
                                 Text(
                                   'Top verified experts for your needs'.tr,
@@ -113,7 +116,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 16.h),
+                        SizedBox(height: 13.h),
 
                         // 4. Consultants List
                         Obx(() {
@@ -156,6 +159,7 @@ class LaundryHomeScreen extends GetView<HomeController> {
                           }
 
                           return ListView.builder(
+                            padding: EdgeInsets.zero,
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: controller.recommendedConsultants.length,
@@ -529,16 +533,20 @@ Widget _buildUpcomingBooking(BookingModel booking) {
 
 Widget _buildExpertCard(UserData consultant) {
   final isOnline = consultant.activeStatus ?? false;
-  final imageUrl = ApiConstants.getImageUrl(consultant.image ?? consultant.avatar);
+  final imageUrl = ApiConstants.getImageUrl(
+    consultant.image ?? consultant.avatar,
+  );
 
   final consultancyType =
-      (consultant.consultancyType != null && consultant.consultancyType!.isNotEmpty)
+      (consultant.consultancyType != null &&
+          consultant.consultancyType!.isNotEmpty)
       ? (consultant.consultancyType![0].toUpperCase() +
             consultant.consultancyType!.substring(1))
       : null;
 
   final experience =
-      (consultant.experience != null && consultant.experience!.trim().isNotEmpty)
+      (consultant.experience != null &&
+          consultant.experience!.trim().isNotEmpty)
       ? (consultant.experience!.toLowerCase().contains("exp")
             ? consultant.experience!
             : (consultant.experience!.toLowerCase().contains("year") ||
@@ -553,7 +561,8 @@ Widget _buildExpertCard(UserData consultant) {
   ].join('  •  ');
 
   return GestureDetector(
-    onTap: () => Get.toNamed(AppRoutes.CONSULTANT_PROFILE, arguments: consultant),
+    onTap: () =>
+        Get.toNamed(AppRoutes.CONSULTANT_PROFILE, arguments: consultant),
     child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
