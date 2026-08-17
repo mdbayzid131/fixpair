@@ -58,6 +58,7 @@ class _SearchViewState extends State<SearchView> {
             color: Colors.white,
             padding: EdgeInsets.only(top: 14.h, bottom: 14.h),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -228,38 +229,43 @@ class _SearchViewState extends State<SearchView> {
   }
 
   Widget _buildCategoryList() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Obx(
-        () => Row(
-          children: controller.categories.map((cat) {
-            final isSelected = controller.selectedCategory.value == cat;
-            return GestureDetector(
-              onTap: () => controller.selectCategory(cat),
-              child: Container(
-                margin: EdgeInsets.only(right: 8.w),
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 7.h),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF0066FF) : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF0066FF)
-                        : const Color(0xFFE2E8F0),
+    return SizedBox(
+      width: double.infinity,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        child: Obx(
+          () => Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: controller.categories.map((cat) {
+              final isSelected = controller.selectedCategory.value == cat;
+              return GestureDetector(
+                onTap: () => controller.selectCategory(cat),
+                child: Container(
+                  margin: EdgeInsets.only(right: 8.w),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 7.h),
+                  decoration: BoxDecoration(
+                    color: isSelected ? const Color(0xFF0066FF) : const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(
+                      color: isSelected
+                          ? const Color(0xFF0066FF)
+                          : const Color(0xFFE2E8F0),
+                    ),
+                  ),
+                  child: Text(
+                    cat,
+                    style: GoogleFonts.manrope(
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w700,
+                      color: isSelected ? Colors.white : const Color(0xFF475569),
+                    ),
                   ),
                 ),
-                child: Text(
-                  cat,
-                  style: GoogleFonts.manrope(
-                    fontSize: 12.5.sp,
-                    fontWeight: FontWeight.w700,
-                    color: isSelected ? Colors.white : const Color(0xFF475569),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );

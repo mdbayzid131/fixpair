@@ -1,3 +1,4 @@
+import 'package:fixpair/core/services/auth_service.dart';
 import 'package:fixpair/core/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -47,21 +48,8 @@ class ProfileView extends GetView<ProfileController> {
 
   Widget _buildUserInfoCard() {
     return Obx(() {
-      if (controller.isLoading.value) {
-        return Container(
-          width: double.infinity,
-          height: 120.h,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24.r),
-          ),
-          child: const Center(
-            child: CircularProgressIndicator(color: Color(0xFF0066FF)),
-          ),
-        );
-      }
-
-      final userData = controller.user.value;
+      final userData =
+          controller.user.value ?? Get.find<AuthService>().user.value;
       final name =
           userData?.name ??
           ((userData?.firstName != null || userData?.lastName != null)
