@@ -123,7 +123,7 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
     // 2. Create engine
     engine = createAgoraRtcEngine();
     await engine.initialize(
-      const RtcEngineContext(
+      RtcEngineContext(
         appId: appId,
         channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
         audioScenario: AudioScenarioType.audioScenarioGameStreaming,
