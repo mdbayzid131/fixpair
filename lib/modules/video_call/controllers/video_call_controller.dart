@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
@@ -21,6 +22,7 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
   static const String appId = ApiConstants.agoraAppId;
 
   late RtcEngine engine;
+  final RxBool isEngineInitialized = false.obs;
   late final AgoraPipController _pipController;
   final RxBool isInPipMode = false.obs;
 
@@ -37,7 +39,8 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
   final RxDouble pipTop = 0.0.obs;
   final RxDouble pipLeft = 0.0.obs;
 
-  // Layout swap view toggle
+  // Role & layout swap view toggle
+  final RxBool isConsultant = false.obs;
   final RxBool isLocalUserFullScreen = false.obs;
 
   // Global overlay minimization state
@@ -59,6 +62,21 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
     // Default initial position near the bottom-right corner
     pipTop.value = Get.height - 290.0;
     pipLeft.value = Get.width - 115.0;
+
+    final authService = Get.find<AuthService>();
+    final role = authService.user.value?.role?.toLowerCase() ?? '';
+    isConsultant.value =
+        role == 'consultant' || role == 'provider' || role == 'expert';
+
+    // Requirement 2: Customer's screen full-screen by default
+    // If Customer (!isConsultant), default local camera to full-screen
+    // If Consultant (isConsultant), default remote customer camera to full-screen
+    isLocalUserFullScreen.value = !isConsultant.value;
+
+    // Requirement 1: Consultant's camera is OFF under all circumstances
+    if (isConsultant.value) {
+      isCameraOn.value = false;
+    }
 
     final args = Get.arguments;
     if (args != null) {
@@ -109,6 +127,7 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
         audioScenario: AudioScenarioType.audioScenarioGameStreaming,
       ),
     );
+    isEngineInitialized.value = true;
 
     // Initialize PiP Controller
     _pipController = engine.createPipController();
@@ -179,22 +198,23 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
 
     // 4. Enable video and join
     await engine.enableVideo();
-    await engine.startPreview();
 
-    // Determine UID according to backend guidelines: 1001 for user, 2001 for consultant
-    final authService = Get.find<AuthService>();
-    final isConsultant =
-        authService.user.value?.role?.toLowerCase() == 'consultant';
-    final int myUid = isConsultant ? 2001 : 1001;
+    if (!isConsultant.value) {
+      await engine.startPreview();
+    } else {
+      await engine.muteLocalVideoStream(true);
+    }
 
-    AppLogger.info('[Agora] Joining channel $channelName with UID $myUid');
+    final int myUid = isConsultant.value ? 2001 : 1001;
+
+    AppLogger.info('[Agora] Joining channel $channelName with UID $myUid (isConsultant: ${isConsultant.value})');
 
     await engine.joinChannel(
       token: token,
       channelId: channelName,
       uid: myUid,
-      options: const ChannelMediaOptions(
-        publishCameraTrack: true,
+      options: ChannelMediaOptions(
+        publishCameraTrack: !isConsultant.value && isCameraOn.value,
         publishMicrophoneTrack: true,
         autoSubscribeAudio: true,
         autoSubscribeVideo: true,
@@ -221,17 +241,20 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
   }
 
   void toggleMic() async {
+    if (!isEngineInitialized.value) return;
     isMicOn.value = !isMicOn.value;
     AppLogger.info('[Agora] toggleMic() called. isMicOn: ${isMicOn.value}');
     await engine.muteLocalAudioStream(!isMicOn.value);
   }
 
   void toggleCamera() async {
+    if (isConsultant.value || !isEngineInitialized.value) return; // Consultant camera is permanently off
     isCameraOn.value = !isCameraOn.value;
     await engine.muteLocalVideoStream(!isCameraOn.value);
   }
 
   void switchCamera() async {
+    if (isConsultant.value || !isEngineInitialized.value) return; // Consultant camera is permanently off
     await engine.switchCamera();
   }
 
@@ -365,9 +388,17 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
   }
 
   Widget _buildOverlayVideoWidget() {
+    if (!isEngineInitialized.value) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF22C55E),
+          strokeWidth: 2,
+        ),
+      );
+    }
     final isLocalFull = isLocalUserFullScreen.value;
     if (isLocalFull) {
-      // Local is in overlay background (meaning in full screen when maximized, so overlay shows client)
+      // Local is in overlay background
       if (!isCameraOn.value) {
         return Container(
           color: const Color(0xFF1E293B),
@@ -387,20 +418,9 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
         ),
       );
     } else {
-      // Overlay shows remote consultant
-      if (remoteUid.value != 0) {
-        if (isRemoteVideoMuted.value) {
-          return Container(
-            color: const Color(0xFF1E293B),
-            child: const Center(
-              child: Icon(
-                Icons.videocam_off_rounded,
-                color: Color(0xFFEF4444),
-                size: 24,
-              ),
-            ),
-          );
-        }
+      // Overlay shows remote user
+      if (remoteUid.value != 0 && isConsultant.value) {
+        // Consultant seeing customer video stream
         return AgoraVideoView(
           controller: VideoViewController.remote(
             rtcEngine: engine,
@@ -408,14 +428,40 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
             connection: RtcConnection(channelId: channelName),
           ),
         );
-      } else {
-        return const Center(
-          child: CircularProgressIndicator(
-            color: Color(0xFF22C55E),
-            strokeWidth: 2,
-          ),
-        );
       }
+      // Customer seeing consultant (consultant camera is off, show avatar)
+      final bookingModel = bookingRx.value ?? booking;
+      final avatarUrl = isConsultant.value
+          ? (bookingModel.user?.image ?? bookingModel.user?.avatar)
+          : (bookingModel.consultant?.image ?? bookingModel.consultant?.avatar);
+      return Container(
+        color: const Color(0xFF0F172A),
+        child: Center(
+          child: CircleAvatar(
+            radius: 18,
+            backgroundColor: const Color(0xFF1E293B),
+            child: ClipOval(
+              child: avatarUrl != null && avatarUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: ApiConstants.getImageUrl(avatarUrl),
+                      fit: BoxFit.cover,
+                      width: 36,
+                      height: 36,
+                      errorWidget: (context, url, error) => const Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+            ),
+          ),
+        ),
+      );
     }
   }
 
@@ -454,8 +500,14 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
       AppLogger.warning('[Agora PiP] Error disposing PiP on endCall: $e');
     }
 
-    await engine.leaveChannel();
-    await engine.release();
+    if (isEngineInitialized.value) {
+      try {
+        await engine.leaveChannel();
+        await engine.release();
+      } catch (e) {
+        AppLogger.warning('[Agora] Error leaving/releasing channel on endCall: $e');
+      }
+    }
 
     closeOverlay();
 
@@ -490,8 +542,14 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
       AppLogger.warning('[Agora PiP] Error disposing PiP on onClose: $e');
     }
 
-    engine.leaveChannel();
-    engine.release();
+    if (isEngineInitialized.value) {
+      try {
+        engine.leaveChannel();
+        engine.release();
+      } catch (e) {
+        AppLogger.warning('[Agora] Error leaving/releasing channel on onClose: $e');
+      }
+    }
     closeOverlay();
 
     try {

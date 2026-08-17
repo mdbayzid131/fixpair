@@ -1,4 +1,6 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:fixpair/core/services/auth_service.dart';
+import 'package:fixpair/data/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -57,6 +59,9 @@ class VideoCallView extends GetView<VideoCallController> {
 
   Widget _buildBackgroundVideo() {
     return Obx(() {
+      if (!controller.isEngineInitialized.value) {
+        return _buildWaitingPlaceholder();
+      }
       final isLocalFull = controller.isLocalUserFullScreen.value;
       if (isLocalFull) {
         // Show client (local user) in full screen
@@ -70,18 +75,24 @@ class VideoCallView extends GetView<VideoCallController> {
           ),
         );
       } else {
-        // Show consultant in full screen
+        // Show consultant / remote user in full screen
         if (controller.remoteUid.value != 0) {
-          if (controller.isRemoteVideoMuted.value) {
+          if (controller.isConsultant.value) {
+            // Consultant watching Customer's camera stream
+            if (controller.isRemoteVideoMuted.value) {
+              return _buildRemoteVideoMutedPlaceholder();
+            }
+            return AgoraVideoView(
+              controller: VideoViewController.remote(
+                rtcEngine: controller.engine,
+                canvas: VideoCanvas(uid: controller.remoteUid.value),
+                connection: RtcConnection(channelId: controller.channelName),
+              ),
+            );
+          } else {
+            // Customer viewing Consultant (Consultant camera is permanently OFF, show avatar)
             return _buildRemoteVideoMutedPlaceholder();
           }
-          return AgoraVideoView(
-            controller: VideoViewController.remote(
-              rtcEngine: controller.engine,
-              canvas: VideoCanvas(uid: controller.remoteUid.value),
-              connection: RtcConnection(channelId: controller.channelName),
-            ),
-          );
         } else {
           return _buildWaitingPlaceholder();
         }
@@ -147,75 +158,18 @@ class VideoCallView extends GetView<VideoCallController> {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: const Color(0xFF0F172A),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 130.w,
-                height: 130.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFFEF4444).withOpacity(0.2),
-                    width: 4,
-                  ),
-                ),
-              ),
-              CircleAvatar(
-                radius: 54.r,
-                backgroundColor: const Color(0xFF1E293B),
-                child: Text(
-                  'YOU'.tr,
-                  style: GoogleFonts.manrope(
-                    fontSize: 28.sp,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF94A3B8),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 2,
-                right: 2,
-                child: Container(
-                  padding: EdgeInsets.all(8.w),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEF4444),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.videocam_off_rounded,
-                    color: Colors.white,
-                    size: 20.sp,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 24.h),
-          Text(
-            'Your camera is turned off'.tr,
-            style: GoogleFonts.manrope(
-              color: Colors.white,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+        ),
       ),
-    );
-  }
-
-  Widget _buildRemoteVideoMutedPlaceholder() {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: const Color(0xFF0F172A),
       child: Obx(() {
-        final booking = controller.bookingRx.value ?? controller.booking;
+        final localAvatarUrl = _getLocalUserAvatarUrl();
+        final authService = Get.find<AuthService>();
+        final userName = authService.user.value?.name ?? 'YOU'.tr;
+
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -223,42 +177,43 @@ class VideoCallView extends GetView<VideoCallController> {
               alignment: Alignment.center,
               children: [
                 Container(
-                  width: 130.w,
-                  height: 130.w,
+                  width: 140.w,
+                  height: 140.w,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFFEF4444).withOpacity(0.2),
-                      width: 4,
+                      color: const Color(0xFFEF4444).withOpacity(0.3),
+                      width: 3,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFEF4444).withOpacity(0.15),
+                        blurRadius: 30,
+                        spreadRadius: 5,
+                      ),
+                    ],
                   ),
                 ),
                 Container(
-                  width: 108.w,
-                  height: 108.w,
+                  width: 118.w,
+                  height: 118.w,
                   decoration: const BoxDecoration(
                     color: Color(0xFF1E293B),
                     shape: BoxShape.circle,
                   ),
                   child: ClipOval(
-                    child:
-                        booking.consultant?.avatar != null &&
-                            booking.consultant!.avatar!.isNotEmpty
+                    child: localAvatarUrl != null && localAvatarUrl.isNotEmpty
                         ? CachedNetworkImage(
-                            imageUrl: ApiConstants.getImageUrl(
-                              booking.consultant!.avatar,
-                            ),
+                            imageUrl: ApiConstants.getImageUrl(localAvatarUrl),
                             fit: BoxFit.cover,
                             placeholder: (context, url) => const Center(
                               child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                             errorWidget: (context, url, error) => Center(
                               child: Text(
-                                _getValidConsultantName(
-                                  booking.consultant?.name,
-                                ).substring(0, 1).toUpperCase(),
+                                userName.substring(0, 1).toUpperCase(),
                                 style: GoogleFonts.manrope(
-                                  fontSize: 36.sp,
+                                  fontSize: 38.sp,
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF94A3B8),
                                 ),
@@ -267,11 +222,9 @@ class VideoCallView extends GetView<VideoCallController> {
                           )
                         : Center(
                             child: Text(
-                              _getValidConsultantName(
-                                booking.consultant?.name,
-                              ).substring(0, 1).toUpperCase(),
+                              userName.substring(0, 1).toUpperCase(),
                               style: GoogleFonts.manrope(
-                                fontSize: 36.sp,
+                                fontSize: 38.sp,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF94A3B8),
                               ),
@@ -280,18 +233,22 @@ class VideoCallView extends GetView<VideoCallController> {
                   ),
                 ),
                 Positioned(
-                  bottom: 2,
-                  right: 2,
+                  bottom: 4,
+                  right: 4,
                   child: Container(
                     padding: EdgeInsets.all(8.w),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFEF4444),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444),
                       shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFF0F172A),
+                        width: 2,
+                      ),
                     ),
                     child: Icon(
                       Icons.videocam_off_rounded,
                       color: Colors.white,
-                      size: 20.sp,
+                      size: 18.sp,
                     ),
                   ),
                 ),
@@ -299,21 +256,151 @@ class VideoCallView extends GetView<VideoCallController> {
             ),
             SizedBox(height: 24.h),
             Text(
-              '${_getValidConsultantName(booking.consultant?.name)} ${'turned camera off'.tr}',
+              'Your camera is turned off'.tr,
               style: GoogleFonts.manrope(
                 color: Colors.white,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            SizedBox(height: 6.h),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildRemoteVideoMutedPlaceholder() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+        ),
+      ),
+      child: Obx(() {
+        final booking = controller.bookingRx.value ?? controller.booking;
+        final consultantName =
+            _getValidConsultantName(booking.consultant?.name);
+        final avatarUrl = _getRemoteUserAvatarUrl();
+
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 140.w,
+                  height: 140.w,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF22C55E).withOpacity(0.3),
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF22C55E).withOpacity(0.15),
+                        blurRadius: 30,
+                        spreadRadius: 5,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 118.w,
+                  height: 118.w,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF1E293B),
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: avatarUrl != null && avatarUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: ApiConstants.getImageUrl(avatarUrl),
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            errorWidget: (context, url, error) => Center(
+                              child: Text(
+                                consultantName.substring(0, 1).toUpperCase(),
+                                style: GoogleFonts.manrope(
+                                  fontSize: 38.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF94A3B8),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Center(
+                            child: Text(
+                              consultantName.substring(0, 1).toUpperCase(),
+                              style: GoogleFonts.manrope(
+                                fontSize: 38.sp,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF94A3B8),
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 4,
+                  right: 4,
+                  child: Container(
+                    padding: EdgeInsets.all(8.w),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF22C55E),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFF0F172A),
+                        width: 2,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.mic_rounded,
+                      color: Colors.white,
+                      size: 18.sp,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 24.h),
             Text(
-              'Audio is still active'.tr,
+              consultantName,
               style: GoogleFonts.manrope(
-                color: const Color(0xFF94A3B8),
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w500,
+                color: Colors.white,
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w700,
               ),
+            ),
+            SizedBox(height: 8.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 8.w,
+                  height: 8.w,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF22C55E),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                SizedBox(width: 6.w),
+                Text(
+                  'Audio active'.tr,
+                  style: GoogleFonts.manrope(
+                    color: const Color(0xFF94A3B8),
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -334,6 +421,42 @@ class VideoCallView extends GetView<VideoCallController> {
       return 'Consultant'.tr;
     }
     return name.trim();
+  }
+
+  String? _getUserAvatarUrl(UserData? user) {
+    if (user == null) return null;
+    if (user.image != null && user.image!.trim().isNotEmpty) {
+      return user.image!.trim();
+    }
+    if (user.avatar != null && user.avatar!.trim().isNotEmpty) {
+      return user.avatar!.trim();
+    }
+    return null;
+  }
+
+  String? _getLocalUserAvatarUrl() {
+    try {
+      final authService = Get.find<AuthService>();
+      final currentUser = authService.user.value;
+      final urlFromAuth = _getUserAvatarUrl(currentUser);
+      if (urlFromAuth != null) return urlFromAuth;
+    } catch (_) {}
+
+    final booking = controller.bookingRx.value ?? controller.booking;
+    if (controller.isConsultant.value) {
+      return _getUserAvatarUrl(booking.consultant);
+    } else {
+      return _getUserAvatarUrl(booking.user);
+    }
+  }
+
+  String? _getRemoteUserAvatarUrl() {
+    final booking = controller.bookingRx.value ?? controller.booking;
+    if (controller.isConsultant.value) {
+      return _getUserAvatarUrl(booking.user);
+    } else {
+      return _getUserAvatarUrl(booking.consultant);
+    }
   }
 
   Widget _buildTopOverlay() {
@@ -514,39 +637,7 @@ class VideoCallView extends GetView<VideoCallController> {
   }
 
   Widget _buildLocalPiPView() {
-    return controller.isCameraOn.value
-        ? AgoraVideoView(
-            controller: VideoViewController(
-              rtcEngine: controller.engine,
-              canvas: const VideoCanvas(uid: 0),
-            ),
-          )
-        : Container(
-            color: const Color(0xFF1E293B),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.videocam_off_rounded,
-                  color: const Color(0xFFEF4444),
-                  size: 24.sp,
-                ),
-                SizedBox(height: 6.h),
-                Text(
-                  'Camera off'.tr,
-                  style: GoogleFonts.manrope(
-                    color: Colors.white70,
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          );
-  }
-
-  Widget _buildRemotePiPView() {
-    if (controller.remoteUid.value == 0) {
+    if (!controller.isEngineInitialized.value) {
       return Container(
         color: const Color(0xFF1E293B),
         child: const Center(
@@ -557,90 +648,286 @@ class VideoCallView extends GetView<VideoCallController> {
         ),
       );
     }
-    return controller.isRemoteVideoMuted.value
-        ? Container(
-            color: const Color(0xFF1E293B),
-            child: Column(
+    if (controller.isCameraOn.value) {
+      return AgoraVideoView(
+        controller: VideoViewController(
+          rtcEngine: controller.engine,
+          canvas: const VideoCanvas(uid: 0),
+        ),
+      );
+    }
+
+    final localAvatarUrl = _getLocalUserAvatarUrl();
+    final authService = Get.find<AuthService>();
+    final userName = authService.user.value?.name ?? 'YOU';
+
+    return Container(
+      color: const Color(0xFF0F172A),
+      padding: EdgeInsets.all(6.w),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 48.w,
+            height: 48.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFFEF4444),
+                width: 2,
+              ),
+            ),
+            child: ClipOval(
+              child: localAvatarUrl != null && localAvatarUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: ApiConstants.getImageUrl(localAvatarUrl),
+                      fit: BoxFit.cover,
+                      errorWidget: (context, url, error) => Center(
+                        child: Text(
+                          userName.substring(0, 1).toUpperCase(),
+                          style: GoogleFonts.manrope(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF94A3B8),
+                          ),
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Text(
+                        userName.substring(0, 1).toUpperCase(),
+                        style: GoogleFonts.manrope(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF94A3B8),
+                        ),
+                      ),
+                    ),
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            'Cam Off'.tr,
+            style: GoogleFonts.manrope(
+              color: Colors.white70,
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRemotePiPView() {
+    if (!controller.isEngineInitialized.value || controller.remoteUid.value == 0) {
+      return Container(
+        color: const Color(0xFF0F172A),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 18.w,
+              height: 18.w,
+              child: const CircularProgressIndicator(
+                color: Color(0xFF22C55E),
+                strokeWidth: 2,
+              ),
+            ),
+            SizedBox(height: 6.h),
+            Text(
+              'Connecting...'.tr,
+              style: GoogleFonts.manrope(
+                color: Colors.white70,
+                fontSize: 9.sp,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (controller.isConsultant.value) {
+      return controller.isRemoteVideoMuted.value
+          ? Container(
+              color: const Color(0xFF1E293B),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.videocam_off_rounded,
+                    color: const Color(0xFFEF4444),
+                    size: 24.sp,
+                  ),
+                  SizedBox(height: 6.h),
+                  Text(
+                    'Cam Off'.tr,
+                    style: GoogleFonts.manrope(
+                      color: Colors.white70,
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : AgoraVideoView(
+              controller: VideoViewController.remote(
+                rtcEngine: controller.engine,
+                canvas: VideoCanvas(uid: controller.remoteUid.value),
+                connection: RtcConnection(channelId: controller.channelName),
+              ),
+            );
+    }
+
+    return Obx(() {
+      final booking = controller.bookingRx.value ?? controller.booking;
+      final consultantName =
+          _getValidConsultantName(booking.consultant?.name);
+      final avatarUrl = _getRemoteUserAvatarUrl();
+
+      return Container(
+        color: const Color(0xFF0F172A),
+        padding: EdgeInsets.all(6.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 48.w,
+              height: 48.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFF22C55E),
+                  width: 2,
+                ),
+              ),
+              child: ClipOval(
+                child: avatarUrl != null && avatarUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: ApiConstants.getImageUrl(avatarUrl),
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) => Center(
+                          child: Text(
+                            consultantName.substring(0, 1).toUpperCase(),
+                            style: GoogleFonts.manrope(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          consultantName.substring(0, 1).toUpperCase(),
+                          style: GoogleFonts.manrope(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF94A3B8),
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+            SizedBox(height: 4.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 2.w),
+              child: Text(
+                consultantName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.manrope(
+                  color: Colors.white,
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            SizedBox(height: 2.h),
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.videocam_off_rounded,
-                  color: const Color(0xFFEF4444),
-                  size: 24.sp,
+                  Icons.mic_rounded,
+                  color: const Color(0xFF22C55E),
+                  size: 10.sp,
                 ),
-                SizedBox(height: 6.h),
+                SizedBox(width: 2.w),
                 Text(
-                  'Cam Off'.tr,
+                  'Audio'.tr,
                   style: GoogleFonts.manrope(
-                    color: Colors.white70,
-                    fontSize: 10.sp,
+                    color: const Color(0xFF94A3B8),
+                    fontSize: 9.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
-          )
-        : AgoraVideoView(
-            controller: VideoViewController.remote(
-              rtcEngine: controller.engine,
-              canvas: VideoCanvas(uid: controller.remoteUid.value),
-              connection: RtcConnection(channelId: controller.channelName),
-            ),
-          );
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildBottomControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        // Mic Toggle
-        _buildToggleControlButton(
-          activeIcon: Icons.mic_rounded,
-          inactiveIcon: Icons.mic_off_rounded,
-          onTap: () => controller.toggleMic(),
-          isActive: controller.isMicOn,
-        ),
+    return Obx(() {
+      final isConsultant = controller.isConsultant.value;
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Mic Toggle
+          _buildToggleControlButton(
+            activeIcon: Icons.mic_rounded,
+            inactiveIcon: Icons.mic_off_rounded,
+            onTap: () => controller.toggleMic(),
+            isActive: controller.isMicOn,
+          ),
 
-        // Camera Toggle
-        _buildToggleControlButton(
-          activeIcon: Icons.videocam_rounded,
-          inactiveIcon: Icons.videocam_off_rounded,
-          onTap: () => controller.toggleCamera(),
-          isActive: controller.isCameraOn,
-        ),
-
-        // Hang up button
-        GestureDetector(
-          onTap: () => controller.endCall(),
-          child: Container(
-            width: 70.w,
-            height: 70.w,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEF4444),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFEF4444).withOpacity(0.35),
-                  blurRadius: 25,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+          // Camera Toggle (Customer only)
+          if (!isConsultant)
+            _buildToggleControlButton(
+              activeIcon: Icons.videocam_rounded,
+              inactiveIcon: Icons.videocam_off_rounded,
+              onTap: () => controller.toggleCamera(),
+              isActive: controller.isCameraOn,
             ),
-            child: Icon(
-              Icons.call_end_rounded,
-              color: Colors.white,
-              size: 30.sp,
+
+          // Hang up button
+          GestureDetector(
+            onTap: () => controller.endCall(),
+            child: Container(
+              width: 70.w,
+              height: 70.w,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEF4444),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFEF4444).withOpacity(0.35),
+                    blurRadius: 25,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.call_end_rounded,
+                color: Colors.white,
+                size: 30.sp,
+              ),
             ),
           ),
-        ),
 
-        // Switch Camera (Flip)
-        _buildStaticControlButton(
-          icon: Icons.flip_camera_ios_rounded,
-          onTap: () => controller.switchCamera(),
-        ),
-      ],
-    );
+          // Switch Camera (Flip) (Customer only)
+          if (!isConsultant)
+            _buildStaticControlButton(
+              icon: Icons.flip_camera_ios_rounded,
+              onTap: () => controller.switchCamera(),
+            ),
+        ],
+      );
+    });
   }
 
   Widget _buildToggleControlButton({
