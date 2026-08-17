@@ -160,7 +160,7 @@ class _SearchViewState extends State<SearchView> {
             child: RefreshIndicator(
               color: const Color(0xFF0066FF),
               backgroundColor: Colors.white,
-              onRefresh: () => controller.fetchConsultants(),
+              onRefresh: controller.onRefresh,
               child: Obx(() {
                 if (controller.isLoading.value &&
                     controller.consultants.isEmpty) {

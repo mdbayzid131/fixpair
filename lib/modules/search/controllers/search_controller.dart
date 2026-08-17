@@ -10,7 +10,7 @@ class SearchController extends GetxController {
   final searchController = TextEditingController();
 
   final selectedCategory = 'All'.obs;
-  final categories = ['All', 'Lawyer', 'Advisor', 'Doctor'];
+  final categories = <String>['All'].obs;
   final searchQuery = ''.obs;
 
   bool get hasMore => _hasMore;
@@ -26,9 +26,35 @@ class SearchController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    fetchCategories();
     fetchConsultants();
 
     searchController.addListener(_onSearchChanged);
+  }
+
+  Future<void> fetchCategories() async {
+    try {
+      final response = await _userRepository.getConsultancyTypes();
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        final fetchedCategories = <String>['All'];
+        for (var item in data) {
+          if (item is Map && item['name'] != null) {
+            final String rawName = item['name'].toString().trim();
+            if (rawName.isNotEmpty) {
+              final formattedName =
+                  rawName[0].toUpperCase() + rawName.substring(1);
+              if (!fetchedCategories.contains(formattedName)) {
+                fetchedCategories.add(formattedName);
+              }
+            }
+          }
+        }
+        categories.assignAll(fetchedCategories);
+      }
+    } catch (e) {
+      debugPrint('Error fetching consultancy types: $e');
+    }
   }
 
   void _onSearchChanged() {
@@ -65,16 +91,27 @@ class SearchController extends GetxController {
     fetchConsultants();
   }
 
-  Future<void> fetchConsultants({bool isLoadMore = false}) async {
+  Future<void> onRefresh() async {
+    await Future.wait([
+      fetchCategories(),
+      fetchConsultants(isRefresh: true),
+    ]);
+  }
+
+  Future<void> fetchConsultants({
+    bool isLoadMore = false,
+    bool isRefresh = false,
+  }) async {
     if (isLoadMore) {
       if (!_hasMore) return;
       isLoadingMore.value = true;
       _currentPage++;
     } else {
-      isLoading.value = true;
+      if (!isRefresh && consultants.isEmpty) {
+        isLoading.value = true;
+      }
       _currentPage = 1;
       _hasMore = true;
-      consultants.clear();
     }
 
     try {

@@ -32,6 +32,7 @@ class ApiConstants {
   // User Profile Endpoints
   static const String profile = '/user/profile';
   static const String consultants = '/user/consultants';
+  static const String consultancyType = '/consultancy-type';
   static String userById(String id) => '/user/$id';
   static String totalConsultations(String id) =>
       '/consultation/consultants/$id/total-consultations';

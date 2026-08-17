@@ -53,6 +53,11 @@ class UserRepository {
     return await _apiClient.getData(ApiConstants.consultants, query: query);
   }
 
+  // Get consultancy types list
+  Future<Response> getConsultancyTypes() async {
+    return await _apiClient.getData(ApiConstants.consultancyType);
+  }
+
   // Get consultant details by ID
   Future<Response> getConsultantById(String id) async {
     return await _apiClient.getData(ApiConstants.userById(id));

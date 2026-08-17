@@ -1,0 +1,69 @@
+📝 USER STORY:
+Title: Retrieve All Consultancy Types
+
+As any user or admin
+I want to fetch the list of all consultancy types
+So that I can see all available options
+
+📖 BDD SCENARIO: GET ALL CONSULTANCY TYPES
+Feature: Consultancy Type Management
+
+Given the system has multiple consultancy types
+When I send a GET request to the consultancy types endpoint
+Then I should receive a 200 OK response with a list of all types
+
+3:33:34 PM | Consultancy Type Management E2E Tests > should get all consultancy types | stdout
+Mon Aug 17 2026 15:33:34 [SERVER-NAME] info: GET /api/v1/consultancy-type 200 - 14.688 ms
+3:33:34 PM | Consultancy Type Management E2E Tests > should get all consultancy types | stdout
+
+
+ GET   /api/v1/consultancy-type [GET-ALL-TYPES]
+ REQUEST 
+{
+  "params": {},
+  "query": {},
+  "body": {}
+}
+ RESPONSE SUCCESS 
+{
+  "success": true,
+  "message": "Consultancy types retrieved successfully",
+  "data": [
+    {
+      "_id": "6a82d56e2f832dadd79bf8a6",
+      "name": "engineer",
+      "status": "active",
+      "createdAt": "2026-08-17T09:33:34.635Z",
+      "updatedAt": "2026-08-17T09:33:34.635Z",
+      "__v": 0,
+      "consultantCount": 0
+    },
+    {
+      "_id": "6a82d56e2f832dadd79bf894",
+      "name": "lawyer",
+      "status": "active",
+      "createdAt": "2026-08-17T09:33:34.211Z",
+      "updatedAt": "2026-08-17T09:33:34.211Z",
+      "__v": 0,
+      "consultantCount": 0
+    },
+    {
+      "_id": "6a82d56e2f832dadd79bf893",
+      "name": "advisor",
+      "status": "active",
+      "createdAt": "2026-08-17T09:33:34.211Z",
+      "updatedAt": "2026-08-17T09:33:34.211Z",
+      "__v": 0,
+      "consultantCount": 1
+    },
+    {
+      "_id": "6a82d56e2f832dadd79bf895",
+      "name": "doctor",
+      "status": "active",
+      "createdAt": "2026-08-17T09:33:34.211Z",
+      "updatedAt": "2026-08-17T09:33:34.211Z",
+      "__v": 0,
+      "consultantCount": 0
+    }
+  ]
+}
