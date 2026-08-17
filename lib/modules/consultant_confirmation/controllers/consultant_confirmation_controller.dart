@@ -344,8 +344,11 @@ class ConsultantConfirmationController extends GetxController {
               SizedBox(height: 24.h),
               Text(
                 'Consultant on Another Call'.tr,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.manrope(
-                  fontSize: 22.sp,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.w800,
                   color: const Color(0xFF1D293D),
                   letterSpacing: 0.2,
