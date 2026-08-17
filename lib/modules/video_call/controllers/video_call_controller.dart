@@ -26,6 +26,8 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
   late final AgoraPipController _pipController;
   final RxBool isInPipMode = false.obs;
 
+  bool _hasConsultantJoined = false;
+
   final RxInt remoteUid = 0.obs;
   final RxBool isJoined = false.obs;
   final RxBool isRemoteVideoMuted = false.obs;
@@ -164,6 +166,7 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
           );
         },
         onUserJoined: (RtcConnection connection, int uid, int elapsed) {
+          _hasConsultantJoined = true;
           remoteUid.value = uid;
           isRemoteVideoMuted.value = false;
           AppLogger.info(
@@ -474,6 +477,9 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
     if (_isEndingCall) return;
     _isEndingCall = true;
 
+    final bool didConsultantJoin =
+        _hasConsultantJoined || callDuration.value > 0 || remoteUid.value != 0;
+
     WidgetsBinding.instance.removeObserver(this);
 
     try {
@@ -485,10 +491,12 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
       AppLogger.warning('[CallKit] Error ending call session: $e');
     }
 
-    try {
-      await _userRepository.endVideoSession(sessionId);
-    } catch (e) {
-      AppLogger.warning('[Agora] Error ending session: $e');
+    if (didConsultantJoin) {
+      try {
+        await _userRepository.endVideoSession(sessionId);
+      } catch (e) {
+        AppLogger.warning('[Agora] Error ending session: $e');
+      }
     }
 
     _timer?.cancel();
@@ -511,14 +519,18 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
 
     closeOverlay();
 
-    Get.offNamed(
-      AppRoutes.CONSULTATION_SUMMARY,
-      arguments: {
-        'booking': booking,
-        'duration': callDuration.value,
-        'cost': currentCost.value,
-      },
-    );
+    if (didConsultantJoin) {
+      Get.offNamed(
+        AppRoutes.CONSULTATION_SUMMARY,
+        arguments: {
+          'booking': booking,
+          'duration': callDuration.value,
+          'cost': currentCost.value,
+        },
+      );
+    } else {
+      Get.back();
+    }
 
     // Completely delete permanent GetX controller on end call
     Get.delete<VideoCallController>(force: true);
