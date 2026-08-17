@@ -182,7 +182,9 @@ class UserData {
         verified: json['verified'] == true,
         provider: json['provider']?.toString(),
         providerId: json['providerId']?.toString(),
-        consultancyType: json['consultancyType']?.toString(),
+        consultancyType: json['consultancyType'] is Map
+            ? json['consultancyType']['name']?.toString()
+            : json['consultancyType']?.toString(),
         experience: json['experience']?.toString(),
         languages: json['languages'] is List ? json['languages'] : [],
         expertise: json['expertise'] is List

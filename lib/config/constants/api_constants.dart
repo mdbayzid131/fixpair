@@ -1,11 +1,11 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class ApiConstants {
   // Base URLs
-  // static const String baseUrl = 'http://10.10.26.189:5000/api/v1';
-  // static const String serverUrl = 'http://10.10.26.189:5000';
-  // static const String baseUrl = 'https://fixpair-live-consultancy.onrender.com/api/v1';
-  // static const String serverUrl = 'https://fixpair-live-consultancy.onrender.com';
-  static const String baseUrl = 'https://nayem5000.binarybards.online/api/v1';
-  static const String serverUrl = 'https://nayem5000.binarybards.online';
+  static String get baseUrl =>
+      dotenv.env['BASE_URL'] ?? 'https://nayem5000.binarybards.online/api/v1';
+  static String get serverUrl =>
+      dotenv.env['SERVER_URL'] ?? 'https://nayem5000.binarybards.online';
 
   static String getImageUrl(String? url) {
     const String placeholder = 'https://i.ibb.co/z5YHLV9/profile.png';
@@ -74,5 +74,6 @@ class ApiConstants {
   static const String markAllNotificationsRead = '/notification/mark-all-read';
 
   // Agora Config
-  static const String agoraAppId = 'af25d4c8759847daace4a7fe5462f361';
+  static String get agoraAppId =>
+      dotenv.env['AGORA_APP_ID'] ?? 'af25d4c8759847daace4a7fe5462f361';
 }

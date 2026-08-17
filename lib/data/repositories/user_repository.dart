@@ -101,7 +101,7 @@ class UserRepository {
     };
     return await _apiClient.getData(
       ApiConstants.recommended,
-      // query: query,
+      query: query.isNotEmpty ? query : null,
     );
   }
 

@@ -19,7 +19,7 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
   final UserRepository _userRepository = Get.find();
 
   // Agora Config
-  static const String appId = ApiConstants.agoraAppId;
+  static String get appId => ApiConstants.agoraAppId;
 
   late RtcEngine engine;
   final RxBool isEngineInitialized = false.obs;

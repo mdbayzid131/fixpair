@@ -17,15 +17,43 @@ class HomeController extends GetxController {
 
   final RxList<BookingModel> confirmedBookings = <BookingModel>[].obs;
   final RxList<UserData> recommendedConsultants = <UserData>[].obs;
+  final selectedCategory = 'All'.obs;
+  final categories = <String>['All'].obs;
   final isLoading = false.obs;
   final hasUnreadNotifications = false.obs;
 
   @override
   void onInit() {
     super.onInit();
+    fetchCategories();
     fetchUpcomingBookings();
     fetchRecommendedConsultants();
     checkUnreadNotifications();
+  }
+
+  Future<void> fetchCategories() async {
+    try {
+      final response = await _userRepository.getConsultancyTypes();
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        final fetchedCategories = <String>['All'];
+        for (var item in data) {
+          if (item is Map && item['name'] != null) {
+            final String rawName = item['name'].toString().trim();
+            if (rawName.isNotEmpty) {
+              final formattedName =
+                  rawName[0].toUpperCase() + rawName.substring(1);
+              if (!fetchedCategories.contains(formattedName)) {
+                fetchedCategories.add(formattedName);
+              }
+            }
+          }
+        }
+        categories.assignAll(fetchedCategories);
+      }
+    } catch (e) {
+      Helpers.showDebugLog('Error fetching consultancy types on home: $e');
+    }
   }
 
   Future<void> checkUnreadNotifications() async {
@@ -149,17 +177,22 @@ class HomeController extends GetxController {
     }
   }
 
-  Future<void> fetchRecommendedConsultants() async {
+  Future<void> fetchRecommendedConsultants({bool isRefresh = false}) async {
     try {
-      isLoading.value = true;
-      final response = await _userRepository.getConsultants(limit: 50);
+      if (!isRefresh && recommendedConsultants.isEmpty) {
+        isLoading.value = true;
+      }
+      final response = await _userRepository.getConsultants(
+        consultancyType: selectedCategory.value,
+        sort: '-averageRating',
+        limit: 50,
+      );
 
       if (response.statusCode == 200) {
         final consultantResponse = ConsultantResponseModel.fromJson(
           response.data,
         );
-        if (consultantResponse.data != null &&
-            consultantResponse.data!.isNotEmpty) {
+        if (consultantResponse.data != null) {
           recommendedConsultants.value = consultantResponse.data!;
         } else {
           // Fallback if data is in a different format
@@ -182,10 +215,17 @@ class HomeController extends GetxController {
     }
   }
 
+  void selectCategory(String category) {
+    if (selectedCategory.value == category) return;
+    selectedCategory.value = category;
+    fetchRecommendedConsultants();
+  }
+
   Future<void> onRefresh() async {
     await Future.wait([
+      fetchCategories(),
       fetchUpcomingBookings(),
-      fetchRecommendedConsultants(),
+      fetchRecommendedConsultants(isRefresh: true),
       checkUnreadNotifications(),
     ]);
   }
