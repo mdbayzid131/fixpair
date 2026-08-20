@@ -6,6 +6,7 @@ import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/core/utils/logger.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// ===================== FIREBASE NOTIFICATION SERVICE =====================
 /// Handles Firebase Cloud Messaging (FCM) push notifications.
@@ -18,6 +19,24 @@ import 'package:fixpair/firebase_options.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Load dotenv so ApiConstants (BASE_URL, SERVER_URL) works correctly
+  // in this isolated background isolate where main() is not called.
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // Ignore if already loaded or file missing — ApiConstants has fallback values
+  }
+
+  // ── Debug: print full raw payload so we can verify backend is sending name/avatar ──
+  print('🔔 [BG CALL] =========================================');
+  print('🔔 [BG CALL] messageId: ${message.messageId}');
+  print('🔔 [BG CALL] notification title: ${message.notification?.title}');
+  print('🔔 [BG CALL] notification body:  ${message.notification?.body}');
+  print('🔔 [BG CALL] data keys: ${message.data.keys.toList()}');
+  print('🔔 [BG CALL] full data: ${message.data}');
+  print('🔔 [BG CALL] =========================================');
+
   AppLogger.debug('Background Message: ${message.messageId}');
   AppLogger.debug('Background Data: ${message.data}');
 
@@ -239,12 +258,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       }
     }
 
+    print('🔔 [BG CALL] Parsed → sessionId=$sessionId | callerName=$callerName | callerAvatar=$callerAvatar');
+
     if (sessionId != null && token != null) {
       final CallKitParams callKitParams = CallKitParams(
         id: sessionId,
         nameCaller: callerName,
         appName: 'Fixpair',
-        avatar: callerAvatar,
+        avatar: callerAvatar.isNotEmpty ? callerAvatar : null,
         handle: 'Video Consultation',
         type: 1, // 0: audio, 1: video
         duration: 35000,
@@ -260,7 +281,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
           showNotification: false,
           isShowCallback: false,
         ),
-        android: const AndroidParams(
+        android: AndroidParams(
           isCustomNotification: true,
           backgroundColor: '#0F172A',
           incomingCallNotificationChannelName: "Incoming Call",

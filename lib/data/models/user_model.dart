@@ -583,7 +583,8 @@ class BookingModel {
       startTime: json['startTime'],
       endTime: json['endTime'],
       preferredWindow: json['preferredWindow'],
-      isReviewed: json['isReviewed'] == true ||
+      isReviewed:
+          json['isReviewed'] == true ||
           json['isReviewed']?.toString() == 'true',
     );
   }
