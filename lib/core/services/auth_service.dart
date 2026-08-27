@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/modules/video_call/controllers/video_call_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fixpair/config/constants/storage_constants.dart';
 import 'package:fixpair/core/services/api_client.dart';
 import 'package:fixpair/core/services/storage_service.dart';
@@ -106,9 +107,18 @@ class AuthService extends GetxService {
   /// ===================== GOOGLE LOGIN =====================
   Future<Response> loginWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        clientId: defaultTargetPlatform == TargetPlatform.iOS
+            ? '827439833710-01cu8oed84nphjju12tcbgq0l7ml4frl.apps.googleusercontent.com'
+            : null,
+      );
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
-        throw Exception('Google Sign-In was cancelled.');
+        return Response(
+          requestOptions: RequestOptions(path: ApiConstants.socialLogin),
+          statusCode: 400,
+          data: {'message': 'Google Sign-In was cancelled.'},
+        );
       }
 
       final GoogleSignInAuthentication googleAuth =
