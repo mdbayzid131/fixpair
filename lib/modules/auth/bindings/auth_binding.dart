@@ -5,29 +5,49 @@ import '../controllers/forgot_password_controller.dart';
 import '../controllers/oto_controller.dart';
 import '../controllers/set_new_pass_controller.dart';
 
+class LoginBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<LoginController>(() => LoginController());
+  }
+}
+
+class RegisterBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<RegisterController>(() => RegisterController());
+  }
+}
+
+class ForgotPasswordBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<ForgotPasswordController>(() => ForgotPasswordController());
+  }
+}
+
+class OtpBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<OtpController>(() => OtpController());
+  }
+}
+
+class SetNewPassBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<SetNewPassController>(() => SetNewPassController());
+  }
+}
+
 class AuthBinding extends Bindings {
   @override
   void dependencies() {
-    if (Get.isRegistered<LoginController>()) {
-      Get.delete<LoginController>(force: true);
-    }
-    if (Get.isRegistered<RegisterController>()) {
-      Get.delete<RegisterController>(force: true);
-    }
-    if (Get.isRegistered<ForgotPasswordController>()) {
-      Get.delete<ForgotPasswordController>(force: true);
-    }
-    if (Get.isRegistered<OtpController>()) {
-      Get.delete<OtpController>(force: true);
-    }
-    if (Get.isRegistered<SetNewPassController>()) {
-      Get.delete<SetNewPassController>(force: true);
-    }
-
-    Get.lazyPut(() => LoginController(), fenix: true);
-    Get.lazyPut(() => RegisterController(), fenix: true);
-    Get.lazyPut(() => ForgotPasswordController(), fenix: true);
-    Get.lazyPut(() => OtpController(), fenix: true);
-    Get.lazyPut(() => SetNewPassController(), fenix: true);
+    Get.lazyPut<LoginController>(() => LoginController());
+    Get.lazyPut<RegisterController>(() => RegisterController());
+    Get.lazyPut<ForgotPasswordController>(() => ForgotPasswordController());
+    Get.lazyPut<OtpController>(() => OtpController());
+    Get.lazyPut<SetNewPassController>(() => SetNewPassController());
   }
 }
+

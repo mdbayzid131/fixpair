@@ -123,33 +123,33 @@ final pages = [
   GetPage(
     name: AppRoutes.LOGIN,
     page: () => const LoginView(),
-    binding: AuthBinding(),
+    binding: LoginBinding(),
   ),
   GetPage(
     name: AppRoutes.REGISTER,
     page: () => const RegisterView(),
-    binding: AuthBinding(),
+    binding: RegisterBinding(),
   ),
   GetPage(
     name: AppRoutes.FORGOT_PASSWORD,
     page: () => const ForgotPasswordView(),
-    binding: AuthBinding(),
+    binding: ForgotPasswordBinding(),
   ),
 
   GetPage(
     name: AppRoutes.OTP,
     page: () => const OtpVerifyScreen(),
-    binding: AuthBinding(),
+    binding: OtpBinding(),
   ),
   GetPage(
     name: AppRoutes.SET_NEW_PASSWORD,
     page: () => const SetNewPasswordScreen(),
-    binding: AuthBinding(),
+    binding: SetNewPassBinding(),
   ),
   GetPage(
     name: AppRoutes.OTP_FORM_REGISTER,
     page: () => const OtpVerifyScreen(),
-    binding: AuthBinding(),
+    binding: OtpBinding(),
   ),
   GetPage(name: AppRoutes.SUCCESS, page: () => const SuccessView()),
   GetPage(
