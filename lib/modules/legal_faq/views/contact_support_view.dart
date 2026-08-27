@@ -77,14 +77,15 @@ class ContactSupportView extends GetView<LegalFAQController> {
                       _buildContactMethodCard(
                         icon: Icons.mail_outline_rounded,
                         title: 'EMAIL US'.tr,
-                        value: email,
+                        value: email.isNotEmpty ? email : 'N/A'.tr,
                         onTap: () {
                           if (email.isEmpty) return;
                           _showActionConfirmationDialog(
                             context: context,
                             title: 'Send Email'.tr,
                             message:
-                                'Do you want to open your mail app to send an email to '.tr + email + '?',
+                                '${'Do you want to open your mail app to send an email to '
+                                    .tr}$email?',
                             icon: Icons.mail_rounded,
                             iconColor: const Color(0xFF0066FF),
                             iconBg: const Color(0xFFE0EFFF),
@@ -113,14 +114,15 @@ class ContactSupportView extends GetView<LegalFAQController> {
                       _buildContactMethodCard(
                         icon: Icons.phone_outlined,
                         title: 'CALL US'.tr,
-                        value: phone,
+                        value: phone.isNotEmpty ? phone : 'N/A'.tr,
                         onTap: () {
                           if (phone.isEmpty) return;
                           _showActionConfirmationDialog(
                             context: context,
                             title: 'Make a Call'.tr,
                             message:
-                                'Do you want to open your phone app to call '.tr + phone + '?',
+                                '${'Do you want to open your phone app to call '
+                                    .tr}$phone?',
                             icon: Icons.phone_rounded,
                             iconColor: const Color(0xFF10B981),
                             iconBg: const Color(0xFFDCFCE7),

@@ -76,18 +76,23 @@ class LegalFAQController extends GetxController {
       isLoadingSupport.value = true;
       final response = await _legalRepo.getCustomerSupport();
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data != null) {
         final data = response.data['data'];
-        supportEmail.value = data['email'] ?? 'support@fixpair.com';
-        supportPhone.value = data['phoneNumber'] ?? '+1234567890';
+        if (data != null && data is Map) {
+          supportEmail.value = data['email'] ?? '';
+          supportPhone.value = data['phoneNumber'] ?? '';
+        } else {
+          supportEmail.value = '';
+          supportPhone.value = '';
+        }
       } else {
-        Helpers.showError(
-          response.data['message'] ?? 'Failed to load support information',
-        );
+        supportEmail.value = '';
+        supportPhone.value = '';
       }
     } catch (e) {
       Helpers.showDebugLog('Error loading support: $e');
-      Helpers.showError('Something went wrong');
+      supportEmail.value = '';
+      supportPhone.value = '';
     } finally {
       isLoadingSupport.value = false;
     }
