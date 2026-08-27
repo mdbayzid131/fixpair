@@ -484,9 +484,11 @@ class VideoCallView extends GetView<VideoCallController> {
           ),
         ),
 
+        SizedBox(width: 6.w),
+
         // Timer with State indicator
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
           decoration: BoxDecoration(
             color: const Color(0xFF0F172A).withOpacity(0.85),
             borderRadius: BorderRadius.circular(24.r),
@@ -516,14 +518,14 @@ class VideoCallView extends GetView<VideoCallController> {
                     ],
                   ),
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(width: 6.w),
                 Text(
                   waiting ? "PAUSED".tr : controller.formattedTime,
                   style: GoogleFonts.manrope(
                     color: Colors.white,
-                    fontSize: 13.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: waiting ? 0.8 : 0.2,
+                    letterSpacing: waiting ? 0.5 : 0.2,
                   ),
                 ),
               ],
@@ -531,38 +533,51 @@ class VideoCallView extends GetView<VideoCallController> {
           }),
         ),
 
+        SizedBox(width: 6.w),
+
         // Consultant Info
-        Obx(() {
-          final booking = controller.bookingRx.value ?? controller.booking;
-          final consultantName = _getValidConsultantName(booking.consultant?.name);
-          return Column(
-            children: [
-              Text(
-                consultantName,
-                style: GoogleFonts.manrope(
-                  color: Colors.white,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w800,
+        Expanded(
+          child: Obx(() {
+            final booking = controller.bookingRx.value ?? controller.booking;
+            final consultantName =
+                _getValidConsultantName(booking.consultant?.name);
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  consultantName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.manrope(
+                    color: Colors.white,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              SizedBox(height: 2.h),
-              Text(
-                booking.consultant?.tags?.toUpperCase() ??
-                    'CONSULTATION',
-                style: GoogleFonts.manrope(
-                  color: Colors.white54,
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.2,
+                SizedBox(height: 2.h),
+                Text(
+                  booking.consultant?.tags?.toUpperCase() ?? 'CONSULTATION',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.manrope(
+                    color: Colors.white54,
+                    fontSize: 9.sp,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.0,
+                  ),
                 ),
-              ),
-            ],
-          );
-        }),
+              ],
+            );
+          }),
+        ),
+
+        SizedBox(width: 6.w),
 
         // Cost Indicator
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [Color(0xFF22C55E), Color(0xFF15803D)],
@@ -581,7 +596,7 @@ class VideoCallView extends GetView<VideoCallController> {
               '${controller.currentCost.value.toStringAsFixed(2)}€',
               style: GoogleFonts.manrope(
                 color: Colors.white,
-                fontSize: 13.sp,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w800,
               ),
             ),
