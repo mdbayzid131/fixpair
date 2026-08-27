@@ -3,6 +3,7 @@ import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/config/constants/storage_constants.dart';
 import 'package:fixpair/core/services/storage_service.dart';
 import 'package:fixpair/core/utils/logger.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 // ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -96,6 +97,19 @@ class SocketService extends GetxService {
     _socket?.on('new-message', (data) {
       AppLogger.debug('New message: $data');
       onMessageReceived?.call(data);
+    });
+
+    // Call cancelled handler
+    _socket?.on('call-cancelled', (data) {
+      AppLogger.info('Call cancelled event received via socket: $data');
+      try {
+        if (Get.isDialogOpen == true) {
+          Get.back();
+        }
+        FlutterCallkitIncoming.endAllCalls();
+      } catch (e) {
+        AppLogger.warning('Error ending CallKit/dialog on call-cancelled: $e');
+      }
     });
   }
 

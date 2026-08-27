@@ -497,6 +497,12 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
       } catch (e) {
         AppLogger.warning('[Agora] Error ending session: $e');
       }
+    } else {
+      try {
+        await _userRepository.actionVideoSession(sessionId, 'CANCEL');
+      } catch (e) {
+        AppLogger.warning('[Agora] Error cancelling session: $e');
+      }
     }
 
     _timer?.cancel();
