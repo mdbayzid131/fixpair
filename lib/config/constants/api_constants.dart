@@ -63,6 +63,9 @@ class ApiConstants {
   static const String setDefaultPaymentMethod = '/payment/set-default';
   static String getInvoice(String consultationId) => '/payment/invoice/$consultationId';
 
+  // Report Endpoints
+  static String getReport(String id) => '/report/$id';
+
   // Review Endpoints
   static const String review = '/review';
   static String consultantReviews(String id) => '/review/consultant/$id';

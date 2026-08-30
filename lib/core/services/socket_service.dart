@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/config/constants/storage_constants.dart';
 import 'package:fixpair/core/services/storage_service.dart';
 import 'package:fixpair/core/utils/logger.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+import 'package:fixpair/modules/video_call/controllers/video_call_controller.dart';
 // ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -99,18 +101,48 @@ class SocketService extends GetxService {
       onMessageReceived?.call(data);
     });
 
-    // Call cancelled handler
-    _socket?.on('call-cancelled', (data) {
-      AppLogger.info('Call cancelled event received via socket: $data');
+    // Global listener for ALL incoming socket events
+    _socket?.onAny((event, data) {
+      debugPrint(
+        'ℹ️┌ 📡 SOCKET EVENT RECEIVED ══════════════════════════════════════\n'
+        'ℹ️│ Event: $event\n'
+        'ℹ️│ Data: $data\n'
+        'ℹ️└ 📡 SOCKET EVENT RECEIVED ══════════════════════════════════════',
+      );
+    });
+
+    // Call cancellation & ending socket handlers
+    void handleCallCancel(dynamic data) async {
+      AppLogger.info('Call cancelled/ended event received via socket: $data');
       try {
-        if (Get.isDialogOpen == true) {
+        while (Get.isDialogOpen == true) {
           Get.back();
         }
-        FlutterCallkitIncoming.endAllCalls();
+        final String? sessionId = data is Map
+            ? (data['sessionId'] ?? data['id'] ?? data['consultationId'] ?? data['bookingId'])?.toString()
+            : null;
+        if (sessionId != null && sessionId.isNotEmpty) {
+          try {
+            await FlutterCallkitIncoming.endCall(sessionId);
+          } catch (_) {}
+        }
+        await FlutterCallkitIncoming.endAllCalls();
+
+        if (Get.isRegistered<VideoCallController>()) {
+          Get.find<VideoCallController>().endCall();
+        }
       } catch (e) {
-        AppLogger.warning('Error ending CallKit/dialog on call-cancelled: $e');
+        AppLogger.warning('Error handling call-cancelled socket event: $e');
       }
-    });
+    }
+
+    _socket?.on('call-ended', handleCallCancel);
+    _socket?.on('call-cancelled', handleCallCancel);
+    _socket?.on('cancel-call', handleCallCancel);
+    _socket?.on('reject-call', handleCallCancel);
+    _socket?.on('end-call', handleCallCancel);
+    _socket?.on('session-ended', handleCallCancel);
+    _socket?.on('consultation-auto-ended', handleCallCancel);
   }
 
   // ──────────────────── PUBLIC METHODS ────────────────────
@@ -136,22 +168,28 @@ class SocketService extends GetxService {
   /// Register user identity with the socket server
   void registerUser(String userId) {
     if (_socket?.connected ?? false) {
-      _socket?.emit('register', userId);
+      emit('register', userId);
       AppLogger.debug('User registered with socket: $userId');
     } else {
       AppLogger.warning('Cannot register: Socket not connected');
     }
   }
 
+  /// Join a consultation room for live signaling, billing & transcript
+  void joinConsultation(String consultationId) {
+    emit('join-consultation', consultationId);
+    AppLogger.debug('Joined consultation room: $consultationId');
+  }
+
   /// Join a chat/notification room
   void joinRoom(String roomId) {
-    _socket?.emit('join-room', roomId);
+    emit('join-room', roomId);
     AppLogger.debug('Joined room: $roomId');
   }
 
   /// Leave a room
   void leaveRoom(String roomId) {
-    _socket?.emit('leave-room', roomId);
+    emit('leave-room', roomId);
     AppLogger.debug('Left room: $roomId');
   }
 
@@ -168,17 +206,40 @@ class SocketService extends GetxService {
       'content': content,
     };
 
-    _socket?.emit('send-message', payload);
-    AppLogger.debug('Message sent: $payload');
+    emit('send-message', payload);
+  }
+
+  /// Emit call cancellation signal to socket server
+  void emitCancelCall(String sessionId) {
+    final payload = {'sessionId': sessionId, 'id': sessionId};
+    emit('cancel-call', payload);
+    emit('call-cancelled', payload);
+  }
+
+  /// Emit call rejection signal to socket server
+  void emitRejectCall(String sessionId) {
+    final payload = {'sessionId': sessionId, 'id': sessionId};
+    emit('reject-call', payload);
+    emit('call-cancelled', payload);
   }
 
   /// Listen to a custom event
   void on(String event, Function(dynamic) callback) {
+    AppLogger.debug('👂 [SOCKET LISTEN] Subscribed to event: $event');
     _socket?.on(event, callback);
   }
 
   /// Emit a custom event
   void emit(String event, dynamic data) {
+    debugPrint(
+      'ℹ️┌ ⚡ SOCKET EVENT EMITTED ══════════════════════════════════════\n'
+      'ℹ️│ Event: $event\n'
+      'ℹ️│ Data: $data\n'
+      'ℹ️└ ⚡ SOCKET EVENT EMITTED ══════════════════════════════════════'
+      '\n',
+      
+      
+    );
     _socket?.emit(event, data);
   }
 }

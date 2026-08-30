@@ -201,6 +201,11 @@ class UserRepository {
     return await _apiClient.getData(ApiConstants.getInvoice(consultationId));
   }
 
+  // Get consultation report details
+  Future<Response> getReport(String id) async {
+    return await _apiClient.getData(ApiConstants.getReport(id));
+  }
+
   // --- Reviews ---
 
   // Post a review for a consultation
@@ -257,7 +262,9 @@ class UserRepository {
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
-        final List<BookingModel> bookings = data.map((e) => BookingModel.fromJson(e)).toList();
+        final List<BookingModel> bookings = data
+            .map((e) => BookingModel.fromJson(e))
+            .toList();
 
         // 1. Try to find the exact booking by ID
         if (bookingId.isNotEmpty) {

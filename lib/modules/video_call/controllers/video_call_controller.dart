@@ -12,6 +12,7 @@ import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fixpair/core/services/auth_service.dart';
+import 'package:fixpair/core/services/socket_service.dart';
 import 'package:fixpair/core/utils/logger.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
 
@@ -27,6 +28,8 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
   final RxBool isInPipMode = false.obs;
 
   bool _hasConsultantJoined = false;
+  bool get hasConsultantJoined =>
+      _hasConsultantJoined || callDuration.value > 0 || remoteUid.value != 0;
 
   final RxInt remoteUid = 0.obs;
   final RxBool isJoined = false.obs;
@@ -91,6 +94,34 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
 
     initAgora();
     _fetchRealBookingDetails();
+    _setupSocketListeners();
+  }
+
+  void _setupSocketListeners() {
+    final consultationId = booking.id ?? '';
+    if (consultationId.isNotEmpty && Get.isRegistered<SocketService>()) {
+      final socketService = Get.find<SocketService>();
+      socketService.joinConsultation(consultationId);
+
+      // Listen to live per-minute billing updates
+      socketService.on('billing-updated', (data) {
+        if (data is Map && data['consumedAmount'] != null) {
+          final double amount = (data['consumedAmount'] as num).toDouble();
+          currentCost.value = amount;
+        }
+      });
+
+      // Listen to billing warning (1 minute remaining)
+      socketService.on('billing-warning', (data) {
+        Get.snackbar(
+          'Balance Warning'.tr,
+          'Your authorized balance is running low (1 minute remaining).'.tr,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: const Color(0xFFF59E0B),
+          colorText: Colors.white,
+        );
+      });
+    }
   }
 
   void updatePipPosition(double dx, double dy) {
@@ -500,6 +531,9 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
     } else {
       try {
         await _userRepository.actionVideoSession(sessionId, 'CANCEL');
+        if (Get.isRegistered<SocketService>()) {
+          Get.find<SocketService>().emitCancelCall(sessionId);
+        }
       } catch (e) {
         AppLogger.warning('[Agora] Error cancelling session: $e');
       }
@@ -535,7 +569,18 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
         },
       );
     } else {
-      Get.back();
+      try {
+        if (Get.isDialogOpen == true) {
+          Get.back();
+        }
+        Get.until((route) => Get.currentRoute != AppRoutes.VIDEO_CALL);
+        if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
+          Get.back();
+        }
+      } catch (e) {
+        AppLogger.warning('[Agora] Error navigating back on endCall: $e');
+        Get.back();
+      }
     }
 
     // Completely delete permanent GetX controller on end call

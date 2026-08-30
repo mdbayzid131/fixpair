@@ -8,6 +8,7 @@ import 'package:fixpair/config/constants/storage_constants.dart';
 import 'package:fixpair/core/services/api_client.dart';
 import 'package:fixpair/core/services/storage_service.dart';
 import 'package:fixpair/core/services/push_notification_service.dart';
+import 'package:fixpair/core/services/socket_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
@@ -344,9 +345,7 @@ class AuthService extends GetxService {
     }
   }
 
-  void _handleIncomingCall(RemoteMessage message, {bool isFromTap = false}) {
-    debugPrint('🔥 [INCOMING CALL] Received payload data: ${message.data}');
-
+  void _handleIncomingCall(RemoteMessage message, {bool isFromTap = false}) async {
     Map<String, dynamic> rawData = Map<String, dynamic>.from(message.data);
     if (rawData['data'] != null) {
       final subData = rawData['data'];
@@ -363,6 +362,34 @@ class AuthService extends GetxService {
     final type = (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'])
         ?.toString()
         .toUpperCase();
+    final status = rawData['status']?.toString().toLowerCase();
+
+    AppLogger.info('📞 [FCM CALL EVENT] Type: ${type ?? 'N/A'} | Status: ${status ?? 'N/A'}');
+
+    if (type == 'CALL_REJECTED' ||
+        type == 'CALL_CANCELLED' ||
+        type == 'CANCEL_CALL' ||
+        type == 'REJECT_CALL' ||
+        status == 'rejected' ||
+        status == 'cancelled') {
+      AppLogger.info('🚫 [FCM CALL REJECTED/CANCELLED] Closing Call & CallKit UI | Data: $rawData');
+      try {
+        if (Get.isDialogOpen == true) {
+          Get.back();
+        }
+        FlutterCallkitIncoming.endAllCalls();
+        if (Get.isRegistered<VideoCallController>()) {
+          await Get.find<VideoCallController>().endCall();
+        }
+        Get.until((route) => Get.currentRoute != AppRoutes.VIDEO_CALL);
+        if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
+          Get.back();
+        }
+      } catch (e) {
+        AppLogger.warning('Error handling CALL_REJECTED FCM notification: $e');
+      }
+      return;
+    }
 
     if (type != 'INCOMING_CALL' &&
         type != 'CALL' &&
@@ -562,7 +589,7 @@ class AuthService extends GetxService {
       }
     }
 
-    debugPrint('🔥 [INCOMING CALL] Parsed: sessionId=$sessionId, bookingId=$bookingId, callerName=$callerName, callerAvatar=$callerAvatar');
+    AppLogger.info('📞 [FCM CALL INCOMING] Session: $sessionId | Booking: $bookingId | Caller: $callerName');
 
     if (sessionId == null || token == null) return;
 
@@ -577,16 +604,13 @@ class AuthService extends GetxService {
     ).obs;
 
     // Even if bookingId is empty, try to fetch real booking details (falls back to active callback/booking lookup)
-    debugPrint('🔥 [INCOMING CALL] Triggering repository booking fetch for ID: $bookingId');
     _userRepository.getBookingById(bookingId).then((realBooking) {
       if (realBooking != null) {
-        debugPrint('🔥 [INCOMING CALL] Successfully resolved booking details! Consultant: ${realBooking.consultant?.name}, ID: ${realBooking.id}');
+        AppLogger.info('✅ [FCM BOOKING RESOLVED] Consultant: ${realBooking.consultant?.name} | ID: ${realBooking.id}');
         bookingRx.value = realBooking;
-      } else {
-        debugPrint('🔥 [INCOMING CALL] Repository booking fetch returned null');
       }
     }).catchError((err) {
-      debugPrint('🔥 [INCOMING CALL] Error fetching booking details: $err');
+      AppLogger.debug('Error fetching booking details for FCM call: $err');
     });
 
     if (isFromTap) {
@@ -919,6 +943,9 @@ class AuthService extends GetxService {
                           sessionId,
                           'REJECT',
                         );
+                        if (Get.isRegistered<SocketService>()) {
+                          Get.find<SocketService>().emitRejectCall(sessionId);
+                        }
                       } catch (e) {
                         AppLogger.warning(
                           'Error notifying backend of rejected call: $e',

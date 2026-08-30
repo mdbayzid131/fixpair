@@ -355,20 +355,24 @@ class FirebaseNotificationService {
 
     // Foreground message listener
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      AppLogger.debug('Foreground: ${message.notification?.title}');
+      final title = message.notification?.title ?? message.data['title'] ?? message.data['type'] ?? 'Push Notification';
+      final type = message.data['type'] ?? message.data['status'] ?? 'NOTIFICATION';
+      AppLogger.info('🔔 [FCM PUSH RECEIVED] Title: $title | Type: $type | Data: ${message.data}');
       onForegroundMessage?.call(message);
     });
 
     // Notification tap (app in background)
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      AppLogger.debug('Notification clicked: ${message.data}');
+      final title = message.notification?.title ?? message.data['title'] ?? 'Notification';
+      AppLogger.info('👆 [FCM PUSH CLICKED] Title: $title | Data: ${message.data}');
       onNotificationTap?.call(message);
     });
 
     // App opened from terminated state
     final initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
-      AppLogger.debug('Opened from terminated: ${initialMessage.data}');
+      final title = initialMessage.notification?.title ?? initialMessage.data['title'] ?? 'Notification';
+      AppLogger.info('🚀 [FCM TERMINATED OPEN] Title: $title | Data: ${initialMessage.data}');
       onNotificationTap?.call(initialMessage);
     }
 

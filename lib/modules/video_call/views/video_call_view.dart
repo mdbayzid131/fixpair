@@ -22,7 +22,11 @@ class VideoCallView extends GetView<VideoCallController> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        controller.minimizeCall();
+        if (controller.hasConsultantJoined) {
+          controller.minimizeCall();
+        } else {
+          controller.endCall();
+        }
       },
       child: Scaffold(
         backgroundColor: const Color(0xFF090D16), // Premium dark theme

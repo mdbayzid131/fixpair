@@ -10,6 +10,8 @@ import 'package:fixpair/data/repositories/user_repository.dart';
 import 'package:fixpair/core/utils/helpers.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
 
+import 'package:fixpair/data/models/report_model.dart';
+
 class ConsultationSummaryController extends GetxController {
   final UserRepository _userRepository = Get.find();
 
@@ -28,8 +30,14 @@ class ConsultationSummaryController extends GetxController {
   final invoiceNo = ''.obs;
 
   final isLoadingInvoice = false.obs;
+  final isLoadingReport = false.obs;
   final isSubmittingReview = false.obs;
+  final isInvoiceExpanded = false.obs;
   final invoiceData = Rxn<InvoiceModel>();
+  final reportData = Rxn<ReportModel>();
+
+  void toggleInvoiceExpanded() =>
+      isInvoiceExpanded.value = !isInvoiceExpanded.value;
 
   @override
   void onInit() {
@@ -39,17 +47,31 @@ class ConsultationSummaryController extends GetxController {
       final bookingArg = args['booking'];
       if (bookingArg != null && bookingArg is BookingModel) {
         booking = bookingArg;
+      } else if (args is BookingModel) {
+        booking = args;
+      }
+
+      if (booking != null) {
         consultantName.value = booking?.consultant?.name ?? 'Consultant';
         if (booking?.id != null) {
-          fetchInvoice(booking!.id!);
+          loadData(booking!.id!);
         }
       }
     }
   }
 
+  Future<void> loadData(String consultationId) async {
+    Helpers.showDebugLog('=== LOADING DATA FOR CONSULTATION: $consultationId ===');
+    await Future.wait([
+      fetchInvoice(consultationId),
+      fetchReport(consultationId),
+    ]);
+  }
+
   Future<void> fetchInvoice(String consultationId) async {
     try {
       isLoadingInvoice.value = true;
+      Helpers.showDebugLog('Fetching Invoice for ID: $consultationId');
       final response = await _userRepository.getInvoice(consultationId);
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data['data'];
@@ -83,6 +105,23 @@ class ConsultationSummaryController extends GetxController {
       Helpers.showDebugLog('Error fetching invoice: $e');
     } finally {
       isLoadingInvoice.value = false;
+    }
+  }
+
+  Future<void> fetchReport(String id) async {
+    try {
+      isLoadingReport.value = true;
+      final response = await _userRepository.getReport(id);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data['data'];
+        if (data != null && data is Map<String, dynamic>) {
+          reportData.value = ReportModel.fromJson(data);
+        }
+      }
+    } catch (e) {
+      Helpers.showDebugLog('Error fetching report: $e');
+    } finally {
+      isLoadingReport.value = false;
     }
   }
 

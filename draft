@@ -1,0 +1,155 @@
+[GETX] GOING TO ROUTE /consultation-report
+[GETX] Instance "ConsultationSummaryController" has been created
+[GETX] Instance "ConsultationSummaryController" has been initialized
+flutter:
+flutter: 🔍🔍🔍 DEBUG: === LOADING DATA FOR CONSULTATION: 6a93ec1858b08e52762542ad ===
+flutter:
+flutter:
+flutter: 🔍🔍🔍 DEBUG: Fetching Invoice for ID: 6a93ec1858b08e52762542ad
+flutter:
+flutter:
+flutter: 🔍🔍🔍 DEBUG: Fetching Report for ID: 6a93ec1858b08e52762542ad via GET /api/v1/report/6a93ec1858b08e52762542ad
+flutter:
+flutter:
+flutter: ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+flutter: │ GET https://nayem5000.binarybards.online/api/v1/payment/invoice/6a93ec1858b08e52762542ad
+flutter: │ Headers: {Content-Type: application/json, Authorization: ***}
+flutter: └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+flutter:
+flutter:
+flutter: ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+flutter: │ GET https://nayem5000.binarybards.online/api/v1/report/6a93ec1858b08e52762542ad
+flutter: │ Headers: {Content-Type: application/json, Authorization: ***}
+flutter: └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+flutter:
+flutter:
+flutter: ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
+flutter: │ [200] https://nayem5000.binarybards.online/api/v1/report/6a93ec1858b08e52762542ad
+flutter: │ Data: {
+flutter: │   "success": true,
+flutter: │   "message": "Report retrieved successfully",
+flutter: │   "data": {
+flutter: │     "aiSummary": {
+flutter: │       "overview": "No transcript recorded for this consultation.",
+flutter: │       "keyPoints": [
+flutter: │         "No dialogue chunks captured."
+flutter: │       ],
+flutter: │       "actionItems": [
+flutter: │         "Consultant may provide manual notes and recommendations."
+flutter: │       ],
+flutter: │       "recommendations": []
+flutter: │     },
+flutter: │     "_id": "6a93ecb558b08e527625438f",
+flutter: │     "consultation": {
+flutter: │       "_id": "6a93ec1858b08e52762542ad",
+flutter: │       "bookingType": "instant",
+flutter: │       "perMinuteRate": 82,
+flutter: │       "status": "completed",
+flutter: │       "id": "6a93ec1858b08e52762542ad"
+flutter: │     },
+flutter: │     "user": {
+flutter: │       "_id": "6a8fc34a04724f827a9aeaaf",
+flutter: │       "name": "Md Bayzid",
+flutter: │       "image": "https://i.ibb.co/z5YHLV9/profile.png"
+flutter: │     },
+flutter: │     "consultant": {
+flutter: │       "_id": "6a939609f990805b1cc7233b",
+flutter: │       "name": "Caccha mama",
+flutter: │       "image": "/image/gemini_generated_image_y6vej3y6vej3y6ve-1788069857122.png"
+flutter: │     },
+flutter: │     "summary": "No transcript recorded for this consultation.",
+flutter: │     "keyPoints": [
+flutter: │       "No dialogue chunks captured."
+flutter: │     ],
+flutter: │     "stepsTaken": [
+flutter: │       "Consultant may provide manual notes and recommendations."
+flutter: │     ],
+flutter: │     "recommendedProducts": [],
+flutter: │     "conversation": "user: Hello, I need some advice on my case.\nconsultant: Sure, I can help with that. Please tell me more.\nuser: It is about a contract dispute.\nconsultant: I see. I will review the documents and get back to you.",
+flutter: │     "duration": 6,
+flutter: │     "notes": "No transcript recorded for this consultation.",
+flutter: │     "images": [
+flutter: │       "/image/chatgpt-image-aug-22,-2026,-03_10_21-pm-1788079283004.png",
+flutter: │       "/image/chatgpt-image-aug-22,-2026,-12_53_45-pm-1788079284307.png"
+flutter: │     ],
+flutter: │     "links": [
+flutter: │       "https://www.racdox.com/works"
+flutter: │     ],
+flutter: │     "pdfUrl": "/reports/report-6a93ec1858b08e52762542ad-1788079285818.pdf",
+flutter: │     "createdAt": "2026-08-30T08:41:25.888Z",
+flutter: │     "updatedAt": "2026-08-30T08:41:25.888Z",
+flutter: │     "__v": 0,
+flutter: │     "id": "6a93ecb558b08e527625438f"
+flutter: │   }
+flutter: │ }
+flutter: └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
+flutter:
+flutter:
+flutter: 🔍🔍🔍 DEBUG: === REPORT API RESPONSE START ===
+flutter:
+flutter:
+flutter: 🔍🔍🔍 DEBUG: Status Code: 200
+flutter:
+flutter:
+flutter: 🔍🔍🔍 DEBUG: Data: {success: true, message: Report retrieved successfully, data: {aiSummary: {overview: No transcript recorded for this consultation., keyPoints: [No dialogue chunks captured.], actionItems: [Consultant may provide manual notes and recommendations.], recommendations: []}, _id: 6a93ecb558b08e527625438f, consultation: {_id: 6a93ec1858b08e52762542ad, bookingType: instant, perMinuteRate: 82, status: completed, id: 6a93ec1858b08e52762542ad}, user: {_id: 6a8fc34a04724f827a9aeaaf, name: Md Bayzid, image: https://i.ibb.co/z5YHLV9/profile.png}, consultant: {_id: 6a939609f990805b1cc7233b, name: Caccha mama, image: /image/gemini_generated_image_y6vej3y6vej3y6ve-1788069857122.png}, summary: No transcript recorded for this consultation., keyPoints: [No dialogue chunks captured.], stepsTaken: [Consultant may provide manual notes and recommendations.], recommendedProducts: [], conversation: user: Hello, I need some advice on my case.
+flutter: consultant: Sure, I can help with that. Please tell me more.
+flutter: user: It is about a contract dispute.
+flutter: consultant: I see. I will review the documents and get back to you., duration: 6, notes: No transcript recorded for this consultation., images: [/image/chatgpt-image-aug-22,-2026,-03_10_21-pm-1788079283004.png, /image/chatgpt-image-aug-22,-2026,-12_53_45-pm-1788079284307.png], links: [https://www.racdox.com/works], pdfUrl: /reports/report-6a93ec1858b08e52762542ad-1788079285818.pdf, createdAt: 2026-08-30T08:41:25.888Z, updatedAt: 2026-08-30T08:41:25.888Z, __v: 0, id: 6a93ecb558b08e527625438f}}
+flutter:
+flutter:
+flutter: 🔍🔍🔍 DEBUG: === REPORT API RESPONSE END ===
+flutter:
+flutter:
+flutter: ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
+flutter: │ [200] https://nayem5000.binarybards.online/api/v1/payment/invoice/6a93ec1858b08e52762542ad
+flutter: │ Data: {
+flutter: │   "success": true,
+flutter: │   "message": "Consultation invoice data retrieved successfully",
+flutter: │   "data": {
+flutter: │     "consultationId": "6a93ec1858b08e52762542ad",
+flutter: │     "invoiceNumber": "INV-2542AD-4846",
+flutter: │     "date": "2026-08-30T08:38:48.602Z",
+flutter: │     "invoiceDate": "2026-08-30T08:59:04.846Z",
+flutter: │     "duration": 0,
+flutter: │     "billableMinutes": 0,
+flutter: │     "perMinuteRate": 82,
+flutter: │     "subtotal": -5,
+flutter: │     "platformFee": 5,
+flutter: │     "totalAmount": 0,
+flutter: │     "status": "paid",
+flutter: │     "paymentMethod": "Not Available",
+flutter: │     "transactionId": null,
+flutter: │     "user": {
+flutter: │       "id": "6a8fc34a04724f827a9aeaaf",
+flutter: │       "name": "Md Bayzid",
+flutter: │       "email": "mdbayazid131@gmail.com"
+flutter: │     },
+flutter: │     "consultant": {
+flutter: │       "id": "6a939609f990805b1cc7233b",
+flutter: │       "name": "Caccha mama",
+flutter: │       "type": "6a8f3cd64f3189b6783ec608"
+flutter: │     }
+flutter: │   }
+flutter: │ }
+flutter: └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
+flutter:
+flutter: ℹ️ℹ️ℹ️ℹ INFO: Socket disconnected
+flutter: 🔍🔍🔍 DEBUG: Socket connect error: WebSocketException: Connection to 'https://nayem5000.binarybards.online:0/socket.io/?EIO=4&transport=websocket#' was not upgraded to websocket, HTTP status code: 502
+flutter: 🔍🔍🔍 DEBUG: Socket error: WebSocketException: Connection to 'https://nayem5000.binarybards.online:0/socket.io/?EIO=4&transport=websocket#' was not upgraded to websocket, HTTP status code: 502
+flutter: 🔍🔍🔍 DEBUG: Socket connect error: WebSocketException: Connection to 'https://nayem5000.binarybards.online:0/socket.io/?EIO=4&transport=websocket#' was not upgraded to websocket, HTTP status code: 502
+flutter: 🔍🔍🔍 DEBUG: Socket error: WebSocketException: Connection to 'https://nayem5000.binarybards.online:0/socket.io/?EIO=4&transport=websocket#' was not upgraded to websocket, HTTP status code: 502
+flutter: ℹ️ℹ️ℹ️ℹ INFO: Socket connected
+flutter: ℹ️ℹ️ℹ️ℹ INFO: Socket disconnected
+flutter: ℹ️ℹ️ℹ️ℹ INFO: Socket connected
+flutter: ℹ️ℹ️ℹ️ℹ INFO: Socket disconnected
+flutter: ℹ️ℹ️ℹ️ℹ INFO: Socket connected
+flutter: ℹ️ℹ️ℹ️ℹ INFO: Socket disconnected
+flutter: 🔍🔍🔍 DEBUG: Socket connect error: WebSocketException: Connection to 'https://nayem5000.binarybards.online:0/socket.io/?EIO=4&transport=websocket#' was not upgraded to websocket, HTTP status code: 502
+flutter: 🔍🔍🔍 DEBUG: Socket error: WebSocketException: Connection to 'https://nayem5000.binarybards.online:0/socket.io/?EIO=4&transport=websocket#' was not upgraded to websocket, HTTP status code: 502
+flutter: 🔍🔍🔍 DEBUG: Socket connect error: WebSocketException: Connection to 'https://nayem5000.binarybards.online:0/socket.io/?EIO=4&transport=websocket#' was not upgraded to websocket, HTTP status code: 502
+flutter: 🔍🔍🔍 DEBUG: Socket error: WebSocketException: Connection to 'https://nayem5000.binarybards.online:0/socket.io/?EIO=4&transport=websocket#' was not upgraded to websocket, HTTP status code: 502
+flutter: ℹ️ℹ️ℹ️ℹ INFO: Socket connected
+flutter: ℹ️ℹ️ℹ️ℹ INFO: Socket disconnected
+flutter: ℹ️ℹ️ℹ️ℹ INFO: Socket connected
+flutter: ℹ️ℹ️ℹ️ℹ INFO: Socket disconnected
+flutter: ℹ️ℹ️ℹ️ℹ INFO: Socket connected
