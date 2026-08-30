@@ -33,34 +33,39 @@ class ConsultantProfileView extends GetView<ConsultantProfileController> {
           return Center(child: Text('Consultant not found'.tr));
         }
 
-        return SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: 24.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Divider(height: 1, color: Color(0xFFF1F5F9)),
-              SizedBox(height: 24.h),
-              _buildProfileHeader(expert),
-              SizedBox(height: 24.h),
-              const Divider(height: 1, color: Color(0xFFF1F5F9)),
-              _buildStatsRow(expert),
-              const Divider(height: 1, color: Color(0xFFF1F5F9)),
-              if ((expert.expertiseList != null &&
-                      expert.expertiseList!.isNotEmpty) ||
-                  (expert.expertise != null &&
-                      expert.expertise!.trim().isNotEmpty)) ...[
+        return RefreshIndicator(
+          onRefresh: () => controller.refreshProfile(),
+          color: const Color(0xFF0066FF),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.only(bottom: 24.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
                 SizedBox(height: 24.h),
-                _buildExpertiseSection(expert),
+                _buildProfileHeader(expert),
                 SizedBox(height: 24.h),
                 const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                _buildStatsRow(expert),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                if ((expert.expertiseList != null &&
+                        expert.expertiseList!.isNotEmpty) ||
+                    (expert.expertise != null &&
+                        expert.expertise!.trim().isNotEmpty)) ...[
+                  SizedBox(height: 24.h),
+                  _buildExpertiseSection(expert),
+                  SizedBox(height: 24.h),
+                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                ],
+                SizedBox(height: 24.h),
+                _buildAboutSection(expert),
+                SizedBox(height: 24.h),
+                const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                SizedBox(height: 24.h),
+                _buildReviewsSection(),
               ],
-              SizedBox(height: 24.h),
-              _buildAboutSection(expert),
-              SizedBox(height: 24.h),
-              const Divider(height: 1, color: Color(0xFFF1F5F9)),
-              SizedBox(height: 24.h),
-              _buildReviewsSection(),
-            ],
+            ),
           ),
         );
       }),

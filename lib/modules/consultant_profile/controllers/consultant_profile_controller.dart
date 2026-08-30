@@ -25,9 +25,11 @@ class ConsultantProfileController extends GetxController {
     }
   }
 
-  Future<void> fetchConsultantDetails(String id) async {
+  Future<void> fetchConsultantDetails(String id, {bool isRefresh = false}) async {
     try {
-      isLoading.value = true;
+      if (!isRefresh && expert.value == null) {
+        isLoading.value = true;
+      }
       final response = await _userRepository.getConsultantById(id);
       if (response.statusCode == 200) {
         final userData = UserData.fromJson(response.data['data']);
@@ -36,7 +38,7 @@ class ConsultantProfileController extends GetxController {
       }
 
       // Fetch reviews and stats in parallel
-      await Future.wait([fetchReviews(id), fetchStats(id)]);
+      await Future.wait([fetchReviews(id, isRefresh: isRefresh), fetchStats(id)]);
     } catch (e) {
       AppLogger.warning('Error fetching consultant details: ${e.toString()}');
     } finally {
@@ -44,9 +46,11 @@ class ConsultantProfileController extends GetxController {
     }
   }
 
-  Future<void> fetchReviews(String id) async {
+  Future<void> fetchReviews(String id, {bool isRefresh = false}) async {
     try {
-      isLoadingReviews.value = true;
+      if (!isRefresh && consultantReviews.isEmpty) {
+        isLoadingReviews.value = true;
+      }
       final response = await _userRepository.getConsultantReviews(
         id,
         page: 1,
@@ -78,5 +82,12 @@ class ConsultantProfileController extends GetxController {
 
   void toggleAboutExpansion() {
     isAboutExpanded.value = !isAboutExpanded.value;
+  }
+
+  Future<void> refreshProfile() async {
+    final id = expert.value?.id;
+    if (id != null && id.isNotEmpty) {
+      await fetchConsultantDetails(id, isRefresh: true);
+    }
   }
 }
