@@ -32,10 +32,13 @@ class VideoCallView extends GetView<VideoCallController> {
         backgroundColor: const Color(0xFF090D16), // Premium dark theme
         body: Stack(
           children: [
-            // 1. Full Screen Video (Background)
+            // 1. Full Screen Video (Camera Feed if On, Dark if Off)
             _buildBackgroundVideo(),
 
-            // 2. Top Bar (Timer, Info, Cost)
+            // 2. Messenger-Style Calling Overlay (Avatar, Name, Calling...)
+            if (!isPipMode) _buildMessengerCallingOverlay(),
+
+            // 3. Top Bar (Timer, Info, Cost)
             if (!isPipMode)
               Positioned(
                 top: 50.h,
@@ -44,10 +47,10 @@ class VideoCallView extends GetView<VideoCallController> {
                 child: _buildTopOverlay(),
               ),
 
-            // 3. User Video (PiP Window)
+            // 4. User Video (PiP Window - Shown ONLY after remote joins)
             if (!isPipMode) _buildUserPiP(),
 
-            // 4. Bottom Controls
+            // 5. Bottom Controls
             if (!isPipMode)
               Positioned(
                 bottom: 40.h,
@@ -64,11 +67,12 @@ class VideoCallView extends GetView<VideoCallController> {
   Widget _buildBackgroundVideo() {
     return Obx(() {
       if (!controller.isEngineInitialized.value) {
-        return _buildWaitingPlaceholder();
+        return _buildDarkBackgroundPlaceholder();
       }
+
       final isLocalFull = controller.isLocalUserFullScreen.value;
       if (isLocalFull) {
-        // Show client (local user) in full screen
+        // Show client (local user) in full screen (shows camera feed if camera is ON)
         if (!controller.isCameraOn.value) {
           return _buildLocalVideoMutedBackgroundPlaceholder();
         }
@@ -79,10 +83,9 @@ class VideoCallView extends GetView<VideoCallController> {
           ),
         );
       } else {
-        // Show consultant / remote user in full screen
+        // Show consultant / remote user in full screen (once remoteUid != 0)
         if (controller.remoteUid.value != 0) {
           if (controller.isConsultant.value) {
-            // Consultant watching Customer's camera stream
             if (controller.isRemoteVideoMuted.value) {
               return _buildRemoteVideoMutedPlaceholder();
             }
@@ -94,69 +97,193 @@ class VideoCallView extends GetView<VideoCallController> {
               ),
             );
           } else {
-            // Customer viewing Consultant (Consultant camera is permanently OFF, show avatar)
             return _buildRemoteVideoMutedPlaceholder();
           }
         } else {
-          return _buildWaitingPlaceholder();
+          // While waiting for remote to join, if local camera is ON show local camera feed, else dark
+          if (controller.isCameraOn.value) {
+            return AgoraVideoView(
+              controller: VideoViewController(
+                rtcEngine: controller.engine,
+                canvas: const VideoCanvas(uid: 0),
+              ),
+            );
+          }
+          return _buildDarkBackgroundPlaceholder();
         }
       }
     });
   }
 
-  Widget _buildWaitingPlaceholder() {
+  Widget _buildDarkBackgroundPlaceholder() {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Beautiful animated-like glowing circle
-          Container(
-            padding: EdgeInsets.all(24.w),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.03),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white.withOpacity(0.05),
-                width: 1.5,
-              ),
-            ),
-            child: const CircularProgressIndicator(
-              color: Color(0xFF22C55E),
-              strokeWidth: 3.5,
-            ),
-          ),
-          SizedBox(height: 24.h),
-          Text(
-            'Waiting for consultant to join...'.tr,
-            style: GoogleFonts.manrope(
-              color: Colors.white,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.2,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Timing & charging will start when they join'.tr,
-            style: GoogleFonts.manrope(
-              color: Colors.white54,
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
+      color: const Color(0xFF0F172A),
     );
   }
+
+  Widget _buildMessengerCallingOverlay() {
+    return Obx(() {
+      // Hide overlay once remote user joins (call is connected)
+      if (controller.remoteUid.value != 0) {
+        return const SizedBox.shrink();
+      }
+
+      final booking = controller.bookingRx.value ?? controller.booking;
+      final targetUser =
+          controller.isConsultant.value ? booking.user : booking.consultant;
+      final targetName = _getValidConsultantName(targetUser?.name);
+      final avatarUrl = _getRemoteUserAvatarUrl();
+
+      return Positioned(
+        top: 185.h,
+        left: 0,
+        right: 0,
+        child: Column(
+          children: [
+            // Circular Avatar (Messenger style)
+            Container(
+              width: 80.w,
+              height: 80.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.25),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    blurRadius: 15,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: avatarUrl != null && avatarUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: ApiConstants.getImageUrl(avatarUrl),
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) => Center(
+                          child: Text(
+                            targetName.substring(0, 1).toUpperCase(),
+                            style: GoogleFonts.manrope(
+                              fontSize: 28.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          targetName.substring(0, 1).toUpperCase(),
+                          style: GoogleFonts.manrope(
+                            fontSize: 28.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+
+            SizedBox(height: 12.h),
+
+            // Target Name (e.g. Caccha mama / Chayon Mondol)
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              child: Text(
+                targetName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.manrope(
+                  color: Colors.white,
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w700,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            SizedBox(height: 4.h),
+
+            // Animated Calling... / Rejection status subtitle (Messenger style)
+            Obx(() {
+              final isRejected = controller.isCallRejected.value;
+              if (isRejected) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  child: Text(
+                    controller.rejectedMessage.value,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.manrope(
+                      color: const Color(0xFFF87171),
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.6),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              final dots = controller.callingDotsText.value;
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Calling'.tr,
+                    style: GoogleFonts.manrope(
+                      color: Colors.white70,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withValues(alpha: 0.6),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    width: 22.w,
+                    child: Text(
+                      dots,
+                      style: GoogleFonts.manrope(
+                        color: Colors.white70,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.6),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ],
+        ),
+      );
+    });
+  }
+
 
   Widget _buildLocalVideoMutedBackgroundPlaceholder() {
     return Container(
@@ -612,7 +739,8 @@ class VideoCallView extends GetView<VideoCallController> {
 
   Widget _buildUserPiP() {
     return Obx(() {
-      if (controller.isJoined.value) {
+      // Hide PiP window while calling/ringing. Only show after remote party joins!
+      if (controller.isJoined.value && controller.remoteUid.value != 0) {
         final isLocalFull = controller.isLocalUserFullScreen.value;
         return Positioned(
           left: controller.pipLeft.value,

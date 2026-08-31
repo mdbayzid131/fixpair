@@ -379,11 +379,20 @@ class AuthService extends GetxService {
         }
         FlutterCallkitIncoming.endAllCalls();
         if (Get.isRegistered<VideoCallController>()) {
-          await Get.find<VideoCallController>().endCall();
+          final controller = Get.find<VideoCallController>();
+          if (!controller.hasConsultantJoined) {
+            controller.handleCallRejected(
+              reason: rawData['body'] ?? 'Call rejected by consultant'.tr,
+            );
+          } else {
+            await controller.endCall();
+          }
         }
-        Get.until((route) => Get.currentRoute != AppRoutes.VIDEO_CALL);
-        if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
-          Get.back();
+        if (!Get.isRegistered<VideoCallController>()) {
+          Get.until((route) => Get.currentRoute != AppRoutes.VIDEO_CALL);
+          if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
+            Get.back();
+          }
         }
       } catch (e) {
         AppLogger.warning('Error handling CALL_REJECTED FCM notification: $e');

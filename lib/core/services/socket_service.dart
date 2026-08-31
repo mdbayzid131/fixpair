@@ -129,7 +129,12 @@ class SocketService extends GetxService {
         await FlutterCallkitIncoming.endAllCalls();
 
         if (Get.isRegistered<VideoCallController>()) {
-          Get.find<VideoCallController>().endCall();
+          final controller = Get.find<VideoCallController>();
+          if (!controller.hasConsultantJoined) {
+            controller.handleCallRejected(reason: 'Call rejected by consultant'.tr);
+          } else {
+            controller.endCall();
+          }
         }
       } catch (e) {
         AppLogger.warning('Error handling call-cancelled socket event: $e');

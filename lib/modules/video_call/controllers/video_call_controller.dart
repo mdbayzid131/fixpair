@@ -52,6 +52,13 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
   final RxBool isOverlayMinimized = false.obs;
   OverlayEntry? _overlayEntry;
 
+  final callingStatusText = 'Calling...'.obs;
+  final callingDotsText = '...'.obs;
+  final isCallRejected = false.obs;
+  final rejectedMessage = ''.obs;
+  Timer? _callingDotTimer;
+  int _dotCount = 3;
+
   Timer? _timer;
   bool _isEndingCall = false;
   late BookingModel booking;
@@ -63,6 +70,7 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
   @override
   void onInit() {
     super.onInit();
+    _startCallingDotAnimation();
     WidgetsBinding.instance.addObserver(this);
     // Default initial position near the bottom-right corner
     pipTop.value = Get.height - 290.0;
@@ -499,6 +507,32 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  void _startCallingDotAnimation() {
+    _callingDotTimer?.cancel();
+    _callingDotTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (isCallRejected.value || remoteUid.value != 0) {
+        timer.cancel();
+        return;
+      }
+      _dotCount = (_dotCount % 3) + 1;
+      callingDotsText.value = '.' * _dotCount;
+    });
+  }
+
+  void handleCallRejected({String? reason}) {
+    if (isCallRejected.value) return;
+    isCallRejected.value = true;
+    _callingDotTimer?.cancel();
+    final String msg = 'Call rejected by consultant'.tr;
+    rejectedMessage.value = msg;
+    callingStatusText.value = msg;
+
+    // Give 2.5 seconds for user to read the short rejection status text before popping screen
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      endCall();
+    });
+  }
+
   void closeOverlay() {
     _overlayEntry?.remove();
     _overlayEntry = null;
@@ -507,6 +541,7 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
   Future<void> endCall() async {
     if (_isEndingCall) return;
     _isEndingCall = true;
+    _callingDotTimer?.cancel();
 
     final bool didConsultantJoin =
         _hasConsultantJoined || callDuration.value > 0 || remoteUid.value != 0;
