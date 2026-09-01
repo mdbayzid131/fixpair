@@ -2,6 +2,13 @@ import 'package:intl/intl.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
 
+num? _parseNum(dynamic val) {
+  if (val == null) return null;
+  if (val is num) return val;
+  if (val is String) return num.tryParse(val);
+  return null;
+}
+
 class ReportModel {
   final String? id;
   final String? sId;
@@ -45,42 +52,44 @@ class ReportModel {
 
   factory ReportModel.fromJson(Map<String, dynamic> json) {
     return ReportModel(
-      id: json['id'] as String? ?? json['_id'] as String?,
-      sId: json['_id'] as String?,
-      aiSummary: json['aiSummary'] != null
+      id: json['id']?.toString() ?? json['_id']?.toString(),
+      sId: json['_id']?.toString(),
+      aiSummary: json['aiSummary'] != null && json['aiSummary'] is Map<String, dynamic>
           ? AiSummaryModel.fromJson(json['aiSummary'])
           : null,
-      consultation: json['consultation'] != null
+      consultation: json['consultation'] != null && json['consultation'] is Map<String, dynamic>
           ? ReportConsultationInfo.fromJson(json['consultation'])
           : null,
-      user: json['user'] != null ? UserData.fromJson(json['user']) : null,
-      consultant: json['consultant'] != null
+      user: json['user'] != null && json['user'] is Map<String, dynamic>
+          ? UserData.fromJson(json['user'])
+          : null,
+      consultant: json['consultant'] != null && json['consultant'] is Map<String, dynamic>
           ? UserData.fromJson(json['consultant'])
           : null,
-      summary: json['summary'] as String?,
-      keyPoints: json['keyPoints'] != null
-          ? List<String>.from(json['keyPoints'].map((x) => x.toString()))
+      summary: json['summary']?.toString(),
+      keyPoints: json['keyPoints'] != null && json['keyPoints'] is List
+          ? List<String>.from((json['keyPoints'] as List).map((x) => x.toString()))
           : [],
-      stepsTaken: json['stepsTaken'] != null
-          ? List<String>.from(json['stepsTaken'].map((x) => x.toString()))
+      stepsTaken: json['stepsTaken'] != null && json['stepsTaken'] is List
+          ? List<String>.from((json['stepsTaken'] as List).map((x) => x.toString()))
           : [],
-      recommendedProducts: json['recommendedProducts'] != null
+      recommendedProducts: json['recommendedProducts'] != null && json['recommendedProducts'] is List
           ? List<RecommendedProductModel>.from(
-              (json['recommendedProducts'] as List).map(
-                (x) => RecommendedProductModel.fromJson(x),
-              ),
+              (json['recommendedProducts'] as List)
+                  .where((x) => x != null && x is Map<String, dynamic>)
+                  .map((x) => RecommendedProductModel.fromJson(x)),
             )
           : [],
-      conversation: json['conversation'] as String?,
-      duration: json['duration'] as num?,
-      notes: json['notes'] as String?,
-      images: json['images'] != null
-          ? List<String>.from(json['images'].map((x) => x.toString()))
+      conversation: json['conversation']?.toString(),
+      duration: _parseNum(json['duration']),
+      notes: json['notes']?.toString(),
+      images: json['images'] != null && json['images'] is List
+          ? List<String>.from((json['images'] as List).map((x) => x.toString()))
           : [],
-      links: json['links'] != null
-          ? List<String>.from(json['links'].map((x) => x.toString()))
+      links: json['links'] != null && json['links'] is List
+          ? List<String>.from((json['links'] as List).map((x) => x.toString()))
           : [],
-      pdfUrl: json['pdfUrl'] as String?,
+      pdfUrl: json['pdfUrl']?.toString(),
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
@@ -128,15 +137,15 @@ class AiSummaryModel {
 
   factory AiSummaryModel.fromJson(Map<String, dynamic> json) {
     return AiSummaryModel(
-      overview: json['overview'] as String?,
-      keyPoints: json['keyPoints'] != null
-          ? List<String>.from(json['keyPoints'].map((x) => x.toString()))
+      overview: json['overview']?.toString(),
+      keyPoints: json['keyPoints'] != null && json['keyPoints'] is List
+          ? List<String>.from((json['keyPoints'] as List).map((x) => x.toString()))
           : [],
-      actionItems: json['actionItems'] != null
-          ? List<String>.from(json['actionItems'].map((x) => x.toString()))
+      actionItems: json['actionItems'] != null && json['actionItems'] is List
+          ? List<String>.from((json['actionItems'] as List).map((x) => x.toString()))
           : [],
-      recommendations: json['recommendations'] != null
-          ? List<String>.from(json['recommendations'].map((x) => x.toString()))
+      recommendations: json['recommendations'] != null && json['recommendations'] is List
+          ? List<String>.from((json['recommendations'] as List).map((x) => x.toString()))
           : [],
     );
   }
@@ -157,10 +166,10 @@ class ReportConsultationInfo {
 
   factory ReportConsultationInfo.fromJson(Map<String, dynamic> json) {
     return ReportConsultationInfo(
-      id: json['id'] as String? ?? json['_id'] as String?,
-      bookingType: json['bookingType'] as String?,
-      perMinuteRate: json['perMinuteRate'] as num?,
-      status: json['status'] as String?,
+      id: json['id']?.toString() ?? json['_id']?.toString(),
+      bookingType: json['bookingType']?.toString(),
+      perMinuteRate: _parseNum(json['perMinuteRate']),
+      status: json['status']?.toString(),
     );
   }
 }
@@ -180,10 +189,11 @@ class RecommendedProductModel {
 
   factory RecommendedProductModel.fromJson(Map<String, dynamic> json) {
     return RecommendedProductModel(
-      name: json['name'] as String? ?? json['title'] as String?,
-      image: json['image'] as String? ?? json['imageUrl'] as String?,
-      price: json['price'] as num?,
-      link: json['link'] as String? ?? json['buyUrl'] as String?,
+      name: json['name']?.toString() ?? json['title']?.toString(),
+      image: json['image']?.toString() ?? json['imageUrl']?.toString(),
+      price: _parseNum(json['price']),
+      link: json['link']?.toString() ?? json['buyLink']?.toString() ?? json['buyUrl']?.toString(),
     );
   }
 }
+

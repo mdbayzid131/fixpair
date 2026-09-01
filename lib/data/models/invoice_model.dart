@@ -1,3 +1,10 @@
+num _parseNum(dynamic val) {
+  if (val == null) return 0;
+  if (val is num) return val;
+  if (val is String) return num.tryParse(val) ?? 0;
+  return 0;
+}
+
 class InvoiceModel {
   final String consultationId;
   final String invoiceNumber;
@@ -35,21 +42,23 @@ class InvoiceModel {
 
   factory InvoiceModel.fromJson(Map<String, dynamic> json) {
     return InvoiceModel(
-      consultationId: json['consultationId'] ?? '',
-      invoiceNumber: json['invoiceNumber'] ?? '',
-      date: json['date'] ?? '',
-      invoiceDate: json['invoiceDate'] ?? '',
+      consultationId: json['consultationId']?.toString() ?? '',
+      invoiceNumber: json['invoiceNumber']?.toString() ?? '',
+      date: json['date']?.toString() ?? '',
+      invoiceDate: json['invoiceDate']?.toString() ?? '',
       duration: json['duration']?.toString(),
       billableMinutes: json['billableMinutes']?.toString(),
-      perMinuteRate: json['perMinuteRate'] ?? 0,
-      subtotal: json['subtotal'] ?? 0,
-      platformFee: json['platformFee'] ?? 0,
-      totalAmount: json['totalAmount'] ?? 0,
-      status: json['status'] ?? '',
-      paymentMethod: json['paymentMethod'] ?? '',
-      transactionId: json['transactionId'] ?? '',
-      user: json['user'] != null ? InvoiceUser.fromJson(json['user']) : null,
-      consultant: json['consultant'] != null
+      perMinuteRate: _parseNum(json['perMinuteRate']),
+      subtotal: _parseNum(json['subtotal']),
+      platformFee: _parseNum(json['platformFee']),
+      totalAmount: _parseNum(json['totalAmount']),
+      status: json['status']?.toString() ?? '',
+      paymentMethod: json['paymentMethod']?.toString() ?? '',
+      transactionId: json['transactionId']?.toString() ?? '',
+      user: json['user'] != null && json['user'] is Map<String, dynamic>
+          ? InvoiceUser.fromJson(json['user'])
+          : null,
+      consultant: json['consultant'] != null && json['consultant'] is Map<String, dynamic>
           ? InvoiceConsultant.fromJson(json['consultant'])
           : null,
     );
