@@ -345,7 +345,10 @@ class AuthService extends GetxService {
     }
   }
 
-  void _handleIncomingCall(RemoteMessage message, {bool isFromTap = false}) async {
+  void _handleIncomingCall(
+    RemoteMessage message, {
+    bool isFromTap = false,
+  }) async {
     Map<String, dynamic> rawData = Map<String, dynamic>.from(message.data);
     if (rawData['data'] != null) {
       final subData = rawData['data'];
@@ -359,12 +362,15 @@ class AuthService extends GetxService {
       }
     }
 
-    final type = (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'])
-        ?.toString()
-        .toUpperCase();
+    final type =
+        (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'])
+            ?.toString()
+            .toUpperCase();
     final status = rawData['status']?.toString().toLowerCase();
 
-    AppLogger.info('📞 [FCM CALL EVENT] Type: ${type ?? 'N/A'} | Status: ${status ?? 'N/A'}');
+    AppLogger.info(
+      '📞 [FCM CALL EVENT] Type: ${type ?? 'N/A'} | Status: ${status ?? 'N/A'}',
+    );
 
     if (type == 'CALL_REJECTED' ||
         type == 'CALL_CANCELLED' ||
@@ -372,7 +378,9 @@ class AuthService extends GetxService {
         type == 'REJECT_CALL' ||
         status == 'rejected' ||
         status == 'cancelled') {
-      AppLogger.info('🚫 [FCM CALL REJECTED/CANCELLED] Closing Call & CallKit UI | Data: $rawData');
+      AppLogger.info(
+        '🚫 [FCM CALL REJECTED/CANCELLED] Closing Call & CallKit UI | Data: $rawData',
+      );
       try {
         if (Get.isDialogOpen == true) {
           Get.back();
@@ -407,13 +415,15 @@ class AuthService extends GetxService {
       return;
     }
 
-    final sessionId = rawData['sessionId']?.toString() ??
+    final sessionId =
+        rawData['sessionId']?.toString() ??
         rawData['session_id']?.toString() ??
         rawData['callId']?.toString() ??
         rawData['call_id']?.toString() ??
         rawData['id']?.toString();
 
-    final token = rawData['token']?.toString() ??
+    final token =
+        rawData['token']?.toString() ??
         rawData['agoraToken']?.toString() ??
         rawData['agora_token']?.toString() ??
         rawData['rtcToken']?.toString() ??
@@ -426,7 +436,7 @@ class AuthService extends GetxService {
       'booking',
       'consultationId',
       'consultation_id',
-      'consultation'
+      'consultation',
     ];
     String bookingId = '';
     for (var key in idKeys) {
@@ -483,13 +493,15 @@ class AuthService extends GetxService {
 
     // 2. Check first name + last name
     if (callerName.isEmpty) {
-      final fn = rawData['consultantFirstName'] ??
+      final fn =
+          rawData['consultantFirstName'] ??
           rawData['consultant_first_name'] ??
           rawData['senderFirstName'] ??
           rawData['sender_first_name'] ??
           rawData['firstName'] ??
           rawData['first_name'];
-      final ln = rawData['consultantLastName'] ??
+      final ln =
+          rawData['consultantLastName'] ??
           rawData['consultant_last_name'] ??
           rawData['senderLastName'] ??
           rawData['sender_last_name'] ??
@@ -502,7 +514,14 @@ class AuthService extends GetxService {
 
     // 3. Check nested JSON objects
     if (callerName.isEmpty) {
-      for (var objKey in ['consultant', 'sender', 'caller', 'user', 'expert', 'booking']) {
+      for (var objKey in [
+        'consultant',
+        'sender',
+        'caller',
+        'user',
+        'expert',
+        'booking',
+      ]) {
         final raw = rawData[objKey];
         if (raw != null) {
           Map<String, dynamic>? map;
@@ -515,7 +534,8 @@ class AuthService extends GetxService {
             } catch (_) {}
           }
           if (map != null) {
-            final n = map['name'] ??
+            final n =
+                map['name'] ??
                 map['displayName'] ??
                 map['consultantName'] ??
                 map['senderName'] ??
@@ -531,13 +551,16 @@ class AuthService extends GetxService {
               }
             }
             if (callerAvatar.isEmpty) {
-              final av = map['avatar'] ??
+              final av =
+                  map['avatar'] ??
                   map['image'] ??
                   map['photo'] ??
                   map['profilePic'] ??
                   map['avatarUrl'] ??
                   map['avatar_url'];
-              if (av != null && av.toString().isNotEmpty && av.toString() != 'null') {
+              if (av != null &&
+                  av.toString().isNotEmpty &&
+                  av.toString() != 'null') {
                 callerAvatar = ApiConstants.getImageUrl(av.toString());
               }
             }
@@ -598,11 +621,14 @@ class AuthService extends GetxService {
       }
     }
 
-    AppLogger.info('📞 [FCM CALL INCOMING] Session: $sessionId | Booking: $bookingId | Caller: $callerName');
+    AppLogger.info(
+      '📞 [FCM CALL INCOMING] Session: $sessionId | Booking: $bookingId | Caller: $callerName',
+    );
 
     if (sessionId == null || token == null) return;
 
-    final channelName = rawData['channelName']?.toString() ??
+    final channelName =
+        rawData['channelName']?.toString() ??
         rawData['channel_name']?.toString() ??
         rawData['channel']?.toString() ??
         sessionId;
@@ -613,21 +639,68 @@ class AuthService extends GetxService {
     ).obs;
 
     // Even if bookingId is empty, try to fetch real booking details (falls back to active callback/booking lookup)
-    _userRepository.getBookingById(bookingId).then((realBooking) {
-      if (realBooking != null) {
-        AppLogger.info('✅ [FCM BOOKING RESOLVED] Consultant: ${realBooking.consultant?.name} | ID: ${realBooking.id}');
-        bookingRx.value = realBooking;
-      }
-    }).catchError((err) {
-      AppLogger.debug('Error fetching booking details for FCM call: $err');
-    });
+    _userRepository
+        .getBookingById(bookingId)
+        .then((realBooking) {
+          if (realBooking != null) {
+            AppLogger.info(
+              '✅ [FCM BOOKING RESOLVED] Consultant: ${realBooking.consultant?.name} | ID: ${realBooking.id}',
+            );
+            bookingRx.value = realBooking;
+          }
+        })
+        .catchError((err) {
+          AppLogger.debug('Error fetching booking details for FCM call: $err');
+        });
 
     if (isFromTap) {
       // Tapped from background -> go directly to video call screen
       _joinVideoCall(bookingRx.value, sessionId, token, channelName);
     } else {
-      // Received in foreground -> show premium interactive ringing dialog
-      _showIncomingCallDialog(bookingRx, sessionId, token, channelName);
+      // Received in foreground -> show full-screen incoming call UI via CallKit
+      final CallKitParams callKitParams = CallKitParams(
+        id: sessionId,
+        nameCaller: callerName,
+        appName: 'Fixpair',
+        avatar: callerAvatar.isNotEmpty ? callerAvatar : null,
+        handle: 'Video Consultation',
+        type: 1, // 0: audio, 1: video
+        duration: 35000,
+        extra: <String, dynamic>{
+          'sessionId': sessionId,
+          'token': token,
+          'channelName': channelName,
+          'callerName': callerName,
+          'callerAvatar': callerAvatar,
+          'bookingId': bookingId,
+        },
+        missedCallNotification: const NotificationParams(
+          showNotification: false,
+          isShowCallback: false,
+        ),
+        android: const AndroidParams(
+          isCustomNotification: false,
+          isShowLogo: false,
+          isShowFullLockedScreen: true,
+          isImportant: true,
+          ringtonePath: 'system_ringtone_default',
+          incomingCallNotificationChannelName: 'Incoming Call',
+          backgroundColor: '#0F172A',
+          textAccept: 'Accept',
+          textDecline: 'Decline',
+        ),
+        ios: const IOSParams(
+          handleType: 'generic',
+          supportsVideo: true,
+          maximumCallGroups: 1,
+          maximumCallsPerCallGroup: 1,
+          audioSessionMode: 'videoChat',
+          audioSessionActive: true,
+          ringtonePath: 'system_ringtone_default',
+        ),
+      );
+
+      await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
     }
   }
 
@@ -690,7 +763,8 @@ class AuthService extends GetxService {
               const SizedBox(height: 12),
               // Description
               Text(
-                'You do not have enough balance for this consultation. Please top up your wallet to join the call.'.tr,
+                'You do not have enough balance for this consultation. Please top up your wallet to join the call.'
+                    .tr,
                 style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFF94A3B8), // Slate 400
@@ -830,75 +904,52 @@ class AuthService extends GetxService {
         child: Obx(() {
           final booking = bookingRx.value;
           return Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: const Color(
-              0xFF0F172A,
-            ).withOpacity(0.95), // Premium Slate 900
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: const Color(0xFF334155).withOpacity(0.5), // Slate 700
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF22C55E).withOpacity(0.15), // Green glow
-                blurRadius: 40,
-                spreadRadius: 5,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(
+                0xFF0F172A,
+              ).withOpacity(0.95), // Premium Slate 900
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: const Color(0xFF334155).withOpacity(0.5), // Slate 700
+                width: 1.5,
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Glowing Ring Indicator with Caller Avatar
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFF22C55E).withOpacity(0.8),
-                        width: 2,
-                      ),
-                    ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(
+                    0xFF22C55E,
+                  ).withOpacity(0.15), // Green glow
+                  blurRadius: 40,
+                  spreadRadius: 5,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Caller Avatar (Clean container, no outer ripple rings)
+                Container(
+                  width: 96,
+                  height: 96,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF1E293B),
+                    shape: BoxShape.circle,
                   ),
-                  Container(
-                    width: 96,
-                    height: 96,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF1E293B),
-                      shape: BoxShape.circle,
-                    ),
-                    child: ClipOval(
-                      child: booking.consultant?.avatar != null &&
-                              booking.consultant!.avatar!.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: ApiConstants.getImageUrl(
-                                booking.consultant!.avatar,
+                  child: ClipOval(
+                    child:
+                        booking.consultant?.avatar != null &&
+                            booking.consultant!.avatar!.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: ApiConstants.getImageUrl(
+                              booking.consultant!.avatar,
+                            ),
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
                               ),
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              ),
-                              errorWidget: (context, url, error) => Center(
-                                child: Text(
-                                  booking.consultant?.name
-                                          ?.substring(0, 1)
-                                          .toUpperCase() ??
-                                      'C',
-                                  style: const TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF22C55E),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : Center(
+                            ),
+                            errorWidget: (context, url, error) => Center(
                               child: Text(
                                 booking.consultant?.name
                                         ?.substring(0, 1)
@@ -911,153 +962,151 @@ class AuthService extends GetxService {
                                 ),
                               ),
                             ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              // Caller Name
-              Text(
-                booking.consultant?.name ?? 'Consultant',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              // Call Subtitle
-              Text(
-                'Incoming Video Consultation...'.tr,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF94A3B8), // Slate 400
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 36),
-              // Action Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // Decline Button
-                  GestureDetector(
-                    onTap: () async {
-                      Get.back(); // Close Dialog
-                      try {
-                        await _userRepository.actionVideoSession(
-                          sessionId,
-                          'REJECT',
-                        );
-                        if (Get.isRegistered<SocketService>()) {
-                          Get.find<SocketService>().emitRejectCall(sessionId);
-                        }
-                      } catch (e) {
-                        AppLogger.warning(
-                          'Error notifying backend of rejected call: $e',
-                        );
-                      }
-                      try {
-                        await FlutterCallkitIncoming.endCall(sessionId);
-                        await FlutterCallkitIncoming.endAllCalls();
-                      } catch (e) {
-                        AppLogger.debug(
-                          'Error ending call on foreground decline: $e',
-                        );
-                      }
-                    },
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFEF4444), // Red 500
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color(0xFFEF4444),
-                                blurRadius: 15,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.call_end,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Decline'.tr,
-                          style: const TextStyle(
-                            color: Color(0xFFEF4444),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Accept Button
-                  GestureDetector(
-                    onTap: () async {
-                      Get.back(); // Close Dialog
-
-                      // Dismiss any pending background CallKit notification
-                      try {
-                        await FlutterCallkitIncoming.endAllCalls();
-                      } catch (e) {
-                        AppLogger.debug(
-                          'Error clearing CallKit on foreground accept: $e',
-                        );
-                      }
-
-                      _joinVideoCall(booking, sessionId, token, channelName);
-                    },
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF22C55E), // Green 500
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
+                          )
+                        : Center(
+                            child: Text(
+                              booking.consultant?.name
+                                      ?.substring(0, 1)
+                                      .toUpperCase() ??
+                                  'C',
+                              style: const TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
                                 color: Color(0xFF22C55E),
-                                blurRadius: 15,
-                                offset: Offset(0, 4),
                               ),
-                            ],
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.videocam,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Accept'.tr,
-                          style: const TextStyle(
-                            color: Color(0xFF22C55E),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
-                ],
-              ),
-            ],
-          ),
-        );
+                ),
+                const SizedBox(height: 24),
+                // Caller Name
+                Text(
+                  booking.consultant?.name ?? 'Consultant',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                // Call Subtitle
+                Text(
+                  'Incoming Video Consultation...'.tr,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF94A3B8), // Slate 400
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 36),
+                // Action Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Decline Button (Clean flat style)
+                    GestureDetector(
+                      onTap: () async {
+                        Get.back(); // Close Dialog
+                        try {
+                          await _userRepository.actionVideoSession(
+                            sessionId,
+                            'REJECT',
+                          );
+                          if (Get.isRegistered<SocketService>()) {
+                            Get.find<SocketService>().emitRejectCall(sessionId);
+                          }
+                        } catch (e) {
+                          AppLogger.warning(
+                            'Error notifying backend of rejected call: $e',
+                          );
+                        }
+                        try {
+                          await FlutterCallkitIncoming.endCall(sessionId);
+                          await FlutterCallkitIncoming.endAllCalls();
+                        } catch (e) {
+                          AppLogger.debug(
+                            'Error ending call on foreground decline: $e',
+                          );
+                        }
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFEF4444), // Red 500
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.call_end,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Decline'.tr,
+                            style: const TextStyle(
+                              color: Color(0xFFEF4444),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Accept Button (Clean flat style)
+                    GestureDetector(
+                      onTap: () async {
+                        Get.back(); // Close Dialog
+
+                        // Dismiss any pending background CallKit notification
+                        try {
+                          await FlutterCallkitIncoming.endAllCalls();
+                        } catch (e) {
+                          AppLogger.debug(
+                            'Error clearing CallKit on foreground accept: $e',
+                          );
+                        }
+
+                        _joinVideoCall(booking, sessionId, token, channelName);
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF22C55E), // Green 500
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.videocam,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Accept'.tr,
+                            style: const TextStyle(
+                              color: Color(0xFF22C55E),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
         }),
       ),
     );
@@ -1066,15 +1115,17 @@ class AuthService extends GetxService {
   void _initCallKit() {
     FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
       if (event == null) return;
+      AppLogger.info('📞 [CallKit Event] ${event.eventName}');
 
       switch (event) {
         case CallEventActionCallAccept():
-          // Mark call as connected in CallKit (updates notification to ongoing)
           try {
             await FlutterCallkitIncoming.setCallConnected(event.id);
           } catch (e) {
             AppLogger.debug('Error setting CallKit connected: $e');
           }
+
+          Map<String, dynamic>? extra;
           final activeCalls = await FlutterCallkitIncoming.activeCalls();
           if (activeCalls.isNotEmpty) {
             CallKitParams? targetCall;
@@ -1085,29 +1136,34 @@ class AuthService extends GetxService {
               }
             }
             targetCall ??= activeCalls.first;
-            final extra = targetCall.extra;
-            if (extra != null) {
-              final booking = BookingModel(
-                id: extra['bookingId'] ?? '',
-                consultant: UserData(
-                  name: extra['callerName'] ?? 'Consultant',
-                  avatar: extra['callerAvatar'] ?? '',
-                ),
-              );
-              _joinVideoCall(
-                booking,
-                extra['sessionId'] ?? '',
-                extra['token'] ?? '',
-                extra['channelName'] ?? '',
-              );
+            if (targetCall.extra != null) {
+              extra = Map<String, dynamic>.from(targetCall.extra!);
             }
           }
+
+          if (extra != null) {
+            final booking = BookingModel(
+              id: extra['bookingId'] ?? '',
+              consultant: UserData(
+                name: extra['callerName'] ?? 'Consultant',
+                avatar: extra['callerAvatar'] ?? '',
+              ),
+            );
+            await _joinVideoCall(
+              booking,
+              extra['sessionId'] ?? '',
+              extra['token'] ?? '',
+              extra['channelName'] ?? '',
+            );
+          }
           break;
+
         case CallEventActionCallDecline():
         case CallEventActionCallTimeout():
           final callId = event is CallEventActionCallDecline
               ? event.id
               : (event as CallEventActionCallTimeout).id;
+
           if (Get.isDialogOpen == true) {
             Get.back();
           }
@@ -1115,14 +1171,23 @@ class AuthService extends GetxService {
             Get.find<VideoCallController>().endCall();
           } else {
             try {
-              await _userRepository.actionVideoSession(callId, 'REJECT');
+              if (callId != null && callId.isNotEmpty) {
+                await _userRepository.actionVideoSession(callId, 'REJECT');
+                if (Get.isRegistered<SocketService>()) {
+                  Get.find<SocketService>().emitRejectCall(callId);
+                }
+              }
             } catch (e) {
               AppLogger.warning(
                 'Error rejecting video session on CallKit event: $e',
               );
             }
           }
+          try {
+            await FlutterCallkitIncoming.endAllCalls();
+          } catch (_) {}
           break;
+
         case CallEventActionCallEnded():
           if (Get.isDialogOpen == true) {
             Get.back();
@@ -1131,6 +1196,7 @@ class AuthService extends GetxService {
             Get.find<VideoCallController>().endCall();
           }
           break;
+
         default:
           break;
       }

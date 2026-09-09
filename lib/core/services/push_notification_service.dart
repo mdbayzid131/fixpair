@@ -54,27 +54,31 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     }
   }
 
-  final type = (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'])
-      ?.toString()
-      .toUpperCase();
+  final type =
+      (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'])
+          ?.toString()
+          .toUpperCase();
 
   if (type == 'INCOMING_CALL' ||
       type == 'CALL' ||
       type == 'VIDEO_CALL' ||
       type == 'CALL_INCOMING') {
-    final sessionId = rawData['sessionId']?.toString() ??
+    final sessionId =
+        rawData['sessionId']?.toString() ??
         rawData['session_id']?.toString() ??
         rawData['callId']?.toString() ??
         rawData['call_id']?.toString() ??
         rawData['id']?.toString();
 
-    final token = rawData['token']?.toString() ??
+    final token =
+        rawData['token']?.toString() ??
         rawData['agoraToken']?.toString() ??
         rawData['agora_token']?.toString() ??
         rawData['rtcToken']?.toString() ??
         rawData['rtc_token']?.toString();
 
-    final channelName = rawData['channelName']?.toString() ??
+    final channelName =
+        rawData['channelName']?.toString() ??
         rawData['channel_name']?.toString() ??
         rawData['channel']?.toString() ??
         sessionId;
@@ -86,7 +90,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       'booking',
       'consultationId',
       'consultation_id',
-      'consultation'
+      'consultation',
     ];
     String bookingId = '';
     for (var key in idKeys) {
@@ -143,13 +147,15 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
     // 2. Check first name + last name
     if (callerName.isEmpty) {
-      final fn = rawData['consultantFirstName'] ??
+      final fn =
+          rawData['consultantFirstName'] ??
           rawData['consultant_first_name'] ??
           rawData['senderFirstName'] ??
           rawData['sender_first_name'] ??
           rawData['firstName'] ??
           rawData['first_name'];
-      final ln = rawData['consultantLastName'] ??
+      final ln =
+          rawData['consultantLastName'] ??
           rawData['consultant_last_name'] ??
           rawData['senderLastName'] ??
           rawData['sender_last_name'] ??
@@ -162,7 +168,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
     // 3. Check nested JSON objects (consultant, sender, caller, booking, user, data)
     if (callerName.isEmpty) {
-      for (var objKey in ['consultant', 'sender', 'caller', 'user', 'expert', 'booking']) {
+      for (var objKey in [
+        'consultant',
+        'sender',
+        'caller',
+        'user',
+        'expert',
+        'booking',
+      ]) {
         final raw = rawData[objKey];
         if (raw != null) {
           Map<String, dynamic>? map;
@@ -175,7 +188,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
             } catch (_) {}
           }
           if (map != null) {
-            final n = map['name'] ??
+            final n =
+                map['name'] ??
                 map['displayName'] ??
                 map['consultantName'] ??
                 map['senderName'] ??
@@ -191,13 +205,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
               }
             }
             if (callerAvatar.isEmpty) {
-              final av = map['avatar'] ??
+              final av =
+                  map['avatar'] ??
                   map['image'] ??
                   map['photo'] ??
                   map['profilePic'] ??
                   map['avatarUrl'] ??
                   map['avatar_url'];
-              if (av != null && av.toString().isNotEmpty && av.toString() != 'null') {
+              if (av != null &&
+                  av.toString().isNotEmpty &&
+                  av.toString() != 'null') {
                 callerAvatar = ApiConstants.getImageUrl(av.toString());
               }
             }
@@ -258,7 +275,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       }
     }
 
-    print('🔔 [BG CALL] Parsed → sessionId=$sessionId | callerName=$callerName | callerAvatar=$callerAvatar');
+    print(
+      '🔔 [BG CALL] Parsed → sessionId=$sessionId | callerName=$callerName | callerAvatar=$callerAvatar',
+    );
 
     if (sessionId != null && token != null) {
       final CallKitParams callKitParams = CallKitParams(
@@ -281,18 +300,26 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
           showNotification: false,
           isShowCallback: false,
         ),
-        android: AndroidParams(
-          isCustomNotification: true,
-          backgroundColor: '#0F172A',
-          incomingCallNotificationChannelName: "Incoming Call",
-          isShowLogo: true,
+        android: const AndroidParams(
+          isCustomNotification: false,
+          isShowLogo: false,
           isShowFullLockedScreen: true,
           isImportant: true,
           ringtonePath: 'system_ringtone_default',
+          incomingCallNotificationChannelName: 'Incoming Call',
+          backgroundColor: '#0F172A',
           textAccept: 'Accept',
           textDecline: 'Decline',
         ),
-        ios: const IOSParams(handleType: 'generic', supportsVideo: true),
+        ios: const IOSParams(
+          handleType: 'generic',
+          supportsVideo: true,
+          maximumCallGroups: 1,
+          maximumCallsPerCallGroup: 1,
+          audioSessionMode: 'videoChat',
+          audioSessionActive: true,
+          ringtonePath: 'system_ringtone_default',
+        ),
       );
 
       await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
@@ -355,24 +382,41 @@ class FirebaseNotificationService {
 
     // Foreground message listener
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      final title = message.notification?.title ?? message.data['title'] ?? message.data['type'] ?? 'Push Notification';
-      final type = message.data['type'] ?? message.data['status'] ?? 'NOTIFICATION';
-      AppLogger.info('🔔 [FCM PUSH RECEIVED] Title: $title | Type: $type | Data: ${message.data}');
+      final title =
+          message.notification?.title ??
+          message.data['title'] ??
+          message.data['type'] ??
+          'Push Notification';
+      final type =
+          message.data['type'] ?? message.data['status'] ?? 'NOTIFICATION';
+      AppLogger.info(
+        '🔔 [FCM PUSH RECEIVED] Title: $title | Type: $type | Data: ${message.data}',
+      );
       onForegroundMessage?.call(message);
     });
 
     // Notification tap (app in background)
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      final title = message.notification?.title ?? message.data['title'] ?? 'Notification';
-      AppLogger.info('👆 [FCM PUSH CLICKED] Title: $title | Data: ${message.data}');
+      final title =
+          message.notification?.title ??
+          message.data['title'] ??
+          'Notification';
+      AppLogger.info(
+        '👆 [FCM PUSH CLICKED] Title: $title | Data: ${message.data}',
+      );
       onNotificationTap?.call(message);
     });
 
     // App opened from terminated state
     final initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
-      final title = initialMessage.notification?.title ?? initialMessage.data['title'] ?? 'Notification';
-      AppLogger.info('🚀 [FCM TERMINATED OPEN] Title: $title | Data: ${initialMessage.data}');
+      final title =
+          initialMessage.notification?.title ??
+          initialMessage.data['title'] ??
+          'Notification';
+      AppLogger.info(
+        '🚀 [FCM TERMINATED OPEN] Title: $title | Data: ${initialMessage.data}',
+      );
       onNotificationTap?.call(initialMessage);
     }
 
