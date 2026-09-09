@@ -178,8 +178,12 @@ class AuthService extends GetxService {
   Future<void> logout() async {
     try {
       await _authRepo.logout();
-      await _clearLocalAuth();
     } catch (e) {
+      AppLogger.warning('Error calling backend logout: $e');
+    } finally {
+      if (Get.isRegistered<SocketService>()) {
+        Get.find<SocketService>().disconnect();
+      }
       await _clearLocalAuth();
     }
   }

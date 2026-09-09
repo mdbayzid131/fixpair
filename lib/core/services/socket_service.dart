@@ -182,11 +182,17 @@ class SocketService extends GetxService {
       }
     }
 
+    _socket?.on('consultant:status-changed', handleConsultantStatus);
     _socket?.on('consultant-status-changed', handleConsultantStatus);
+    _socket?.on('consultant:status-updated', handleConsultantStatus);
     _socket?.on('consultant-status-updated', handleConsultantStatus);
+    _socket?.on('user:status-changed', handleConsultantStatus);
     _socket?.on('user-status-changed', handleConsultantStatus);
+    _socket?.on('user:status-updated', handleConsultantStatus);
     _socket?.on('user-status-updated', handleConsultantStatus);
+    _socket?.on('consultant:online-status', handleConsultantStatus);
     _socket?.on('consultant-online-status', handleConsultantStatus);
+    _socket?.on('expert:status-changed', handleConsultantStatus);
     _socket?.on('expert-status-changed', handleConsultantStatus);
   }
 
