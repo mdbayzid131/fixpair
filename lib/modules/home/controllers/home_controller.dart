@@ -8,6 +8,7 @@ import '../../../data/repositories/user_repository.dart';
 import '../../../data/repositories/notification_repository.dart';
 import '../../../core/utils/helpers.dart';
 import '../../../config/constants/api_constants.dart';
+import '../../../core/services/socket_service.dart';
 
 class HomeController extends GetxController {
   final UserRepository _userRepository = Get.find();
@@ -29,6 +30,7 @@ class HomeController extends GetxController {
     fetchUpcomingBookings();
     fetchRecommendedConsultants();
     checkUnreadNotifications();
+    _listenToConsultantStatusChanges();
   }
 
   Future<void> fetchCategories() async {
@@ -228,5 +230,25 @@ class HomeController extends GetxController {
       fetchRecommendedConsultants(isRefresh: true),
       checkUnreadNotifications(),
     ]);
+  }
+
+  void _listenToConsultantStatusChanges() {
+    if (Get.isRegistered<SocketService>()) {
+      final socketService = Get.find<SocketService>();
+      ever(socketService.consultantStatusUpdate, (statusData) {
+        if (statusData != null) {
+          final String? consultantId = statusData['consultantId']?.toString();
+          final bool? isOnline = statusData['isOnline'] as bool?;
+          if (consultantId != null && isOnline != null) {
+            final index = recommendedConsultants.indexWhere((c) => c.id == consultantId);
+            if (index != -1) {
+              recommendedConsultants[index] = recommendedConsultants[index].copyWith(activeStatus: isOnline);
+              recommendedConsultants.refresh();
+              Helpers.showDebugLog('Real-time updated consultant $consultantId activeStatus: $isOnline on Home');
+            }
+          }
+        }
+      });
+    }
   }
 }

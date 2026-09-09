@@ -28,6 +28,12 @@ class SocketService extends GetxService {
   /// Callback for incoming messages
   void Function(dynamic data)? onMessageReceived;
 
+  /// Callback for consultant online/offline status changes
+  void Function(String consultantId, bool isOnline)? onConsultantStatusChanged;
+
+  /// Observable for consultant status changes (Rx stream for controllers)
+  final consultantStatusUpdate = Rxn<Map<String, dynamic>>();
+
   @override
   void onInit() {
     super.onInit();
@@ -148,6 +154,40 @@ class SocketService extends GetxService {
     _socket?.on('end-call', handleCallCancel);
     _socket?.on('session-ended', handleCallCancel);
     _socket?.on('consultation-auto-ended', handleCallCancel);
+
+    // Consultant Online/Offline Status change handlers
+    void handleConsultantStatus(dynamic data) {
+      AppLogger.info('Consultant status update event received via socket: $data');
+      if (data is Map) {
+        final String? consultantId = (data['consultantId'] ??
+                data['userId'] ??
+                data['id'] ??
+                data['_id'])
+            ?.toString();
+
+        final dynamic statusVal = data['activeStatus'] ?? data['isOnline'] ?? data['status'];
+        final bool isOnline = statusVal == true ||
+            statusVal?.toString() == 'true' ||
+            statusVal?.toString().toLowerCase() == 'online' ||
+            statusVal?.toString().toLowerCase() == 'active';
+
+        if (consultantId != null && consultantId.isNotEmpty) {
+          consultantStatusUpdate.value = {
+            'consultantId': consultantId,
+            'isOnline': isOnline,
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          };
+          onConsultantStatusChanged?.call(consultantId, isOnline);
+        }
+      }
+    }
+
+    _socket?.on('consultant-status-changed', handleConsultantStatus);
+    _socket?.on('consultant-status-updated', handleConsultantStatus);
+    _socket?.on('user-status-changed', handleConsultantStatus);
+    _socket?.on('user-status-updated', handleConsultantStatus);
+    _socket?.on('consultant-online-status', handleConsultantStatus);
+    _socket?.on('expert-status-changed', handleConsultantStatus);
   }
 
   // ──────────────────── PUBLIC METHODS ────────────────────
