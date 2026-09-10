@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:fixpair/config/routes/app_pages.dart';
@@ -26,6 +27,7 @@ import 'package:fixpair/config/constants/api_constants.dart';
 class AuthService extends GetxService {
   late AuthRepo _authRepo;
   late UserRepository _userRepository;
+  final Completer<void> _initCompleter = Completer<void>();
 
   // Reactive state
   final isLoggedIn = false.obs;
@@ -34,15 +36,33 @@ class AuthService extends GetxService {
   @override
   void onInit() {
     super.onInit();
-    // Explicitly find ApiClient to ensure it's initialized before AuthRepo
-    _authRepo = AuthRepo(apiClient: Get.put(ApiClient()));
-    _userRepository = UserRepository();
 
     // Check initial login state
-    _checkLoginStatus();
+    _initAuth();
 
     // Initialize CallKit global event listener
     _initCallKit();
+  }
+
+  Future<void> _initAuth() async {
+    try {
+      // Explicitly find ApiClient to ensure it's initialized before AuthRepo
+      _authRepo = AuthRepo(apiClient: Get.put(ApiClient()));
+      _userRepository = UserRepository();
+      // Initialize push notifications & CallKit permissions early
+      setupPushNotifications();
+      await _checkLoginStatus();
+    } finally {
+      if (!_initCompleter.isCompleted) {
+        _initCompleter.complete();
+      }
+    }
+  }
+
+  Future<void> ensureInitialized() async {
+    if (!_initCompleter.isCompleted) {
+      await _initCompleter.future;
+    }
   }
 
   Future<void> _checkLoginStatus() async {
@@ -367,17 +387,32 @@ class AuthService extends GetxService {
             ?.toString()
             .toUpperCase();
     final status = rawData['status']?.toString().toLowerCase();
+    final action = rawData['action']?.toString().toUpperCase();
 
     AppLogger.info(
-      '📞 [FCM CALL EVENT] Type: ${type ?? 'N/A'} | Status: ${status ?? 'N/A'}',
+      '📞 [FCM CALL EVENT] Type: ${type ?? 'N/A'} | Status: ${status ?? 'N/A'} | Action: ${action ?? 'N/A'}',
     );
 
     if (type == 'CALL_REJECTED' ||
         type == 'CALL_CANCELLED' ||
         type == 'CANCEL_CALL' ||
         type == 'REJECT_CALL' ||
+        type == 'CALL_ENDED' ||
+        type == 'END_CALL' ||
+        type == 'CALL_MISSED' ||
+        type == 'MISSED_CALL' ||
+        type == 'SESSION_ENDED' ||
+        type == 'CONSULTATION_AUTO_ENDED' ||
+        action == 'CALL_REJECTED' ||
+        action == 'CALL_CANCELLED' ||
+        action == 'CANCEL_CALL' ||
+        action == 'REJECT_CALL' ||
         status == 'rejected' ||
-        status == 'cancelled') {
+        status == 'cancelled' ||
+        status == 'canceled' ||
+        status == 'ended' ||
+        status == 'missed' ||
+        status == 'closed') {
       AppLogger.info(
         '🚫 [FCM CALL REJECTED/CANCELLED] Closing Call & CallKit UI | Data: $rawData',
       );
@@ -385,7 +420,18 @@ class AuthService extends GetxService {
         if (Get.isDialogOpen == true) {
           Get.back();
         }
-        FlutterCallkitIncoming.endAllCalls();
+        final sessionId =
+            rawData['sessionId']?.toString() ??
+            rawData['session_id']?.toString() ??
+            rawData['callId']?.toString() ??
+            rawData['call_id']?.toString() ??
+            rawData['id']?.toString();
+        if (sessionId != null && sessionId.isNotEmpty) {
+          try {
+            await FlutterCallkitIncoming.endCall(sessionId);
+          } catch (_) {}
+        }
+        await FlutterCallkitIncoming.endAllCalls();
         if (Get.isRegistered<VideoCallController>()) {
           final controller = Get.find<VideoCallController>();
           if (!controller.hasConsultantJoined) {
@@ -655,7 +701,7 @@ class AuthService extends GetxService {
 
     if (isFromTap) {
       // Tapped from background -> go directly to video call screen
-      _joinVideoCall(bookingRx.value, sessionId, token, channelName);
+      joinVideoCall(bookingRx.value, sessionId, token, channelName);
     } else {
       // Received in foreground -> show full-screen incoming call UI via CallKit
       final CallKitParams callKitParams = CallKitParams(
@@ -682,9 +728,10 @@ class AuthService extends GetxService {
           isCustomNotification: false,
           isShowLogo: false,
           isShowFullLockedScreen: true,
+          isFullScreen: true,
           isImportant: true,
           ringtonePath: 'system_ringtone_default',
-          incomingCallNotificationChannelName: 'Incoming Call',
+          incomingCallNotificationChannelName: 'Incoming Video Call',
           backgroundColor: '#0F172A',
           textAccept: 'Accept',
           textDecline: 'Decline',
@@ -828,7 +875,7 @@ class AuthService extends GetxService {
     );
   }
 
-  Future<void> _joinVideoCall(
+  Future<void> joinVideoCall(
     BookingModel booking,
     String sessionId,
     String token,
@@ -945,9 +992,7 @@ class AuthService extends GetxService {
                             ),
                             fit: BoxFit.cover,
                             placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                             errorWidget: (context, url, error) => Center(
                               child: Text(
@@ -1073,7 +1118,7 @@ class AuthService extends GetxService {
                           );
                         }
 
-                        _joinVideoCall(booking, sessionId, token, channelName);
+                        joinVideoCall(booking, sessionId, token, channelName);
                       },
                       child: Column(
                         children: [
@@ -1095,6 +1140,7 @@ class AuthService extends GetxService {
                             'Accept'.tr,
                             style: const TextStyle(
                               color: Color(0xFF22C55E),
+                          
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                             ),
@@ -1149,7 +1195,7 @@ class AuthService extends GetxService {
                 avatar: extra['callerAvatar'] ?? '',
               ),
             );
-            await _joinVideoCall(
+            await joinVideoCall(
               booking,
               extra['sessionId'] ?? '',
               extra['token'] ?? '',
@@ -1171,7 +1217,7 @@ class AuthService extends GetxService {
             Get.find<VideoCallController>().endCall();
           } else {
             try {
-              if (callId != null && callId.isNotEmpty) {
+              if (callId.isNotEmpty) {
                 await _userRepository.actionVideoSession(callId, 'REJECT');
                 if (Get.isRegistered<SocketService>()) {
                   Get.find<SocketService>().emitRejectCall(callId);

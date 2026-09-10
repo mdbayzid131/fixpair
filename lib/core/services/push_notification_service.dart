@@ -58,11 +58,47 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'])
           ?.toString()
           .toUpperCase();
+  final status = rawData['status']?.toString().toLowerCase();
+  final action = rawData['action']?.toString().toUpperCase();
 
-  if (type == 'INCOMING_CALL' ||
-      type == 'CALL' ||
-      type == 'VIDEO_CALL' ||
-      type == 'CALL_INCOMING') {
+  // Handle Call Rejection / Cancellation / End while app is in background or terminated
+  if (type == 'CALL_REJECTED' ||
+      type == 'CALL_CANCELLED' ||
+      type == 'CANCEL_CALL' ||
+      type == 'REJECT_CALL' ||
+      type == 'CALL_ENDED' ||
+      type == 'END_CALL' ||
+      type == 'CALL_MISSED' ||
+      type == 'MISSED_CALL' ||
+      type == 'SESSION_ENDED' ||
+      type == 'CONSULTATION_AUTO_ENDED' ||
+      action == 'CALL_REJECTED' ||
+      action == 'CALL_CANCELLED' ||
+      action == 'CANCEL_CALL' ||
+      action == 'REJECT_CALL' ||
+      status == 'rejected' ||
+      status == 'cancelled' ||
+      status == 'canceled' ||
+      status == 'ended' ||
+      status == 'missed' ||
+      status == 'closed') {
+    print('🚫 [BG CALL] Call cancelled/rejected/ended received in background. Ending CallKit calls.');
+    final sessionId =
+        rawData['sessionId']?.toString() ??
+        rawData['session_id']?.toString() ??
+        rawData['callId']?.toString() ??
+        rawData['call_id']?.toString() ??
+        rawData['id']?.toString();
+    if (sessionId != null && sessionId.isNotEmpty) {
+      try {
+        await FlutterCallkitIncoming.endCall(sessionId);
+      } catch (_) {}
+    }
+    try {
+      await FlutterCallkitIncoming.endAllCalls();
+    } catch (_) {}
+    return;
+  }
     final sessionId =
         rawData['sessionId']?.toString() ??
         rawData['session_id']?.toString() ??
@@ -304,9 +340,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
           isCustomNotification: false,
           isShowLogo: false,
           isShowFullLockedScreen: true,
+          isFullScreen: true,
           isImportant: true,
           ringtonePath: 'system_ringtone_default',
-          incomingCallNotificationChannelName: 'Incoming Call',
+          incomingCallNotificationChannelName: 'Incoming Video Call',
           backgroundColor: '#0F172A',
           textAccept: 'Accept',
           textDecline: 'Decline',
@@ -325,7 +362,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
     }
   }
-}
+
 
 class FirebaseNotificationService {
   FirebaseNotificationService._();

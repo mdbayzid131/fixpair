@@ -27,7 +27,9 @@ class SplashController extends GetxController {
       if (activeCalls.isNotEmpty) {
         final call = activeCalls.first;
         final extra = call.extra;
-        if (extra != null) {
+        final sessionId = extra?['sessionId']?.toString() ?? call.id;
+        if (extra != null && sessionId.isNotEmpty) {
+          await _authService.ensureInitialized();
           final booking = BookingModel(
             id: extra['bookingId'] ?? '',
             consultant: UserData(
@@ -35,14 +37,11 @@ class SplashController extends GetxController {
               avatar: extra['callerAvatar'] ?? '',
             ),
           );
-          Get.offAllNamed(
-            AppRoutes.VIDEO_CALL,
-            arguments: {
-              'booking': booking,
-              'sessionId': extra['sessionId'],
-              'token': extra['token'],
-              'channelName': extra['channelName'],
-            },
+          await _authService.joinVideoCall(
+            booking,
+            sessionId,
+            extra['token'] ?? '',
+            extra['channelName'] ?? '',
           );
           return;
         }
