@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
+import 'package:fixpair/core/utils/helpers.dart';
 import 'package:fixpair/core/widgets/custom_appbar.dart';
 import 'package:fixpair/data/models/report_model.dart';
 import 'package:fixpair/modules/consultation_summary/controllers/consultation_summary_controller.dart';
@@ -1116,7 +1117,7 @@ class ConsultationReportView extends GetView<ConsultationSummaryController> {
   Future<void> _launchExternalUrl(String url) async {
     final Uri uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      Get.snackbar('Error', 'Could not launch URL: $url');
+      Helpers.showError('Could not launch URL: $url', title: 'Error'.tr);
     }
   }
 }

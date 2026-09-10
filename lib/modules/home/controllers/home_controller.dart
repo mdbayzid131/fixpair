@@ -118,15 +118,14 @@ class HomeController extends GetxController {
         } else if (joinResponse.statusCode == 402) {
           Get.find<AuthService>().showPaymentRequiredDialog();
         } else {
-          Get.snackbar(
-            'Error'.tr,
+          Helpers.showError(
             joinResponse.statusMessage ?? 'Failed to join video call'.tr,
           );
         }
       }
     } catch (e) {
       Helpers.showDebugLog('Error starting video call: $e');
-      Get.snackbar('Error'.tr, 'Could not start video call. Please try again.'.tr);
+      Helpers.showError('Could not start video call. Please try again.'.tr);
     } finally {
       isLoading.value = false;
     }

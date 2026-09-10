@@ -14,6 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:fixpair/core/utils/logger.dart';
+import 'package:fixpair/core/utils/helpers.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/auth_repository.dart';
@@ -619,11 +620,8 @@ class AuthService extends GetxService {
       } else if (response.statusCode == 402) {
         showPaymentRequiredDialog();
       } else {
-        Get.snackbar(
-          'Error'.tr,
+        Helpers.showError(
           response.statusMessage ?? 'Failed to join video session'.tr,
-          backgroundColor: const Color(0xFF0F172A).withOpacity(0.9),
-          colorText: Colors.white,
         );
       }
     } catch (e) {

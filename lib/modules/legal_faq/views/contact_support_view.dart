@@ -1,4 +1,5 @@
 import 'package:fixpair/core/widgets/custom_appbar.dart';
+import 'package:fixpair/core/utils/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -99,10 +100,7 @@ class ContactSupportView extends GetView<LegalFAQController> {
                                   mode: LaunchMode.externalApplication,
                                 );
                               } else {
-                                Get.snackbar(
-                                  'Error'.tr,
-                                  'Could not open mail client'.tr,
-                                );
+                                Helpers.showError('Could not open mail client'.tr);
                               }
                             },
                           );
@@ -136,10 +134,7 @@ class ContactSupportView extends GetView<LegalFAQController> {
                                   mode: LaunchMode.externalApplication,
                                 );
                               } else {
-                                Get.snackbar(
-                                  'Error'.tr,
-                                  'Could not open phone dialer'.tr,
-                                );
+                                Helpers.showError('Could not open phone dialer'.tr);
                               }
                             },
                           );
