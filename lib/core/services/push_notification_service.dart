@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
+import 'package:fixpair/config/constants/storage_constants.dart';
+import 'package:fixpair/core/services/storage_service.dart';
 import 'package:fixpair/core/utils/logger.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
@@ -330,6 +333,37 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       );
 
       await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
+
+      // Listen for CallKit events in background isolate (Decline / Timeout)
+      FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
+        if (event == null) return;
+        switch (event) {
+          case CallEventActionCallDecline(:final id):
+          case CallEventActionCallTimeout(:final id):
+            if (id.isNotEmpty) {
+              try {
+                final token = await StorageService.getString(StorageConstants.bearerToken);
+                final dio = Dio(BaseOptions(
+                  baseUrl: ApiConstants.baseUrl,
+                  headers: {
+                    'Content-Type': 'application/json',
+                    if (token.isNotEmpty) 'Authorization': 'Bearer $token',
+                  },
+                ));
+                await dio.post(ApiConstants.actionVideoSession, data: {
+                  'sessionId': id,
+                  'action': 'REJECT',
+                });
+                AppLogger.info('🔔 [BG CALL] Successfully notified backend of rejected call $id');
+              } catch (e) {
+                AppLogger.warning('🔔 [BG CALL] Error notifying backend of rejection in BG: $e');
+              }
+            }
+            break;
+          default:
+            break;
+        }
+      });
     }
   }
 }

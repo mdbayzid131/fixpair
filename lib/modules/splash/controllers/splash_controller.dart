@@ -28,23 +28,30 @@ class SplashController extends GetxController {
         final call = activeCalls.first;
         final extra = call.extra;
         if (extra != null) {
-          final booking = BookingModel(
-            id: extra['bookingId'] ?? '',
-            consultant: UserData(
-              name: extra['callerName'] ?? 'Consultant',
-              avatar: extra['callerAvatar'] ?? '',
-            ),
-          );
-          Get.offAllNamed(
-            AppRoutes.VIDEO_CALL,
-            arguments: {
-              'booking': booking,
-              'sessionId': extra['sessionId'],
-              'token': extra['token'],
-              'channelName': extra['channelName'],
-            },
-          );
-          return;
+          final sessionId = (extra['sessionId'] ?? call.id ?? '').toString();
+          final token = (extra['token'] ?? '').toString();
+          final channelName = (extra['channelName'] ?? '').toString();
+          final bookingId = (extra['bookingId'] ?? '').toString();
+          final callerName = (extra['callerName'] ?? 'Consultant').toString();
+          final callerAvatar = (extra['callerAvatar'] ?? '').toString();
+
+          if (sessionId.isNotEmpty) {
+            final booking = BookingModel(
+              id: bookingId,
+              consultant: UserData(
+                name: callerName,
+                avatar: callerAvatar,
+              ),
+            );
+            // Properly join the video session with backend handshake & session activation
+            await _authService.joinVideoCall(
+              booking,
+              sessionId,
+              token,
+              channelName,
+            );
+            return;
+          }
         }
       }
     } catch (e) {

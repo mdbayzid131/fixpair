@@ -652,7 +652,7 @@ class AuthService extends GetxService {
 
     if (isFromTap) {
       // Tapped from background notification -> directly enter video call screen
-      _joinVideoCall(bookingRx.value, sessionId, token, channelName);
+      joinVideoCall(bookingRx.value, sessionId, token, channelName);
     } else {
       // ── [UNIFIED FULL-SCREEN CALLKIT INCOMING UI] ──
       // Show native CallKit Incoming UI with Accept & Decline buttons across Foreground, Background & Terminated states
@@ -825,17 +825,28 @@ class AuthService extends GetxService {
     );
   }
 
-  Future<void> _joinVideoCall(
+  bool _isJoiningCall = false;
+
+  /// Joins video session with backend handshake, token resolution, and proper navigation
+  Future<void> joinVideoCall(
     BookingModel booking,
     String sessionId,
     String token,
     String channelName,
   ) async {
-    // Show a loading indicator dialog
-    Get.dialog(
-      const Center(child: CircularProgressIndicator(color: Color(0xFF22C55E))),
-      barrierDismissible: false,
-    );
+    if (_isJoiningCall) {
+      AppLogger.info('⚠️ Already joining a video call session, skipping duplicate call.');
+      return;
+    }
+    _isJoiningCall = true;
+
+    // Show a loading indicator dialog if not already visible
+    if (Get.isDialogOpen != true) {
+      Get.dialog(
+        const Center(child: CircularProgressIndicator(color: Color(0xFF22C55E))),
+        barrierDismissible: false,
+      );
+    }
 
     try {
       final response = await _userRepository.joinVideoSession(sessionId);
@@ -847,18 +858,30 @@ class AuthService extends GetxService {
 
       if (response.statusCode == 200) {
         final joinData = response.data['data'];
-        final freshToken = joinData['token'] ?? token;
-        final freshChannel = joinData['channelName'] ?? channelName;
+        final freshToken = (joinData is Map ? joinData['token'] : null) ?? token;
+        final freshChannel = (joinData is Map ? joinData['channelName'] : null) ?? channelName;
 
-        Get.toNamed(
-          AppRoutes.VIDEO_CALL,
-          arguments: {
-            'booking': booking,
-            'sessionId': sessionId,
-            'token': freshToken,
-            'channelName': freshChannel,
-          },
-        );
+        if (Get.currentRoute == AppRoutes.SPLASH) {
+          Get.offAllNamed(
+            AppRoutes.VIDEO_CALL,
+            arguments: {
+              'booking': booking,
+              'sessionId': sessionId,
+              'token': freshToken,
+              'channelName': freshChannel,
+            },
+          );
+        } else {
+          Get.toNamed(
+            AppRoutes.VIDEO_CALL,
+            arguments: {
+              'booking': booking,
+              'sessionId': sessionId,
+              'token': freshToken,
+              'channelName': freshChannel,
+            },
+          );
+        }
       } else if (response.statusCode == 402) {
         showPaymentRequiredDialog();
       } else {
@@ -875,15 +898,29 @@ class AuthService extends GetxService {
       }
       AppLogger.warning('Error joining video session: $e');
       // Fallback: join anyway using notification token
-      Get.toNamed(
-        AppRoutes.VIDEO_CALL,
-        arguments: {
-          'booking': booking,
-          'sessionId': sessionId,
-          'token': token,
-          'channelName': channelName,
-        },
-      );
+      if (Get.currentRoute == AppRoutes.SPLASH) {
+        Get.offAllNamed(
+          AppRoutes.VIDEO_CALL,
+          arguments: {
+            'booking': booking,
+            'sessionId': sessionId,
+            'token': token,
+            'channelName': channelName,
+          },
+        );
+      } else {
+        Get.toNamed(
+          AppRoutes.VIDEO_CALL,
+          arguments: {
+            'booking': booking,
+            'sessionId': sessionId,
+            'token': token,
+            'channelName': channelName,
+          },
+        );
+      }
+    } finally {
+      _isJoiningCall = false;
     }
   }
 
@@ -931,7 +968,7 @@ class AuthService extends GetxService {
                 avatar: extra['callerAvatar'] ?? '',
               ),
             );
-            await _joinVideoCall(
+            await joinVideoCall(
               booking,
               extra['sessionId'] ?? id,
               extra['token'] ?? '',
