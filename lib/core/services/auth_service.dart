@@ -371,36 +371,13 @@ class AuthService extends GetxService {
   }
 
   void _handleIncomingCall(RemoteMessage message, {bool isFromTap = false}) async {
-    Map<String, dynamic> rawData = Map<String, dynamic>.from(message.data);
-    if (rawData['data'] != null) {
-      final subData = rawData['data'];
-      if (subData is Map) {
-        rawData.addAll(Map<String, dynamic>.from(subData));
-      } else if (subData is String && subData.trim().startsWith('{')) {
-        try {
-          final dec = jsonDecode(subData);
-          if (dec is Map) rawData.addAll(Map<String, dynamic>.from(dec));
-        } catch (_) {}
-      }
-    }
+    final payload = IncomingCallPayload.fromMessage(message);
 
-    final type = (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'])
-        ?.toString()
-        .toUpperCase();
-    final status = rawData['status']?.toString().toLowerCase();
+    AppLogger.info('📞 [FCM CALL EVENT] Type: ${payload.type} | Status: ${payload.status}');
 
-    AppLogger.info('📞 [FCM CALL EVENT] Type: ${type ?? 'N/A'} | Status: ${status ?? 'N/A'}');
-
-    if (type == 'CALL_REJECTED' ||
-        type == 'CALL_CANCELLED' ||
-        type == 'CANCEL_CALL' ||
-        type == 'REJECT_CALL' ||
-        type == 'SESSION_ENDED' ||
-        type == 'CALL_ENDED' ||
-        status == 'rejected' ||
-        status == 'cancelled' ||
-        status == 'ended') {
-      AppLogger.info('🚫 [FCM CALL REJECTED/CANCELLED] Closing Call & CallKit UI | Data: $rawData');
+    // ── 1. Call cancellation / rejection from remote peer ──
+    if (payload.isCancelOrReject) {
+      AppLogger.info('🚫 [FCM CALL REJECTED/CANCELLED] Closing Call & CallKit UI');
       try {
         while (Get.isDialogOpen == true) {
           Get.back();
@@ -409,8 +386,9 @@ class AuthService extends GetxService {
         if (Get.isRegistered<VideoCallController>()) {
           final controller = Get.find<VideoCallController>();
           if (!controller.hasConsultantJoined) {
+            final String? reason = (message.data['body'] ?? message.notification?.body)?.toString();
             controller.handleCallRejected(
-              reason: rawData['body'] ?? 'Call rejected by consultant'.tr,
+              reason: reason ?? 'Call rejected by consultant'.tr,
             );
           } else {
             await controller.endCall();
@@ -428,277 +406,33 @@ class AuthService extends GetxService {
       return;
     }
 
-    if (type != 'INCOMING_CALL' &&
-        type != 'CALL' &&
-        type != 'VIDEO_CALL' &&
-        type != 'CALL_INCOMING') {
+    // ── 2. Validate incoming call data ──
+    if (!payload.isIncomingCall || payload.sessionId.isEmpty || payload.token.isEmpty) {
       return;
     }
 
-    final sessionId = rawData['sessionId']?.toString() ??
-        rawData['session_id']?.toString() ??
-        rawData['callId']?.toString() ??
-        rawData['call_id']?.toString() ??
-        rawData['id']?.toString();
-
-    final token = rawData['token']?.toString() ??
-        rawData['agoraToken']?.toString() ??
-        rawData['agora_token']?.toString() ??
-        rawData['rtcToken']?.toString() ??
-        rawData['rtc_token']?.toString();
-
-    // Robust parsing of booking ID
-    final idKeys = [
-      'bookingId',
-      'booking_id',
-      'booking',
-      'consultationId',
-      'consultation_id',
-      'consultation'
-    ];
-    String bookingId = '';
-    for (var key in idKeys) {
-      final val = rawData[key]?.toString();
-      if (val != null && val.isNotEmpty) {
-        bookingId = val;
-        break;
-      }
-    }
-
-    bool isValidName(String? n) {
-      if (n == null) return false;
-      final clean = n.trim().toLowerCase();
-      return clean.isNotEmpty &&
-          clean != 'a user' &&
-          clean != 'user' &&
-          clean != 'notification' &&
-          clean != 'fixpair' &&
-          clean != 'fixpair notification' &&
-          clean != 'incoming call' &&
-          clean != 'video call' &&
-          clean != 'call' &&
-          clean != 'consultant' &&
-          clean != 'null' &&
-          clean != 'undefined';
-    }
-
-    String callerName = '';
-    String callerAvatar = '';
-
-    // 1. Check direct keys
-    final nameKeys = [
-      'consultantName',
-      'consultant_name',
-      'senderName',
-      'sender_name',
-      'expertName',
-      'expert_name',
-      'callerName',
-      'caller_name',
-      'name',
-      'displayName',
-      'display_name',
-      'userName',
-      'user_name',
-    ];
-    for (var key in nameKeys) {
-      final val = rawData[key]?.toString().trim();
-      if (isValidName(val)) {
-        callerName = val!;
-        break;
-      }
-    }
-
-    // 2. Check first name + last name
-    if (callerName.isEmpty) {
-      final fn = rawData['consultantFirstName'] ??
-          rawData['consultant_first_name'] ??
-          rawData['senderFirstName'] ??
-          rawData['sender_first_name'] ??
-          rawData['firstName'] ??
-          rawData['first_name'];
-      final ln = rawData['consultantLastName'] ??
-          rawData['consultant_last_name'] ??
-          rawData['senderLastName'] ??
-          rawData['sender_last_name'] ??
-          rawData['lastName'] ??
-          rawData['last_name'];
-      if (isValidName(fn?.toString())) {
-        callerName = '$fn ${ln ?? ''}'.trim();
-      }
-    }
-
-    // 3. Check nested JSON objects
-    if (callerName.isEmpty) {
-      for (var objKey in ['consultant', 'sender', 'caller', 'user', 'expert', 'booking']) {
-        final raw = rawData[objKey];
-        if (raw != null) {
-          Map<String, dynamic>? map;
-          if (raw is Map) {
-            map = Map<String, dynamic>.from(raw);
-          } else if (raw is String && raw.trim().startsWith('{')) {
-            try {
-              final dec = jsonDecode(raw);
-              if (dec is Map) map = Map<String, dynamic>.from(dec);
-            } catch (_) {}
-          }
-          if (map != null) {
-            final n = map['name'] ??
-                map['displayName'] ??
-                map['consultantName'] ??
-                map['senderName'] ??
-                map['fullName'] ??
-                map['full_name'];
-            if (isValidName(n?.toString())) {
-              callerName = n.toString().trim();
-            } else {
-              final f = map['firstName'] ?? map['first_name'];
-              final l = map['lastName'] ?? map['last_name'];
-              if (isValidName(f?.toString())) {
-                callerName = '$f ${l ?? ''}'.trim();
-              }
-            }
-            if (callerAvatar.isEmpty) {
-              final av = map['avatar'] ??
-                  map['image'] ??
-                  map['photo'] ??
-                  map['profilePic'] ??
-                  map['avatarUrl'] ??
-                  map['avatar_url'];
-              if (av != null && av.toString().isNotEmpty && av.toString() != 'null') {
-                callerAvatar = ApiConstants.getImageUrl(av.toString());
-              }
-            }
-            if (callerName.isNotEmpty) break;
-          }
-        }
-      }
-    }
-
-    // 4. Check notification body for caller name
-    if (callerName.isEmpty) {
-      final body = message.notification?.body?.trim();
-      if (body != null && body.isNotEmpty) {
-        final match = RegExp(
-          r'^(.+?)\s+(is calling|calling|sent you a call)',
-          caseSensitive: false,
-        ).firstMatch(body);
-        if (match != null) {
-          final extracted = match.group(1)?.trim();
-          if (isValidName(extracted)) {
-            callerName = extracted!;
-          }
-        }
-      }
-    }
-
-    // 5. Default fallback
-    if (callerName.isEmpty) {
-      callerName = 'Fixpair Consultant';
-    }
-
-    // Extract Avatar URL
-    if (callerAvatar.isEmpty) {
-      final avatarKeys = [
-        'consultantAvatar',
-        'consultant_avatar',
-        'consultantImage',
-        'consultant_image',
-        'senderAvatar',
-        'sender_avatar',
-        'senderImage',
-        'sender_image',
-        'callerAvatar',
-        'caller_avatar',
-        'avatar',
-        'image',
-        'photo',
-        'profilePic',
-        'avatarUrl',
-        'avatar_url',
-      ];
-      for (var key in avatarKeys) {
-        final val = rawData[key]?.toString();
-        if (val != null && val.isNotEmpty && val != 'null') {
-          callerAvatar = ApiConstants.getImageUrl(val);
-          break;
-        }
-      }
-    }
-
-    AppLogger.info('📞 [FCM CALL INCOMING] Session: $sessionId | Booking: $bookingId | Caller: $callerName');
-
-    if (sessionId == null || token == null) return;
-
-    final channelName = rawData['channelName']?.toString() ??
-        rawData['channel_name']?.toString() ??
-        rawData['channel']?.toString() ??
-        sessionId;
-
     final bookingRx = BookingModel(
-      id: bookingId,
-      consultant: UserData(name: callerName, avatar: callerAvatar),
+      id: payload.bookingId,
+      consultant: UserData(name: payload.callerName, avatar: payload.callerAvatar),
     ).obs;
 
-    // Even if bookingId is empty, try to fetch real booking details (falls back to active callback/booking lookup)
-    _userRepository.getBookingById(bookingId).then((realBooking) {
-      if (realBooking != null) {
-        AppLogger.info('✅ [FCM BOOKING RESOLVED] Consultant: ${realBooking.consultant?.name} | ID: ${realBooking.id}');
-        bookingRx.value = realBooking;
-      }
-    }).catchError((err) {
-      AppLogger.debug('Error fetching booking details for FCM call: $err');
-    });
+    if (payload.bookingId.isNotEmpty) {
+      _userRepository.getBookingById(payload.bookingId).then((realBooking) {
+        if (realBooking != null) {
+          AppLogger.info('✅ [FCM BOOKING RESOLVED] Consultant: ${realBooking.consultant?.name} | ID: ${realBooking.id}');
+          bookingRx.value = realBooking;
+        }
+      }).catchError((err) {
+        AppLogger.debug('Error fetching booking details for FCM call: $err');
+      });
+    }
 
     if (isFromTap) {
-      // Tapped from background notification -> directly enter video call screen
-      joinVideoCall(bookingRx.value, sessionId, token, channelName);
+      // Direct enter if tapped from OS system notification tray
+      joinVideoCall(bookingRx.value, payload.sessionId, payload.token, payload.channelName);
     } else {
-      // ── [UNIFIED FULL-SCREEN CALLKIT INCOMING UI] ──
-      // Show native CallKit Incoming UI with Accept & Decline buttons across Foreground, Background & Terminated states
-      final CallKitParams callKitParams = CallKitParams(
-        id: sessionId,
-        nameCaller: callerName.isNotEmpty ? callerName : 'Consultant',
-        appName: 'Fixpair',
-        avatar: callerAvatar.isNotEmpty ? callerAvatar : null,
-        handle: 'Video Consultation',
-        type: 1, // 0: audio, 1: video
-        duration: 35000,
-        extra: <String, dynamic>{
-          'sessionId': sessionId,
-          'token': token,
-          'channelName': channelName,
-          'callerName': callerName,
-          'callerAvatar': callerAvatar,
-          'bookingId': bookingId,
-        },
-        missedCallNotification: const NotificationParams(
-          showNotification: false,
-          isShowCallback: false,
-        ),
-        android: const AndroidParams(
-          isCustomNotification: false,
-          isShowLogo: false,
-          isShowFullLockedScreen: true,
-          isImportant: true,
-          ringtonePath: 'system_ringtone_default',
-          incomingCallNotificationChannelName: 'Incoming Call',
-          backgroundColor: '#0F172A',
-          textAccept: 'Accept',
-          textDecline: 'Decline',
-        ),
-        ios: const IOSParams(
-          handleType: 'generic',
-          supportsVideo: true,
-          maximumCallGroups: 1,
-          maximumCallsPerCallGroup: 1,
-          audioSessionMode: 'videoChat',
-          audioSessionActive: true,
-          ringtonePath: 'system_ringtone_default',
-        ),
-      );
-
-      await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
+      // Unified Full-Screen CallKit Incoming UI with Accept & Decline buttons
+      await FlutterCallkitIncoming.showCallkitIncoming(payload.toCallKitParams());
     }
   }
 
