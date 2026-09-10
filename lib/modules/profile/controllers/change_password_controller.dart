@@ -23,12 +23,12 @@ class ChangePasswordController extends GetxController {
     }
 
     if (newPasswordController.text != confirmPasswordController.text) {
-      Helpers.showError('New password and confirm password do not match');
+      Helpers.showError('New password and confirm password do not match'.tr);
       return;
     }
 
     Helpers.hideKeyboard();
-    Helpers.showLoadingDialog(message: 'Updating password...');
+    Helpers.showLoadingDialog(message: 'Updating password...'.tr);
     isLoading.value = true;
 
     try {
@@ -40,19 +40,19 @@ class ChangePasswordController extends GetxController {
       Helpers.hideLoadingDialog();
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Helpers.showSuccess('Password updated successfully');
+        Helpers.showSuccess('Password updated successfully'.tr);
         _clearFields();
         Get.back();
       } else {
         final errorMsg =
             response.data?['message'] ??
             response.statusMessage ??
-            'Failed to change password';
+            'Failed to change password'.tr;
         Helpers.showError(errorMsg);
       }
     } catch (e) {
       Helpers.hideLoadingDialog();
-      Helpers.showError('An error occurred: $e');
+      Helpers.showError('An error occurred'.tr);
     } finally {
       isLoading.value = false;
     }

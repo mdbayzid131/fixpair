@@ -65,12 +65,12 @@ class NotificationsController extends GetxController {
         _updateHomeUnreadStatus();
       } else {
         Helpers.showError(
-          response.statusMessage ?? 'Failed to load notifications',
+          response.statusMessage ?? 'Failed to load notifications'.tr,
         );
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());
-      Helpers.showError('An error occurred while loading notifications');
+      Helpers.showError('An error occurred while loading notifications'.tr);
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;

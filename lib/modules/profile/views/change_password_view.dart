@@ -29,7 +29,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
               children: [
                 SizedBox(height: 12.h),
                 Text(
-                  'Set a new password',
+                  'Set a new password'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w800,
@@ -38,7 +38,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  'Ensure your account is secure by choosing a strong password with at least 6 characters.',
+                  'Ensure your account is secure by choosing a strong password with at least 6 characters.'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
@@ -50,7 +50,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
 
                 // 1. Current Password
                 Text(
-                  'Current Password',
+                  'Current Password'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
@@ -61,7 +61,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                 Obx(
                   () => CustomTextField(
                     controller: controller.currentPasswordController,
-                    hintText: 'Enter current password',
+                    hintText: 'Enter current password'.tr,
                     obscureText: controller.obscureCurrentPassword.value,
                     isLabelVisible: false,
                     fillColor: Colors.white,
@@ -82,7 +82,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                     ),
                     validator: (v) => Validators.required(
                       v,
-                      message: 'Current password is required',
+                      message: 'Current password is required'.tr,
                     ),
                   ),
                 ),
@@ -90,7 +90,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
 
                 // 2. New Password
                 Text(
-                  'New Password',
+                  'New Password'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
@@ -101,7 +101,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                 Obx(
                   () => CustomTextField(
                     controller: controller.newPasswordController,
-                    hintText: 'Enter new password',
+                    hintText: 'Enter new password'.tr,
                     obscureText: controller.obscureNewPassword.value,
                     isLabelVisible: false,
                     fillColor: Colors.white,
@@ -134,7 +134,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
 
                 // 3. Confirm New Password
                 Text(
-                  'Confirm New Password',
+                  'Confirm New Password'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
@@ -145,7 +145,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                 Obx(
                   () => CustomTextField(
                     controller: controller.confirmPasswordController,
-                    hintText: 'Re-enter new password',
+                    hintText: 'Re-enter new password'.tr,
                     obscureText: controller.obscureConfirmPassword.value,
                     isLabelVisible: false,
                     fillColor: Colors.white,
@@ -175,7 +175,7 @@ class ChangePasswordView extends GetView<ChangePasswordController> {
                 // Change Password Button
                 Obx(
                   () => CustomElevatedButton(
-                    label: 'Change Password',
+                    label: 'Change Password'.tr,
                     onPressed: controller.changePassword,
                     isLoading: controller.isLoading.value,
                     backgroundColor: const Color(0xFF0066FF),

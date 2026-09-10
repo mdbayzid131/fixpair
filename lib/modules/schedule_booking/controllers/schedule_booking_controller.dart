@@ -504,7 +504,7 @@ class ScheduleBookingController extends GetxController {
     if (expert.value == null ||
         selectedDateIndex.value == -1 ||
         selectedStartTime.isEmpty) {
-      Helpers.showWarning('Please select a date, start time, and duration');
+      Helpers.showWarning('Please select a date, start time, and duration'.tr);
       return;
     }
 
@@ -526,7 +526,7 @@ class ScheduleBookingController extends GetxController {
         if (response.statusCode == 200) {
           isLoading.value = false;
           Helpers.showSuccess(
-            'Booking rescheduled successfully. Waiting for consultant approval.',
+            'Booking rescheduled successfully. Waiting for consultant approval.'.tr,
           );
           Future.microtask(() {
             Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR, arguments: 2);
@@ -534,7 +534,7 @@ class ScheduleBookingController extends GetxController {
           return;
         } else {
           Helpers.showError(
-            response.data['message'] ?? 'Failed to reschedule booking',
+            response.data['message'] ?? 'Failed to reschedule booking'.tr,
           );
         }
       } else {

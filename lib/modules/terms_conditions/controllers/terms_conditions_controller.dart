@@ -27,7 +27,7 @@ class TermsConditionsController extends GetxController {
             .toList();
       }
     } catch (e) {
-      Helpers.showError('Failed to load Terms & Conditions');
+      Helpers.showError('Failed to load Terms & Conditions'.tr);
     } finally {
       isLoading.value = false;
     }

@@ -70,7 +70,7 @@ class OtpController extends GetxController with WidgetsBindingObserver {
 
   Future<void> verifyOtp() async {
     if (otpController.text.length < 6) {
-      Helpers.showError('Please enter valid 6-digit OTP');
+      Helpers.showError('Please enter valid 6-digit OTP'.tr);
       return;
     }
 
@@ -83,7 +83,7 @@ class OtpController extends GetxController with WidgetsBindingObserver {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Helpers.showSuccess('Verification successful');
+        Helpers.showSuccess('Verification successful'.tr);
 
         if (isForgotPassword) {
           final resetToken = response.data['data'];
@@ -97,7 +97,7 @@ class OtpController extends GetxController with WidgetsBindingObserver {
           Get.offAllNamed(AppRoutes.LOGIN);
         }
       } else {
-        Helpers.showError(response.data['message'] ?? 'Verification failed');
+        Helpers.showError(response.data['message'] ?? 'Verification failed'.tr);
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());
@@ -116,7 +116,7 @@ class OtpController extends GetxController with WidgetsBindingObserver {
         await _authService.resendOtp(email);
       }
 
-      Helpers.showSuccess('OTP resent successfully');
+      Helpers.showSuccess('OTP resent successfully'.tr);
       startTimer();
     } catch (e) {
       Helpers.showError(e.toString());

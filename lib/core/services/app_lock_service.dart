@@ -73,8 +73,8 @@ class AppLockService extends GetxService with WidgetsBindingObserver {
             .hasUsableBiometric();
         if (!hasBiometric) {
           Helpers.showError(
-            'No biometric is set up on this device.',
-            title: 'Unavailable',
+            'No biometric is set up on this device.'.tr,
+            title: 'Unavailable'.tr,
           );
           biometricEnabled.value = false;
           await _box.write(biometricEnabledKey, false);
@@ -87,8 +87,8 @@ class AppLockService extends GetxService with WidgetsBindingObserver {
           biometricEnabled.value = false;
           await _box.write(biometricEnabledKey, false);
           Helpers.showError(
-            'Try again or ensure biometrics are enabled in system settings.',
-            title: 'Verification Failed',
+            'Try again or ensure biometrics are enabled in system settings.'.tr,
+            title: 'Verification Failed'.tr,
           );
           return;
         }

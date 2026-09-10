@@ -149,7 +149,7 @@ class RegisterController extends GetxController {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         Helpers.showSuccess(
-          'Registration successful, please verify your email',
+          'Registration successful, please verify your email'.tr,
         );
         Get.toNamed(
           AppRoutes.OTP_FORM_REGISTER,
@@ -157,7 +157,7 @@ class RegisterController extends GetxController {
         );
       } else {
         // ApiChecker.checkWriteApi(response);
-        Helpers.showError(response.data['message'] ?? 'Registration failed');
+        Helpers.showError(response.data['message'] ?? 'Registration failed'.tr);
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());
@@ -172,10 +172,10 @@ class RegisterController extends GetxController {
       isLoading.value = true;
       final response = await _authService.loginWithGoogle();
       if (response.statusCode == 200) {
-        Helpers.showSuccess('Login successful');
+        Helpers.showSuccess('Login successful'.tr);
         Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
       } else {
-        Helpers.showError(response.data['message'] ?? 'Google Login failed');
+        Helpers.showError(response.data['message'] ?? 'Google Login failed'.tr);
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());
@@ -190,10 +190,10 @@ class RegisterController extends GetxController {
       isLoading.value = true;
       final response = await _authService.loginWithApple();
       if (response.statusCode == 200) {
-        Helpers.showSuccess('Login successful');
+        Helpers.showSuccess('Login successful'.tr);
         Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
       } else {
-        Helpers.showError(response.data['message'] ?? 'Apple Login failed');
+        Helpers.showError(response.data['message'] ?? 'Apple Login failed'.tr);
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());

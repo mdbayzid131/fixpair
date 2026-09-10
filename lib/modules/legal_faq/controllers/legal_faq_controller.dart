@@ -38,7 +38,7 @@ class LegalFAQController extends GetxController {
         expandedStates.value = List.generate(faqItems.length, (index) => false);
       }
     } catch (e) {
-      Helpers.showError('Failed to load FAQs');
+      Helpers.showError('Failed to load FAQs'.tr);
     } finally {
       isLoading.value = false;
     }
@@ -53,19 +53,19 @@ class LegalFAQController extends GetxController {
       isLoading.value = true;
       final response = await _userRepository.deleteAccount();
       if (response.statusCode == 200) {
-        Helpers.showSuccess('Account deleted successfully');
+        Helpers.showSuccess('Account deleted successfully'.tr);
         // Clear storage and go to splash/login
         StorageService.clearAll();
 
         Get.offAllNamed(AppRoutes.LOGIN);
       } else {
         Helpers.showError(
-          response.data['message'] ?? 'Failed to delete account',
+          response.data['message'] ?? 'Failed to delete account'.tr,
         );
       }
     } catch (e) {
       Helpers.showDebugLog('Error deleting account: $e');
-      Helpers.showError('Something went wrong');
+      Helpers.showError('Something went wrong'.tr);
     } finally {
       isLoading.value = false;
     }
