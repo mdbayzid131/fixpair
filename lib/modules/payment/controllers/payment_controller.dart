@@ -95,4 +95,35 @@ class PaymentController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> deleteCard(String paymentMethodId) async {
+    try {
+      isLoading.value = true;
+      final response = await _userRepository.deletePaymentMethod(paymentMethodId);
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        Get.snackbar(
+          'Success'.tr,
+          'Card removed successfully'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+          backgroundColor: const Color(0xFF10B981),
+          colorText: Colors.white,
+        );
+        await fetchPaymentMethods();
+      } else {
+        Get.snackbar(
+          'Error'.tr,
+          response.statusMessage ?? 'Failed to delete card'.tr,
+          backgroundColor: const Color(0xFFEF4444),
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Helpers.showDebugLog('Error deleting payment method: $e');
+      Get.snackbar('Error'.tr, 'Failed to remove card'.tr);
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

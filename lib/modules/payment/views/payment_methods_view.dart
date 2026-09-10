@@ -354,58 +354,84 @@ class PaymentMethodsView extends GetView<PaymentController> {
                             ],
                           ),
 
-                          // Default Status Badge or Set Default Action Button
-                          if (isDefault)
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF10B981),
-                                borderRadius: BorderRadius.circular(16.r),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF10B981).withValues(alpha: 0.5),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Default Status Badge or Set Default Action Button
+                              if (isDefault)
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF10B981),
+                                    borderRadius: BorderRadius.circular(16.r),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF10B981).withValues(alpha: 0.5),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.check_circle_rounded, color: Colors.white, size: 12),
-                                  SizedBox(width: 4.w),
-                                  Text(
-                                    'DEFAULT',
-                                    style: GoogleFonts.manrope(
-                                      fontSize: 10.sp,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.5,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.check_circle_rounded, color: Colors.white, size: 12),
+                                      SizedBox(width: 4.w),
+                                      Text(
+                                        'DEFAULT',
+                                        style: GoogleFonts.manrope(
+                                          fontSize: 10.sp,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else
+                                InkWell(
+                                  onTap: () => controller.setDefaultCard(id),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(16.r),
+                                      border: Border.all(color: Colors.white38),
+                                    ),
+                                    child: Text(
+                                      'Set as Default',
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 11.sp,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
-                                ],
-                              ),
-                            )
-                          else
-                            InkWell(
-                              onTap: () => controller.setDefaultCard(id),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(16.r),
-                                  border: Border.all(color: Colors.white38),
                                 ),
-                                child: Text(
-                                  'Set as Default',
-                                  style: GoogleFonts.manrope(
-                                    fontSize: 11.sp,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+
+                              SizedBox(width: 8.w),
+
+                              // Delete Card Button
+                              InkWell(
+                                onTap: () => _showDeleteCardDialog(id, last4),
+                                borderRadius: BorderRadius.circular(16.r),
+                                child: Container(
+                                  padding: EdgeInsets.all(6.w),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.25),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white24),
+                                  ),
+                                  child: Icon(
+                                    Icons.delete_outline_rounded,
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    size: 15.sp,
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
+                          ),
                         ],
                       ),
                     ],
@@ -851,9 +877,121 @@ class PaymentMethodsView extends GetView<PaymentController> {
       child: Text(
         text,
         style: GoogleFonts.manrope(
-          fontSize: 10.sp,
-          fontWeight: FontWeight.w800,
           color: color,
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteCardDialog(String id, String last4) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
+        child: Container(
+          padding: EdgeInsets.all(24.w),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A),
+            borderRadius: BorderRadius.circular(24.r),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.1),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.5),
+                blurRadius: 30,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56.w,
+                height: 56.w,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444).withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.delete_outline_rounded,
+                  color: const Color(0xFFEF4444),
+                  size: 28.sp,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                'Remove Card'.tr,
+                style: GoogleFonts.manrope(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                '${'Are you sure you want to remove card ending in'.tr} •••• $last4? ${'This action cannot be undone.'.tr}',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.manrope(
+                  fontSize: 13.sp,
+                  color: const Color(0xFF94A3B8),
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 22.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Get.back(),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 13.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancel'.tr,
+                        style: GoogleFonts.manrope(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF94A3B8),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                        controller.deleteCard(id);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEF4444),
+                        padding: EdgeInsets.symmetric(vertical: 13.h),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                      child: Text(
+                        'Delete'.tr,
+                        style: GoogleFonts.manrope(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -61,6 +61,7 @@ class ApiConstants {
   static const String attachPaymentMethod = '/payment/attach-method';
   static const String paymentMethods = '/payment/methods';
   static const String setDefaultPaymentMethod = '/payment/set-default';
+  static String deletePaymentMethod(String id) => '/payment/methods/$id';
   static String getInvoice(String consultationId) => '/payment/invoice/$consultationId';
 
   // Report Endpoints
