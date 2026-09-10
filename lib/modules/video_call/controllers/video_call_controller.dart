@@ -61,11 +61,11 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
 
   Timer? _timer;
   bool _isEndingCall = false;
-  late BookingModel booking;
+  BookingModel booking = BookingModel();
   final bookingRx = Rxn<BookingModel>();
-  late String sessionId;
-  late String token;
-  late String channelName;
+  String sessionId = '';
+  String token = '';
+  String channelName = 'test_channel';
 
   @override
   void onInit() {
@@ -92,13 +92,27 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
     }
 
     final args = Get.arguments;
-    if (args != null) {
-      booking = args['booking'];
-      bookingRx.value = booking;
-      sessionId = args['sessionId'];
-      token = args['token'] ?? "";
-      channelName = args['channelName'] ?? "test_channel";
+    if (args != null && args is Map) {
+      if (args['booking'] is BookingModel) {
+        booking = args['booking'];
+      } else if (args['booking'] is Map) {
+        try {
+          booking = BookingModel.fromJson(Map<String, dynamic>.from(args['booking']));
+        } catch (_) {
+          booking = BookingModel(
+            id: (args['bookingId'] ?? '').toString(),
+          );
+        }
+      } else {
+        booking = BookingModel(
+          id: (args['bookingId'] ?? args['channelName'] ?? '').toString(),
+        );
+      }
+      sessionId = (args['sessionId'] ?? '').toString();
+      token = (args['token'] ?? '').toString();
+      channelName = (args['channelName'] ?? 'test_channel').toString();
     }
+    bookingRx.value = booking;
 
     initAgora();
     _fetchRealBookingDetails();

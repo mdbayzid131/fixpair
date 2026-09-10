@@ -560,17 +560,26 @@ class AuthService extends GetxService {
   }
 
   bool _isJoiningCall = false;
+  DateTime? _lastCallAcceptHandledTime;
+  String? _lastAcceptedCallId;
 
   /// Joins video session with backend handshake, token resolution, and proper navigation
-  Future<void> joinVideoCall(
+  Future<bool> joinVideoCall(
     BookingModel booking,
     String sessionId,
     String token,
     String channelName,
   ) async {
+    final realSessionId = IncomingCallPayload.resolveSessionId(sessionId);
+    if (realSessionId.isEmpty) return false;
+
+    if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
+      AppLogger.info('⚠️ Already on video call screen, skipping duplicate joinVideoCall.');
+      return true;
+    }
     if (_isJoiningCall) {
       AppLogger.info('⚠️ Already joining a video call session, skipping duplicate call.');
-      return;
+      return false;
     }
     _isJoiningCall = true;
 
@@ -583,10 +592,10 @@ class AuthService extends GetxService {
     }
 
     try {
-      final response = await _userRepository.joinVideoSession(sessionId);
+      final response = await _userRepository.joinVideoSession(realSessionId);
 
-      // Close the loading dialog
-      if (Get.isDialogOpen == true) {
+      // Close all open loading dialogs
+      while (Get.isDialogOpen == true) {
         Get.back();
       }
 
@@ -600,7 +609,7 @@ class AuthService extends GetxService {
             AppRoutes.VIDEO_CALL,
             arguments: {
               'booking': booking,
-              'sessionId': sessionId,
+              'sessionId': realSessionId,
               'token': freshToken,
               'channelName': freshChannel,
             },
@@ -610,48 +619,41 @@ class AuthService extends GetxService {
             AppRoutes.VIDEO_CALL,
             arguments: {
               'booking': booking,
-              'sessionId': sessionId,
+              'sessionId': realSessionId,
               'token': freshToken,
               'channelName': freshChannel,
             },
           );
         }
+        return true;
       } else if (response.statusCode == 402) {
+        try {
+          await FlutterCallkitIncoming.endAllCalls();
+        } catch (_) {}
         showPaymentRequiredDialog();
+        return false;
       } else {
+        try {
+          await FlutterCallkitIncoming.endAllCalls();
+        } catch (_) {}
         Helpers.showError(
           response.statusMessage ?? 'Failed to join video session'.tr,
         );
+        return false;
       }
     } catch (e) {
-      if (Get.isDialogOpen == true) {
+      while (Get.isDialogOpen == true) {
         Get.back();
       }
       AppLogger.warning('Error joining video session: $e');
-      // Fallback: join anyway using notification token
-      if (Get.currentRoute == AppRoutes.SPLASH) {
-        Get.offAllNamed(
-          AppRoutes.VIDEO_CALL,
-          arguments: {
-            'booking': booking,
-            'sessionId': sessionId,
-            'token': token,
-            'channelName': channelName,
-          },
-        );
-      } else {
-        Get.toNamed(
-          AppRoutes.VIDEO_CALL,
-          arguments: {
-            'booking': booking,
-            'sessionId': sessionId,
-            'token': token,
-            'channelName': channelName,
-          },
-        );
-      }
+      try {
+        await FlutterCallkitIncoming.endAllCalls();
+      } catch (_) {}
+      return false;
     } finally {
-      _isJoiningCall = false;
+      Future.delayed(const Duration(seconds: 3), () {
+        _isJoiningCall = false;
+      });
     }
   }
 
@@ -666,6 +668,19 @@ class AuthService extends GetxService {
       switch (event) {
         // ── 1. USER ACCEPTS THE CALL ──
         case CallEventActionCallAccept(:final id):
+          final now = DateTime.now();
+          if (_lastCallAcceptHandledTime != null &&
+              (_lastAcceptedCallId == id || now.difference(_lastCallAcceptHandledTime!) < const Duration(seconds: 4))) {
+            AppLogger.info('⚠️ Skipping duplicate CallKit accept event within cooldown');
+            break;
+          }
+          if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
+            AppLogger.info('⚠️ Already on video call screen, skipping CallKit accept event');
+            break;
+          }
+          _lastCallAcceptHandledTime = now;
+          _lastAcceptedCallId = id;
+
           if (id.isNotEmpty) {
             try {
               await FlutterCallkitIncoming.setCallConnected(id);
@@ -721,9 +736,10 @@ class AuthService extends GetxService {
           } else {
             try {
               if (id.isNotEmpty) {
-                await _userRepository.actionVideoSession(id, 'REJECT');
+                final realSessionId = IncomingCallPayload.resolveSessionId(id);
+                await _userRepository.actionVideoSession(realSessionId, 'REJECT');
                 if (Get.isRegistered<SocketService>()) {
-                  Get.find<SocketService>().emitRejectCall(id);
+                  Get.find<SocketService>().emitRejectCall(realSessionId);
                 }
               }
             } catch (e) {
@@ -754,6 +770,8 @@ class AuthService extends GetxService {
         default:
           break;
       }
+    }, onError: (err) {
+      AppLogger.debug('CallKit event stream exception caught safely: $err');
     });
   }
 }

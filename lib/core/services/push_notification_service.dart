@@ -306,10 +306,33 @@ class IncomingCallPayload {
     );
   }
 
+  static String formatToUuid(String id) {
+    if (id.isEmpty) return '00000000-0000-0000-0000-000000000000';
+    final uuidRegex = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+    if (uuidRegex.hasMatch(id)) return id;
+
+    final clean = id.replaceAll(RegExp(r'[^0-9a-fA-F]'), '');
+    final padded = (clean + '00000000000000000000000000000000').substring(0, 32);
+    return '${padded.substring(0, 8)}-${padded.substring(8, 12)}-${padded.substring(12, 16)}-${padded.substring(16, 20)}-${padded.substring(20, 32)}';
+  }
+
+  static String resolveSessionId(String id, [Map<String, dynamic>? extra]) {
+    if (extra != null && extra['sessionId'] != null && extra['sessionId'].toString().isNotEmpty) {
+      return extra['sessionId'].toString();
+    }
+    final clean = id.replaceAll('-', '');
+    if (clean.length == 32 && clean.endsWith('00000000')) {
+      return clean.substring(0, 24);
+    }
+    return id;
+  }
+
+  String get callKitUuid => formatToUuid(sessionId);
+
   /// Creates standard FlutterCallkitIncoming parameters with full-screen intent
   CallKitParams toCallKitParams() {
     return CallKitParams(
-      id: sessionId,
+      id: callKitUuid,
       nameCaller: callerName.isNotEmpty ? callerName : 'Consultant',
       appName: 'Fixpair',
       avatar: callerAvatar.isNotEmpty ? callerAvatar : null,
@@ -342,11 +365,17 @@ class IncomingCallPayload {
       ios: const IOSParams(
         handleType: 'generic',
         supportsVideo: true,
-        maximumCallGroups: 1,
+        maximumCallGroups: 2,
         maximumCallsPerCallGroup: 1,
         audioSessionMode: 'videoChat',
         audioSessionActive: true,
-        ringtonePath: 'system_ringtone_default',
+        audioSessionPreferredSampleRate: 44100.0,
+        audioSessionPreferredIOBufferDuration: 0.005,
+        supportsDTMF: true,
+        supportsHolding: true,
+        supportsGrouping: false,
+        supportsUngrouping: false,
+        ringtonePath: '',
       ),
     );
   }
@@ -399,6 +428,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         case CallEventActionCallTimeout(:final id):
           if (id.isNotEmpty) {
             try {
+              final realSessionId = IncomingCallPayload.resolveSessionId(id);
               final token = await StorageService.getString(
                 StorageConstants.bearerToken,
               );
@@ -413,10 +443,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
               );
               await dio.post(
                 ApiConstants.actionVideoSession,
-                data: {'sessionId': id, 'action': 'REJECT'},
+                data: {'sessionId': realSessionId, 'action': 'REJECT'},
               );
               AppLogger.info(
-                '🔔 [BG CALL] Successfully notified backend of rejected call $id',
+                '🔔 [BG CALL] Successfully notified backend of rejected call $realSessionId',
               );
             } catch (e) {
               AppLogger.warning(
@@ -428,6 +458,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         default:
           break;
       }
+    }, onError: (err) {
+      AppLogger.debug('BG CallKit event stream exception handled: $err');
     });
   }
 }
@@ -456,7 +488,7 @@ class FirebaseNotificationService {
     );
     AppLogger.debug('FCM Permission: ${settings.authorizationStatus}');
 
-    // Get APNS token for iOS reliability
+    // Get APNS token and VoIP token for iOS reliability
     try {
       if (Platform.isIOS) {
         String? apnsToken = await _messaging.getAPNSToken();
@@ -466,6 +498,13 @@ class FirebaseNotificationService {
           apnsToken = await _messaging.getAPNSToken();
           retryCount++;
           AppLogger.debug('⏳ Waiting for APNS Token... (Retry: $retryCount)');
+        }
+
+        try {
+          final voipToken = await FlutterCallkitIncoming.getDevicePushTokenVoIP();
+          AppLogger.info('📱 [iOS VoIP Token]: $voipToken');
+        } catch (e) {
+          AppLogger.debug('Error fetching iOS VoIP token: $e');
         }
       }
     } catch (e) {

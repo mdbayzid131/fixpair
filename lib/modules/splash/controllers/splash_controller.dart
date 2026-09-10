@@ -2,6 +2,7 @@ import 'package:fixpair/config/constants/image_paths.dart';
 import 'package:fixpair/config/constants/storage_constants.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/core/services/auth_service.dart';
+import 'package:fixpair/core/services/push_notification_service.dart';
 import 'package:fixpair/core/services/storage_service.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:flutter/material.dart';
@@ -28,31 +29,36 @@ class SplashController extends GetxController {
       final activeCalls = await FlutterCallkitIncoming.activeCalls();
       if (activeCalls.isNotEmpty) {
         final call = activeCalls.first;
-        final extra = call.extra;
-        if (extra != null) {
-          final sessionId = (extra['sessionId'] ?? call.id ?? '').toString();
-          final token = (extra['token'] ?? '').toString();
-          final channelName = (extra['channelName'] ?? '').toString();
-          final bookingId = (extra['bookingId'] ?? '').toString();
-          final callerName = (extra['callerName'] ?? 'Consultant').toString();
-          final callerAvatar = (extra['callerAvatar'] ?? '').toString();
+        // Only join if the user explicitly answered/accepted the call from lock screen
+        if (call.isAccepted == true) {
+          final extra = call.extra;
+          if (extra != null) {
+            final sessionId = IncomingCallPayload.resolveSessionId(
+              (extra['sessionId'] ?? call.id ?? '').toString(),
+              extra,
+            );
+            final token = (extra['token'] ?? '').toString();
+            final channelName = (extra['channelName'] ?? '').toString();
+            final bookingId = (extra['bookingId'] ?? '').toString();
+            final callerName = (extra['callerName'] ?? 'Consultant').toString();
+            final callerAvatar = (extra['callerAvatar'] ?? '').toString();
 
-          if (sessionId.isNotEmpty) {
-            final booking = BookingModel(
-              id: bookingId,
-              consultant: UserData(
-                name: callerName,
-                avatar: callerAvatar,
-              ),
-            );
-            // Properly join the video session with backend handshake & session activation
-            await _authService.joinVideoCall(
-              booking,
-              sessionId,
-              token,
-              channelName,
-            );
-            return;
+            if (sessionId.isNotEmpty) {
+              final booking = BookingModel(
+                id: bookingId,
+                consultant: UserData(
+                  name: callerName,
+                  avatar: callerAvatar,
+                ),
+              );
+              final bool joined = await _authService.joinVideoCall(
+                booking,
+                sessionId,
+                token,
+                channelName,
+              );
+              if (joined) return;
+            }
           }
         }
       }
@@ -60,10 +66,20 @@ class SplashController extends GetxController {
       // Proceed to normal navigation on any error
     }
 
+    // Clean up any old / stale active calls from native memory
+    try {
+      await FlutterCallkitIncoming.endAllCalls();
+    } catch (_) {}
+
     // ── 2. Standard splash transition delay ──
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 2));
 
     // ── 3. Onboarding & Authentication routing ──
+    await _proceedNormalRouting();
+  }
+
+  Future<void> _proceedNormalRouting() async {
+    if (Get.currentRoute != AppRoutes.SPLASH) return;
     final bool hasSeenOnboarding =
         await StorageService.getBool(StorageConstants.onboardingSeen) ?? false;
     if (!hasSeenOnboarding) {
