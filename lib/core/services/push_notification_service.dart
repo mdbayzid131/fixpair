@@ -382,6 +382,16 @@ class FirebaseNotificationService {
     return token;
   }
 
+  /// Get current FCM Token
+  static Future<String?> getToken() async {
+    try {
+      return await _messaging.getToken();
+    } catch (e) {
+      AppLogger.debug('Error fetching FCM token: $e');
+      return null;
+    }
+  }
+
   /// Subscribe to a topic
   static Future<void> subscribeToTopic(String topic) async {
     await _messaging.subscribeToTopic(topic);

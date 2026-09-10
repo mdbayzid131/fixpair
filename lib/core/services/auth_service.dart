@@ -177,7 +177,21 @@ class AuthService extends GetxService {
   /// ===================== LOGOUT =====================
   Future<void> logout() async {
     try {
-      await _authRepo.logout();
+      // 1. Get current device FCM token
+      String deviceToken =
+          await StorageService.getString(StorageConstants.deviceToken);
+      if (deviceToken.isEmpty) {
+        final fcmToken = await FirebaseNotificationService.getToken();
+        if (fcmToken != null && fcmToken.isNotEmpty) {
+          deviceToken = fcmToken;
+        }
+      }
+
+      AppLogger.info(
+        '🚪 [LOGOUT] Calling logout API with deviceToken: $deviceToken',
+      );
+      // 2. Call backend logout with deviceToken in body: { "deviceToken": "..." }
+      await _authRepo.logout(deviceToken: deviceToken);
     } catch (e) {
       AppLogger.warning('Error calling backend logout: $e');
     } finally {
@@ -286,6 +300,7 @@ class AuthService extends GetxService {
     await StorageService.remove(StorageConstants.bearerToken);
     await StorageService.remove(StorageConstants.refreshToken);
     await StorageService.remove(StorageConstants.userData);
+    await StorageService.remove(StorageConstants.deviceToken);
 
     isLoggedIn.value = false;
     user.value = null;
@@ -301,7 +316,8 @@ class AuthService extends GetxService {
       // 1. Initialize FCM and obtain device token
       final String? token = await FirebaseNotificationService.initialize();
       print('🔥 [AUTH SERVICE] FCM TOKEN LOADED: $token');
-      if (token != null) {
+      if (token != null && token.isNotEmpty) {
+        await StorageService.setString(StorageConstants.deviceToken, token);
         // 2. Upload the token to the backend
         print('🔥 [AUTH SERVICE] UPLOADING FCM TOKEN TO BACKEND...');
         await _userRepository.saveDeviceToken(token);
@@ -310,6 +326,12 @@ class AuthService extends GetxService {
 
       // 3. Listen for token refreshes dynamically
       FirebaseNotificationService.onTokenRefresh = (newToken) async {
+        if (newToken.isNotEmpty) {
+          await StorageService.setString(
+            StorageConstants.deviceToken,
+            newToken,
+          );
+        }
         if (isLoggedIn.value) {
           await _userRepository.saveDeviceToken(newToken);
         }

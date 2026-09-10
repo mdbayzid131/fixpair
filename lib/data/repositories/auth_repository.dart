@@ -88,8 +88,12 @@ class AuthRepo {
   }
 
   /// ===================== LOGOUT =====================
-  Future<Response> logout() async {
-    return await apiClient.postData(ApiConstants.logout, {});
+  Future<Response> logout({String? deviceToken}) async {
+    final Map<String, dynamic> body = {};
+    if (deviceToken != null && deviceToken.trim().isNotEmpty) {
+      body['deviceToken'] = deviceToken.trim();
+    }
+    return await apiClient.postData(ApiConstants.logout, body);
   }
 
   /// ===================== REFRESH TOKEN =====================
