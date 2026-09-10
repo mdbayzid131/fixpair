@@ -147,13 +147,23 @@ class SocketService extends GetxService {
       }
     }
 
+    // Call cancellation & ending socket handlers
     _socket?.on('call-ended', handleCallCancel);
+    _socket?.on('call:ended', handleCallCancel);
     _socket?.on('call-cancelled', handleCallCancel);
+    _socket?.on('call:cancelled', handleCallCancel);
     _socket?.on('cancel-call', handleCallCancel);
+    _socket?.on('cancel:call', handleCallCancel);
     _socket?.on('reject-call', handleCallCancel);
+    _socket?.on('reject:call', handleCallCancel);
+    _socket?.on('call-rejected', handleCallCancel);
+    _socket?.on('call:rejected', handleCallCancel);
     _socket?.on('end-call', handleCallCancel);
+    _socket?.on('end:call', handleCallCancel);
     _socket?.on('session-ended', handleCallCancel);
+    _socket?.on('session:ended', handleCallCancel);
     _socket?.on('consultation-auto-ended', handleCallCancel);
+    _socket?.on('consultation:auto-ended', handleCallCancel);
 
     // Consultant Online/Offline Status change handlers
     void handleConsultantStatus(dynamic data) {

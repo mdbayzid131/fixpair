@@ -57,7 +57,37 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final type = (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'])
       ?.toString()
       .toUpperCase();
+  final status = rawData['status']?.toString().toLowerCase();
 
+  // ── [CALL CANCELLATION / REJECTION IN BACKGROUND / TERMINATED STATE] ──
+  // If the consultant cancelled or ended the call while app is in background/terminated,
+  // immediately dismiss any active full-screen CallKit UI and stop ringtone.
+  if (type == 'CALL_REJECTED' ||
+      type == 'CALL_CANCELLED' ||
+      type == 'CANCEL_CALL' ||
+      type == 'REJECT_CALL' ||
+      type == 'SESSION_ENDED' ||
+      type == 'CALL_ENDED' ||
+      status == 'rejected' ||
+      status == 'cancelled' ||
+      status == 'ended') {
+    final sessionId = rawData['sessionId']?.toString() ??
+        rawData['session_id']?.toString() ??
+        rawData['callId']?.toString() ??
+        rawData['call_id']?.toString() ??
+        rawData['id']?.toString();
+    try {
+      if (sessionId != null && sessionId.isNotEmpty) {
+        await FlutterCallkitIncoming.endCall(sessionId);
+      }
+    } catch (_) {}
+    try {
+      await FlutterCallkitIncoming.endAllCalls();
+    } catch (_) {}
+    return;
+  }
+
+  // ── [INCOMING CALL IN BACKGROUND / TERMINATED STATE] ──
   if (type == 'INCOMING_CALL' ||
       type == 'CALL' ||
       type == 'VIDEO_CALL' ||
@@ -123,8 +153,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       'consultant_name',
       'senderName',
       'sender_name',
-      'expertName',
-      'expert_name',
       'callerName',
       'caller_name',
       'name',
@@ -201,35 +229,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
                 callerAvatar = ApiConstants.getImageUrl(av.toString());
               }
             }
-            if (callerName.isNotEmpty) break;
+            break;
           }
         }
       }
     }
 
-    // 4. Check notification body for caller name (e.g. "Dr. Alex is calling you")
-    if (callerName.isEmpty) {
-      final body = message.notification?.body?.trim();
-      if (body != null && body.isNotEmpty) {
-        final match = RegExp(
-          r'^(.+?)\s+(is calling|calling|sent you a call)',
-          caseSensitive: false,
-        ).firstMatch(body);
-        if (match != null) {
-          final extracted = match.group(1)?.trim();
-          if (isValidName(extracted)) {
-            callerName = extracted!;
-          }
-        }
-      }
-    }
-
-    // 5. Default fallback
-    if (callerName.isEmpty) {
-      callerName = 'Fixpair Consultant';
-    }
-
-    // Extract Avatar URL
+    // 4. Check direct avatar keys if not yet found
     if (callerAvatar.isEmpty) {
       final avatarKeys = [
         'consultantAvatar',
@@ -240,8 +246,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         'sender_avatar',
         'senderImage',
         'sender_image',
-        'callerAvatar',
-        'caller_avatar',
         'avatar',
         'image',
         'photo',
@@ -258,12 +262,34 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       }
     }
 
+    // 5. Check notification body for caller name (e.g. "Dr. Alex is calling you")
+    if (callerName.isEmpty) {
+      final body = message.notification?.body?.trim();
+      if (body != null && body.isNotEmpty) {
+        final match = RegExp(
+          r'^(.+?)\s+(is calling|calling|sent you a call)',
+          caseSensitive: false,
+        ).firstMatch(body);
+        if (match != null) {
+          final extracted = match.group(1)?.trim();
+          if (isValidName(extracted)) {
+            callerName = extracted!;
+          }
+        }
+      }
+    }
+
+    // 6. Default fallback
+    if (callerName.isEmpty) {
+      callerName = 'Fixpair Consultant';
+    }
+
     print('🔔 [BG CALL] Parsed → sessionId=$sessionId | callerName=$callerName | callerAvatar=$callerAvatar');
 
     if (sessionId != null && token != null) {
       final CallKitParams callKitParams = CallKitParams(
         id: sessionId,
-        nameCaller: callerName,
+        nameCaller: callerName.isNotEmpty ? callerName : 'Consultant',
         appName: 'Fixpair',
         avatar: callerAvatar.isNotEmpty ? callerAvatar : null,
         handle: 'Video Consultation',
@@ -281,18 +307,26 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
           showNotification: false,
           isShowCallback: false,
         ),
-        android: AndroidParams(
-          isCustomNotification: true,
-          backgroundColor: '#0F172A',
-          incomingCallNotificationChannelName: "Incoming Call",
-          isShowLogo: true,
+        android: const AndroidParams(
+          isCustomNotification: false,
+          isShowLogo: false,
           isShowFullLockedScreen: true,
           isImportant: true,
           ringtonePath: 'system_ringtone_default',
+          incomingCallNotificationChannelName: 'Incoming Call',
+          backgroundColor: '#0F172A',
           textAccept: 'Accept',
           textDecline: 'Decline',
         ),
-        ios: const IOSParams(handleType: 'generic', supportsVideo: true),
+        ios: const IOSParams(
+          handleType: 'generic',
+          supportsVideo: true,
+          maximumCallGroups: 1,
+          maximumCallsPerCallGroup: 1,
+          audioSessionMode: 'videoChat',
+          audioSessionActive: true,
+          ringtonePath: 'system_ringtone_default',
+        ),
       );
 
       await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
