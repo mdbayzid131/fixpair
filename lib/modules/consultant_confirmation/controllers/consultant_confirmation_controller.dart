@@ -330,7 +330,7 @@ class ConsultantConfirmationController extends GetxController {
                   color: const Color(0xFFFEF3C7), // Soft amber bg
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: const Color(0xFFFEF3C7).withOpacity(0.5),
+                    color: const Color(0xFFFEF3C7).withValues(alpha: 0.5),
                     width: 4,
                   ),
                 ),
