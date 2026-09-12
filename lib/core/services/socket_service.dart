@@ -1,5 +1,7 @@
 import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/config/constants/storage_constants.dart';
+import 'package:fixpair/core/services/auth_service.dart';
+import 'package:fixpair/core/services/push_notification_service.dart';
 import 'package:fixpair/core/services/storage_service.dart';
 import 'package:fixpair/core/utils/logger.dart';
 import 'package:fixpair/modules/video_call/controllers/video_call_controller.dart';
@@ -115,6 +117,36 @@ class SocketService extends GetxService {
         'ℹ️└ 📡 SOCKET EVENT RECEIVED ══════════════════════════════════════',
       );
     });
+
+    // ── Incoming call handler via Socket ──
+    void handleIncomingCall(dynamic data) {
+      AppLogger.info('Incoming call event received via socket: $data');
+      if (data is Map && Get.isRegistered<AuthService>()) {
+        try {
+          final payload = IncomingCallPayload.fromMap(
+            Map<String, dynamic>.from(data),
+            defaultType: 'INCOMING_CALL',
+          );
+          Get.find<AuthService>().handleIncomingCallPayload(payload);
+        } catch (e) {
+          AppLogger.warning('Error processing incoming call socket event: $e');
+        }
+      }
+    }
+
+    const incomingCallEvents = [
+      'incoming-call',
+      'incoming:call',
+      'call-incoming',
+      'call:incoming',
+      'receive-call',
+      'receive:call',
+      'new-call',
+      'new:call',
+    ];
+    for (final event in incomingCallEvents) {
+      _socket?.on(event, handleIncomingCall);
+    }
 
     // ── Call cancellation / ending handler ──
     void handleCallCancel(dynamic data) async {

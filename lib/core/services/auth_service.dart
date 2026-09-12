@@ -372,12 +372,20 @@ class AuthService extends GetxService {
 
   void _handleIncomingCall(RemoteMessage message, {bool isFromTap = false}) async {
     final payload = IncomingCallPayload.fromMessage(message);
+    final String? reason = (message.data['body'] ?? message.notification?.body)?.toString();
+    handleIncomingCallPayload(payload, isFromTap: isFromTap, rawReason: reason);
+  }
 
-    AppLogger.info('📞 [FCM CALL EVENT] Type: ${payload.type} | Status: ${payload.status}');
+  void handleIncomingCallPayload(
+    IncomingCallPayload payload, {
+    bool isFromTap = false,
+    String? rawReason,
+  }) async {
+    AppLogger.info('📞 [CALL EVENT] Type: ${payload.type} | Status: ${payload.status}');
 
     // ── 1. Call cancellation / rejection from remote peer ──
     if (payload.isCancelOrReject) {
-      AppLogger.info('🚫 [FCM CALL REJECTED/CANCELLED] Closing Call & CallKit UI');
+      AppLogger.info('🚫 [CALL REJECTED/CANCELLED] Closing Call & CallKit UI');
       try {
         while (Get.isDialogOpen == true) {
           Get.back();
@@ -386,9 +394,8 @@ class AuthService extends GetxService {
         if (Get.isRegistered<VideoCallController>()) {
           final controller = Get.find<VideoCallController>();
           if (!controller.hasConsultantJoined) {
-            final String? reason = (message.data['body'] ?? message.notification?.body)?.toString();
             controller.handleCallRejected(
-              reason: reason ?? 'Call rejected by consultant'.tr,
+              reason: rawReason ?? 'Call rejected by consultant'.tr,
             );
           } else {
             await controller.endCall();
@@ -401,13 +408,19 @@ class AuthService extends GetxService {
           }
         }
       } catch (e) {
-        AppLogger.warning('Error handling CALL_REJECTED FCM notification: $e');
+        AppLogger.warning('Error handling CALL_REJECTED notification: $e');
       }
       return;
     }
 
     // ── 2. Validate incoming call data ──
     if (!payload.isIncomingCall || payload.sessionId.isEmpty || payload.token.isEmpty) {
+      return;
+    }
+
+    // Don't show incoming call if already in an active video call
+    if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
+      AppLogger.info('⚠️ Already in video call, skipping show incoming call.');
       return;
     }
 
@@ -419,11 +432,11 @@ class AuthService extends GetxService {
     if (payload.bookingId.isNotEmpty) {
       _userRepository.getBookingById(payload.bookingId).then((realBooking) {
         if (realBooking != null) {
-          AppLogger.info('✅ [FCM BOOKING RESOLVED] Consultant: ${realBooking.consultant?.name} | ID: ${realBooking.id}');
+          AppLogger.info('✅ [BOOKING RESOLVED] Consultant: ${realBooking.consultant?.name} | ID: ${realBooking.id}');
           bookingRx.value = realBooking;
         }
       }).catchError((err) {
-        AppLogger.debug('Error fetching booking details for FCM call: $err');
+        AppLogger.debug('Error fetching booking details for call: $err');
       });
     }
 

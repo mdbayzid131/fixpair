@@ -41,9 +41,18 @@ class IncomingCallPayload {
   });
 
   factory IncomingCallPayload.fromMessage(RemoteMessage message) {
-    final Map<String, dynamic> rawData = Map<String, dynamic>.from(
+    return IncomingCallPayload.fromMap(
       message.data,
+      notificationBody: message.notification?.body,
     );
+  }
+
+  factory IncomingCallPayload.fromMap(
+    Map<dynamic, dynamic> rawInputData, {
+    String? notificationBody,
+    String? defaultType,
+  }) {
+    final Map<String, dynamic> rawData = Map<String, dynamic>.from(rawInputData);
     if (rawData['data'] != null) {
       final subData = rawData['data'];
       if (subData is Map) {
@@ -57,7 +66,7 @@ class IncomingCallPayload {
     }
 
     final type =
-        (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'])
+        (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'] ?? defaultType)
             ?.toString()
             .toUpperCase() ??
         '';
@@ -73,12 +82,6 @@ class IncomingCallPayload {
         status == 'rejected' ||
         status == 'cancelled' ||
         status == 'ended';
-
-    final bool isIncomingCall =
-        type == 'INCOMING_CALL' ||
-        type == 'CALL' ||
-        type == 'VIDEO_CALL' ||
-        type == 'CALL_INCOMING';
 
     final sessionId =
         (rawData['sessionId'] ??
@@ -97,6 +100,13 @@ class IncomingCallPayload {
                 rawData['rtc_token'])
             ?.toString() ??
         '';
+
+    final bool isIncomingCall =
+        type == 'INCOMING_CALL' ||
+        type == 'CALL' ||
+        type == 'VIDEO_CALL' ||
+        type == 'CALL_INCOMING' ||
+        (sessionId.isNotEmpty && token.isNotEmpty && !isCancelOrReject);
 
     final channelName =
         (rawData['channelName'] ??
@@ -198,53 +208,18 @@ class IncomingCallPayload {
       ]) {
         final raw = rawData[objKey];
         if (raw != null) {
-          Map<String, dynamic>? map;
           if (raw is Map) {
-            map = Map<String, dynamic>.from(raw);
-          } else if (raw is String && raw.trim().startsWith('{')) {
-            try {
-              final dec = jsonDecode(raw);
-              if (dec is Map) map = Map<String, dynamic>.from(dec);
-            } catch (_) {}
-          }
-          if (map != null) {
-            final n =
-                map['name'] ??
-                map['displayName'] ??
-                map['consultantName'] ??
-                map['senderName'] ??
-                map['fullName'] ??
-                map['full_name'];
+            final n = raw['name'] ?? raw['displayName'] ?? raw['userName'];
             if (isValidName(n?.toString())) {
               callerName = n.toString().trim();
-            } else {
-              final f = map['firstName'] ?? map['first_name'];
-              final l = map['lastName'] ?? map['last_name'];
-              if (isValidName(f?.toString())) {
-                callerName = '$f ${l ?? ''}'.trim();
-              }
+              break;
             }
-            if (callerAvatar.isEmpty) {
-              final av =
-                  map['avatar'] ??
-                  map['image'] ??
-                  map['photo'] ??
-                  map['profilePic'] ??
-                  map['avatarUrl'] ??
-                  map['avatar_url'];
-              if (av != null &&
-                  av.toString().isNotEmpty &&
-                  av.toString() != 'null') {
-                callerAvatar = ApiConstants.getImageUrl(av.toString());
-              }
-            }
-            break;
           }
         }
       }
     }
 
-    // ── 5. Direct avatar keys ──
+    // ── 5. Caller Avatar Extraction ──
     if (callerAvatar.isEmpty) {
       final avatarKeys = [
         'consultantAvatar',
@@ -272,18 +247,16 @@ class IncomingCallPayload {
     }
 
     // ── 6. Check notification body ──
-    if (callerName.isEmpty) {
-      final body = message.notification?.body?.trim();
-      if (body != null && body.isNotEmpty) {
-        final match = RegExp(
-          r'^(.+?)\s+(is calling|calling|sent you a call)',
-          caseSensitive: false,
-        ).firstMatch(body);
-        if (match != null) {
-          final extracted = match.group(1)?.trim();
-          if (isValidName(extracted)) {
-            callerName = extracted!;
-          }
+    if (callerName.isEmpty && notificationBody != null && notificationBody.trim().isNotEmpty) {
+      final body = notificationBody.trim();
+      final match = RegExp(
+        r'^(.+?)\s+(is calling|calling|sent you a call)',
+        caseSensitive: false,
+      ).firstMatch(body);
+      if (match != null) {
+        final extracted = match.group(1)?.trim();
+        if (isValidName(extracted)) {
+          callerName = extracted!;
         }
       }
     }
@@ -312,7 +285,7 @@ class IncomingCallPayload {
     if (uuidRegex.hasMatch(id)) return id;
 
     final clean = id.replaceAll(RegExp(r'[^0-9a-fA-F]'), '');
-    final padded = (clean + '00000000000000000000000000000000').substring(0, 32);
+    final padded = '${clean}00000000000000000000000000000000'.substring(0, 32);
     return '${padded.substring(0, 8)}-${padded.substring(8, 12)}-${padded.substring(12, 16)}-${padded.substring(16, 20)}-${padded.substring(20, 32)}';
   }
 
