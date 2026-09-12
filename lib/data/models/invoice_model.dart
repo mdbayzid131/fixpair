@@ -35,22 +35,32 @@ class InvoiceModel {
 
   factory InvoiceModel.fromJson(Map<String, dynamic> json) {
     return InvoiceModel(
-      consultationId: json['consultationId'] ?? '',
-      invoiceNumber: json['invoiceNumber'] ?? '',
-      date: json['date'] ?? '',
-      invoiceDate: json['invoiceDate'] ?? '',
+      consultationId: json['consultationId']?.toString() ?? '',
+      invoiceNumber: json['invoiceNumber']?.toString() ?? '',
+      date: json['date']?.toString() ?? '',
+      invoiceDate: json['invoiceDate']?.toString() ?? '',
       duration: json['duration']?.toString(),
       billableMinutes: json['billableMinutes']?.toString(),
-      perMinuteRate: json['perMinuteRate'] ?? 0,
-      subtotal: json['subtotal'] ?? 0,
-      platformFee: json['platformFee'] ?? 0,
-      totalAmount: json['totalAmount'] ?? 0,
-      status: json['status'] ?? '',
-      paymentMethod: json['paymentMethod'] ?? '',
-      transactionId: json['transactionId'] ?? '',
-      user: json['user'] != null ? InvoiceUser.fromJson(json['user']) : null,
-      consultant: json['consultant'] != null
-          ? InvoiceConsultant.fromJson(json['consultant'])
+      perMinuteRate: json['perMinuteRate'] is num
+          ? json['perMinuteRate'] as num
+          : (num.tryParse(json['perMinuteRate']?.toString() ?? '0') ?? 0),
+      subtotal: json['subtotal'] is num
+          ? json['subtotal'] as num
+          : (num.tryParse(json['subtotal']?.toString() ?? '0') ?? 0),
+      platformFee: json['platformFee'] is num
+          ? json['platformFee'] as num
+          : (num.tryParse(json['platformFee']?.toString() ?? '0') ?? 0),
+      totalAmount: json['totalAmount'] is num
+          ? json['totalAmount'] as num
+          : (num.tryParse(json['totalAmount']?.toString() ?? '0') ?? 0),
+      status: json['status']?.toString() ?? '',
+      paymentMethod: json['paymentMethod']?.toString() ?? '',
+      transactionId: json['transactionId']?.toString() ?? '',
+      user: json['user'] != null && json['user'] is Map<String, dynamic>
+          ? InvoiceUser.fromJson(json['user'] as Map<String, dynamic>)
+          : null,
+      consultant: json['consultant'] != null && json['consultant'] is Map<String, dynamic>
+          ? InvoiceConsultant.fromJson(json['consultant'] as Map<String, dynamic>)
           : null,
     );
   }

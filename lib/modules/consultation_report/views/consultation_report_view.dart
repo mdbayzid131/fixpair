@@ -808,7 +808,7 @@ class ConsultationReportView extends GetView<ConsultationSummaryController> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                item.price != null ? '€${item.price}' : '',
+                                item.formattedPrice,
                                 style: GoogleFonts.manrope(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w800,
@@ -1114,8 +1114,18 @@ class ConsultationReportView extends GetView<ConsultationSummaryController> {
 
   // Launch external URL safely
   Future<void> _launchExternalUrl(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+    try {
+      String formattedUrl = url.trim();
+      if (formattedUrl.isEmpty) return;
+      if (!formattedUrl.startsWith('http://') &&
+          !formattedUrl.startsWith('https://')) {
+        formattedUrl = 'https://$formattedUrl';
+      }
+      final Uri uri = Uri.parse(formattedUrl);
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        Get.snackbar('Error', 'Could not launch URL: $url');
+      }
+    } catch (e) {
       Get.snackbar('Error', 'Could not launch URL: $url');
     }
   }
