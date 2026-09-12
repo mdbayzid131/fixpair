@@ -2,7 +2,6 @@ import 'package:fixpair/core/utils/helpers.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HistoryController extends GetxController {
@@ -111,16 +110,16 @@ class HistoryController extends GetxController {
       final response = await _userRepository.cancelBooking(id, reason: reason);
 
       if (response.statusCode == 200) {
-        Helpers.showSuccess('Booking cancelled successfully');
+        Helpers.showSuccess('Booking cancelled successfully'.tr);
         await fetchMyBookings(); // Refresh the list
       } else {
         Helpers.showError(
-          response.data['message'] ?? 'Failed to cancel booking',
+          response.data['message'] ?? 'Failed to cancel booking'.tr,
         );
       }
     } catch (e) {
       Helpers.showDebugLog('Error cancelling booking: $e');
-      Helpers.showError('An unexpected error occurred');
+      Helpers.showError('An unexpected error occurred'.tr);
     } finally {
       isLoading.value = false;
     }
@@ -147,13 +146,13 @@ class HistoryController extends GetxController {
         return true;
       } else {
         Helpers.showError(
-          response.data['message'] ?? 'Failed to submit review',
+          response.data['message'] ?? 'Failed to submit review'.tr,
         );
         return false;
       }
     } catch (e) {
       Helpers.showDebugLog('Error submitting review: $e');
-      Helpers.showError('An unexpected error occurred while posting review');
+      Helpers.showError('An unexpected error occurred while posting review'.tr);
       return false;
     } finally {
       isLoading.value = false;

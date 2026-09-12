@@ -1,22 +1,23 @@
-import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
 import 'package:fixpair/config/constants/storage_constants.dart';
+import 'package:fixpair/core/services/auth_service.dart';
+import 'package:fixpair/core/services/push_notification_service.dart';
 import 'package:fixpair/core/services/storage_service.dart';
 import 'package:fixpair/core/utils/logger.dart';
-import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:fixpair/modules/video_call/controllers/video_call_controller.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+import 'package:get/get.dart';
 // ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 /// ===================== SOCKET SERVICE =====================
-/// Manages real-time Socket.IO connection lifecycle.
-/// Handles: connection, registration, rooms, messaging, and reconnection.
-/// Requires: socket_io_client
+/// Manages real-time Socket.IO connection lifecycle, presence tracking,
+/// call termination signaling, and messaging rooms across the application.
 class SocketService extends GetxService {
   IO.Socket? _socket;
 
-  /// Expose socket for direct event listening in controllers
+  /// Expose socket instance for direct event listening
   IO.Socket? get socket => _socket;
 
   /// Observable connection state
@@ -27,6 +28,12 @@ class SocketService extends GetxService {
 
   /// Callback for incoming messages
   void Function(dynamic data)? onMessageReceived;
+
+  /// Callback for consultant online/offline status changes
+  void Function(String consultantId, bool isOnline)? onConsultantStatusChanged;
+
+  /// Observable for consultant status changes (Rx stream for GetX controllers)
+  final consultantStatusUpdate = Rxn<Map<String, dynamic>>();
 
   @override
   void onInit() {
@@ -51,7 +58,7 @@ class SocketService extends GetxService {
       return;
     }
 
-    // Extract base URL (remove /api/v1 suffix)
+    // Extract base server URL (strips '/api/v1' suffix)
     final baseUrl = ApiConstants.baseUrl.replaceAll('/api/v1', '');
     AppLogger.debug('Socket connecting to: $baseUrl');
 
@@ -101,7 +108,7 @@ class SocketService extends GetxService {
       onMessageReceived?.call(data);
     });
 
-    // Global listener for ALL incoming socket events
+    // Global debug logger for socket events
     _socket?.onAny((event, data) {
       debugPrint(
         'ℹ️┌ 📡 SOCKET EVENT RECEIVED ══════════════════════════════════════\n'
@@ -111,7 +118,37 @@ class SocketService extends GetxService {
       );
     });
 
-    // Call cancellation & ending socket handlers
+    // ── Incoming call handler via Socket ──
+    void handleIncomingCall(dynamic data) {
+      AppLogger.info('Incoming call event received via socket: $data');
+      if (data is Map && Get.isRegistered<AuthService>()) {
+        try {
+          final payload = IncomingCallPayload.fromMap(
+            Map<String, dynamic>.from(data),
+            defaultType: 'INCOMING_CALL',
+          );
+          Get.find<AuthService>().handleIncomingCallPayload(payload);
+        } catch (e) {
+          AppLogger.warning('Error processing incoming call socket event: $e');
+        }
+      }
+    }
+
+    const incomingCallEvents = [
+      'incoming-call',
+      'incoming:call',
+      'call-incoming',
+      'call:incoming',
+      'receive-call',
+      'receive:call',
+      'new-call',
+      'new:call',
+    ];
+    for (final event in incomingCallEvents) {
+      _socket?.on(event, handleIncomingCall);
+    }
+
+    // ── Call cancellation / ending handler ──
     void handleCallCancel(dynamic data) async {
       AppLogger.info('Call cancelled/ended event received via socket: $data');
       try {
@@ -141,13 +178,74 @@ class SocketService extends GetxService {
       }
     }
 
-    _socket?.on('call-ended', handleCallCancel);
-    _socket?.on('call-cancelled', handleCallCancel);
-    _socket?.on('cancel-call', handleCallCancel);
-    _socket?.on('reject-call', handleCallCancel);
-    _socket?.on('end-call', handleCallCancel);
-    _socket?.on('session-ended', handleCallCancel);
-    _socket?.on('consultation-auto-ended', handleCallCancel);
+    // Register all call cancellation / termination event aliases
+    const callCancelEvents = [
+      'call-ended',
+      'call:ended',
+      'call-cancelled',
+      'call:cancelled',
+      'cancel-call',
+      'cancel:call',
+      'reject-call',
+      'reject:call',
+      'call-rejected',
+      'call:rejected',
+      'end-call',
+      'end:call',
+      'session-ended',
+      'session:ended',
+      'consultation-auto-ended',
+      'consultation:auto-ended',
+    ];
+    for (final event in callCancelEvents) {
+      _socket?.on(event, handleCallCancel);
+    }
+
+    // ── Consultant presence status handler ──
+    void handleConsultantStatus(dynamic data) {
+      AppLogger.info('Consultant status update event received via socket: $data');
+      if (data is Map) {
+        final String? consultantId = (data['consultantId'] ??
+                data['userId'] ??
+                data['id'] ??
+                data['_id'])
+            ?.toString();
+
+        final dynamic statusVal = data['activeStatus'] ?? data['isOnline'] ?? data['status'];
+        final bool isOnline = statusVal == true ||
+            statusVal?.toString() == 'true' ||
+            statusVal?.toString().toLowerCase() == 'online' ||
+            statusVal?.toString().toLowerCase() == 'active';
+
+        if (consultantId != null && consultantId.isNotEmpty) {
+          consultantStatusUpdate.value = {
+            'consultantId': consultantId,
+            'isOnline': isOnline,
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+          };
+          onConsultantStatusChanged?.call(consultantId, isOnline);
+        }
+      }
+    }
+
+    // Register all consultant presence event aliases
+    const consultantStatusEvents = [
+      'consultant:status-changed',
+      'consultant-status-changed',
+      'consultant:status-updated',
+      'consultant-status-updated',
+      'user:status-changed',
+      'user-status-changed',
+      'user:status-updated',
+      'user-status-updated',
+      'consultant:online-status',
+      'consultant-online-status',
+      'expert:status-changed',
+      'expert-status-changed',
+    ];
+    for (final event in consultantStatusEvents) {
+      _socket?.on(event, handleConsultantStatus);
+    }
   }
 
   // ──────────────────── PUBLIC METHODS ────────────────────
@@ -162,7 +260,7 @@ class SocketService extends GetxService {
     }
   }
 
-  /// Disconnect the socket
+  /// Disconnect and dispose socket
   void disconnect() {
     _socket?.disconnect();
     _socket?.dispose();
@@ -240,10 +338,7 @@ class SocketService extends GetxService {
       'ℹ️┌ ⚡ SOCKET EVENT EMITTED ══════════════════════════════════════\n'
       'ℹ️│ Event: $event\n'
       'ℹ️│ Data: $data\n'
-      'ℹ️└ ⚡ SOCKET EVENT EMITTED ══════════════════════════════════════'
-      '\n',
-      
-      
+      'ℹ️└ ⚡ SOCKET EVENT EMITTED ══════════════════════════════════════',
     );
     _socket?.emit(event, data);
   }

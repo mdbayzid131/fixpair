@@ -413,7 +413,7 @@ class ApiClient extends GetxService {
   void _forceLogout() {
     StorageService.clearAll();
     Get.offAllNamed(AppRoutes.LOGIN);
-    Helpers.showError('Please login again.', title: 'Session Expired');
+    Helpers.showError('Please login again.'.tr, title: 'Session Expired'.tr);
   }
 }
 

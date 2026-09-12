@@ -2,6 +2,7 @@ import 'package:fixpair/core/utils/logger.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/models/review_model.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
+import 'package:fixpair/core/services/socket_service.dart';
 import 'package:get/get.dart';
 
 class ConsultantProfileController extends GetxController {
@@ -18,6 +19,7 @@ class ConsultantProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _listenToConsultantStatusChanges();
     if (Get.arguments is UserData) {
       expert.value = Get.arguments as UserData;
       // Fetch fresh data to get full bio/details
@@ -88,6 +90,24 @@ class ConsultantProfileController extends GetxController {
     final id = expert.value?.id;
     if (id != null && id.isNotEmpty) {
       await fetchConsultantDetails(id, isRefresh: true);
+    }
+  }
+
+  void _listenToConsultantStatusChanges() {
+    if (Get.isRegistered<SocketService>()) {
+      final socketService = Get.find<SocketService>();
+      ever(socketService.consultantStatusUpdate, (statusData) {
+        if (statusData != null) {
+          final String? consultantId = statusData['consultantId']?.toString();
+          final bool? isOnline = statusData['isOnline'] as bool?;
+          if (consultantId != null &&
+              isOnline != null &&
+              expert.value?.id == consultantId) {
+            expert.value = expert.value?.copyWith(activeStatus: isOnline);
+            AppLogger.info('Real-time updated consultant profile status: $isOnline for $consultantId');
+          }
+        }
+      });
     }
   }
 }

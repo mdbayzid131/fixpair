@@ -26,7 +26,7 @@ class BookingDetailsController extends GetxController {
       final response = await _userRepository.cancelBooking(id, reason: reason);
 
       if (response.statusCode == 200) {
-        Helpers.showSuccess('Booking cancelled successfully');
+        Helpers.showSuccess('Booking cancelled successfully'.tr);
         if (booking.value != null) {
           // Re-create the booking model with updated status to trigger Obx refresh
           booking.value = BookingModel(
@@ -49,12 +49,12 @@ class BookingDetailsController extends GetxController {
         }
       } else {
         Helpers.showError(
-          response.data['message'] ?? 'Failed to cancel booking',
+          response.data['message'] ?? 'Failed to cancel booking'.tr,
         );
       }
     } catch (e) {
       Helpers.showDebugLog('Error cancelling booking: $e');
-      Helpers.showError('An unexpected error occurred');
+      Helpers.showError('An unexpected error occurred'.tr);
     } finally {
       isLoading.value = false;
     }
@@ -72,7 +72,7 @@ class BookingDetailsController extends GetxController {
 
     try {
       isLoading.value = true;
-      Helpers.showLoadingDialog(message: 'Initializing video call...');
+      Helpers.showLoadingDialog(message: 'Initializing video call...'.tr);
 
       // 1. Create or get session
       final sessionResponse = await _userRepository.createVideoSession(
@@ -109,17 +109,17 @@ class BookingDetailsController extends GetxController {
         } else {
           Helpers.hideLoadingDialog();
           Helpers.showError(
-            joinResponse.statusMessage ?? 'Failed to join video call',
+            joinResponse.statusMessage ?? 'Failed to join video call'.tr,
           );
         }
       } else {
         Helpers.hideLoadingDialog();
-        Helpers.showError('Failed to create video session');
+        Helpers.showError('Failed to create video session'.tr);
       }
     } catch (e) {
       Helpers.hideLoadingDialog();
       Helpers.showDebugLog('Error starting video call: $e');
-      Helpers.showError('Could not start video call. Please try again.');
+      Helpers.showError('Could not start video call. Please try again.'.tr);
     } finally {
       isLoading.value = false;
     }

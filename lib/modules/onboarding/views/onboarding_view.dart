@@ -246,7 +246,7 @@ class OnboardingView extends GetView<OnboardingController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
+                title.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
@@ -254,7 +254,7 @@ class OnboardingView extends GetView<OnboardingController> {
                 ),
               ),
               Text(
-                desc,
+                desc.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
@@ -360,7 +360,7 @@ class OnboardingView extends GetView<OnboardingController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
+                title.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
@@ -371,7 +371,7 @@ class OnboardingView extends GetView<OnboardingController> {
               ),
               SizedBox(height: 2.h),
               Text(
-                desc,
+                desc.tr,
                 style: GoogleFonts.manrope(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
@@ -573,7 +573,7 @@ class OnboardingView extends GetView<OnboardingController> {
         ),
       ),
       child: Text(
-        text,
+        text.tr,
         style: GoogleFonts.manrope(
           fontSize: 10.sp,
           fontWeight: FontWeight.w700,
@@ -598,51 +598,50 @@ class OnboardingView extends GetView<OnboardingController> {
             margin: EdgeInsets.symmetric(horizontal: 24.w),
             decoration: BoxDecoration(
               color: const Color(0xFF0F172A), // Slate 900
-              borderRadius: BorderRadius.circular(28.r),
-              border: Border.all(
-                color: const Color(0xFF334155).withOpacity(0.5),
-                width: 1.5,
-              ),
+              borderRadius: BorderRadius.circular(24.r),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF22C55E).withOpacity(0.12),
-                  blurRadius: 30,
-                  spreadRadius: 5,
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 25,
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                // Glowing Avatar Ring
                 Stack(
                   alignment: Alignment.center,
                   children: [
                     Container(
-                      width: 80.w,
-                      height: 80.w,
+                      width: 70.w,
+                      height: 70.w,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFF22C55E).withOpacity(0.8),
-                          width: 2,
-                        ),
+                        color: const Color(0xFF0066FF).withOpacity(0.2),
+                      ),
+                    ),
+                    Container(
+                      width: 54.w,
+                      height: 54.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF0066FF).withOpacity(0.4),
                       ),
                     ),
                     CircleAvatar(
-                      radius: 34.r,
-                      backgroundColor: const Color(0xFF1E293B),
+                      radius: 20.r,
+                      backgroundColor: const Color(0xFF0066FF),
                       child: Icon(
                         Icons.person,
-                        color: const Color(0xFF22C55E),
-                        size: 36.sp,
+                        color: Colors.white,
+                        size: 24.sp,
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: 16.h),
                 Text(
-                  'Consultant Calling',
+                  'Consultant Calling'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -651,7 +650,7 @@ class OnboardingView extends GetView<OnboardingController> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Incoming Video Consultation...',
+                  'Incoming Video Consultation...'.tr,
                   style: GoogleFonts.manrope(
                     fontSize: 11.sp,
                     color: const Color(0xFF94A3B8),
@@ -710,7 +709,7 @@ class OnboardingView extends GetView<OnboardingController> {
         ),
         SizedBox(height: 6.h),
         Text(
-          label,
+          label.tr,
           style: GoogleFonts.manrope(
             color: color,
             fontWeight: FontWeight.w700,
@@ -799,7 +798,7 @@ class OnboardingView extends GetView<OnboardingController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'CARD HOLDER',
+                          'CARD HOLDER'.tr,
                           style: GoogleFonts.manrope(
                             color: Colors.white38,
                             fontSize: 8.sp,
@@ -820,7 +819,7 @@ class OnboardingView extends GetView<OnboardingController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'EXPIRES',
+                          'EXPIRES'.tr,
                           style: GoogleFonts.manrope(
                             color: Colors.white38,
                             fontSize: 8.sp,
@@ -854,7 +853,7 @@ class OnboardingView extends GetView<OnboardingController> {
               ),
               SizedBox(width: 6.w),
               Text(
-                'Secured by Stripe Payments',
+                'Secured by Stripe Payments'.tr,
                 style: GoogleFonts.manrope(
                   color: const Color(0xFF64748B),
                   fontSize: 12.sp,

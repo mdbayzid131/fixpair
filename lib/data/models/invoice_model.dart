@@ -1,3 +1,10 @@
+num _parseNum(dynamic val) {
+  if (val == null) return 0;
+  if (val is num) return val;
+  if (val is String) return num.tryParse(val) ?? 0;
+  return 0;
+}
+
 class InvoiceModel {
   final String consultationId;
   final String invoiceNumber;
@@ -35,32 +42,24 @@ class InvoiceModel {
 
   factory InvoiceModel.fromJson(Map<String, dynamic> json) {
     return InvoiceModel(
-      consultationId: json['consultationId']?.toString() ?? '',
-      invoiceNumber: json['invoiceNumber']?.toString() ?? '',
+      consultationId: json['consultationId']?.toString() ?? json['_id']?.toString() ?? '',
+      invoiceNumber: json['invoiceNumber']?.toString() ?? json['invoiceNo']?.toString() ?? '',
       date: json['date']?.toString() ?? '',
-      invoiceDate: json['invoiceDate']?.toString() ?? '',
+      invoiceDate: json['invoiceDate']?.toString() ?? json['createdAt']?.toString() ?? '',
       duration: json['duration']?.toString(),
-      billableMinutes: json['billableMinutes']?.toString(),
-      perMinuteRate: json['perMinuteRate'] is num
-          ? json['perMinuteRate'] as num
-          : (num.tryParse(json['perMinuteRate']?.toString() ?? '0') ?? 0),
-      subtotal: json['subtotal'] is num
-          ? json['subtotal'] as num
-          : (num.tryParse(json['subtotal']?.toString() ?? '0') ?? 0),
-      platformFee: json['platformFee'] is num
-          ? json['platformFee'] as num
-          : (num.tryParse(json['platformFee']?.toString() ?? '0') ?? 0),
-      totalAmount: json['totalAmount'] is num
-          ? json['totalAmount'] as num
-          : (num.tryParse(json['totalAmount']?.toString() ?? '0') ?? 0),
+      billableMinutes: json['billableMinutes']?.toString() ?? json['duration']?.toString(),
+      perMinuteRate: _parseNum(json['perMinuteRate']),
+      subtotal: _parseNum(json['subtotal']),
+      platformFee: _parseNum(json['platformFee']),
+      totalAmount: _parseNum(json['totalAmount']),
       status: json['status']?.toString() ?? '',
       paymentMethod: json['paymentMethod']?.toString() ?? '',
       transactionId: json['transactionId']?.toString() ?? '',
-      user: json['user'] != null && json['user'] is Map<String, dynamic>
-          ? InvoiceUser.fromJson(json['user'] as Map<String, dynamic>)
+      user: json['user'] != null && json['user'] is Map
+          ? InvoiceUser.fromJson(Map<String, dynamic>.from(json['user']))
           : null,
-      consultant: json['consultant'] != null && json['consultant'] is Map<String, dynamic>
-          ? InvoiceConsultant.fromJson(json['consultant'] as Map<String, dynamic>)
+      consultant: json['consultant'] != null && json['consultant'] is Map
+          ? InvoiceConsultant.fromJson(Map<String, dynamic>.from(json['consultant']))
           : null,
     );
   }
@@ -75,9 +74,9 @@ class InvoiceUser {
 
   factory InvoiceUser.fromJson(Map<String, dynamic> json) {
     return InvoiceUser(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
+      id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
     );
   }
 }
@@ -91,8 +90,8 @@ class InvoiceConsultant {
 
   factory InvoiceConsultant.fromJson(Map<String, dynamic> json) {
     return InvoiceConsultant(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
+      id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
       type: json['type']?.toString(),
     );
   }

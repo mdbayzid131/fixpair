@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
+import '../utils/helpers.dart';
 import 'biometric_service.dart';
 
 /// ===================== APP LOCK SERVICE =====================
@@ -71,11 +72,9 @@ class AppLockService extends GetxService with WidgetsBindingObserver {
         final hasBiometric = await BiometricService.instance
             .hasUsableBiometric();
         if (!hasBiometric) {
-          Get.snackbar(
-            'Unavailable',
-            'No biometric is set up on this device.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Get.theme.colorScheme.errorContainer,
+          Helpers.showError(
+            'No biometric is set up on this device.'.tr,
+            title: 'Unavailable'.tr,
           );
           biometricEnabled.value = false;
           await _box.write(biometricEnabledKey, false);
@@ -87,11 +86,9 @@ class AppLockService extends GetxService with WidgetsBindingObserver {
         if (!ok) {
           biometricEnabled.value = false;
           await _box.write(biometricEnabledKey, false);
-          Get.snackbar(
-            'Verification Failed',
-            'Try again or ensure biometrics are enabled in system settings.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Get.theme.colorScheme.errorContainer,
+          Helpers.showError(
+            'Try again or ensure biometrics are enabled in system settings.'.tr,
+            title: 'Verification Failed'.tr,
           );
           return;
         }

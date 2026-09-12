@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fixpair/core/services/api_checker.dart';
 import 'package:fixpair/core/services/auth_service.dart';
+import 'package:fixpair/core/utils/helpers.dart';
 import 'package:get/get.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/user_repository.dart';
@@ -247,7 +248,7 @@ class ConsultantConfirmationController extends GetxController {
       }
 
       if (targetBooking == null) {
-        Get.snackbar('Error'.tr, 'Invalid booking details'.tr);
+        Helpers.showError('Invalid booking details'.tr);
         return;
       }
 
@@ -273,8 +274,7 @@ class ConsultantConfirmationController extends GetxController {
             Get.find<AuthService>().showPaymentRequiredDialog();
             return;
           } else {
-            Get.snackbar(
-              'Error'.tr,
+            Helpers.showError(
               joinResponse.statusMessage ?? 'Failed to join video call'.tr,
             );
             return;
@@ -299,8 +299,7 @@ class ConsultantConfirmationController extends GetxController {
       });
       return;
     } catch (e) {
-      Get.snackbar(
-        'Error'.tr,
+      Helpers.showError(
         'Could not start video call. Please try again.'.tr,
       );
     } finally {
@@ -331,7 +330,7 @@ class ConsultantConfirmationController extends GetxController {
                   color: const Color(0xFFFEF3C7), // Soft amber bg
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: const Color(0xFFFEF3C7).withOpacity(0.5),
+                    color: const Color(0xFFFEF3C7).withValues(alpha: 0.5),
                     width: 4,
                   ),
                 ),

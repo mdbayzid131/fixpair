@@ -27,7 +27,7 @@ class PrivacyPolicyController extends GetxController {
             .toList();
       }
     } catch (e) {
-      Helpers.showError('Failed to load Privacy Policy');
+      Helpers.showError('Failed to load Privacy Policy'.tr);
     } finally {
       isLoading.value = false;
     }

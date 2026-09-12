@@ -29,7 +29,7 @@ class ForgotPasswordController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        Helpers.showSuccess('Reset link sent to your email');
+        Helpers.showSuccess('Reset link sent to your email'.tr);
         Get.toNamed(
           AppRoutes.OTP,
           arguments: {
@@ -39,7 +39,7 @@ class ForgotPasswordController extends GetxController {
         );
       } else {
         Helpers.showError(
-          response.data['message'] ?? 'Failed to send reset link',
+          response.data['message'] ?? 'Failed to send reset link'.tr,
         );
       }
     } catch (e) {

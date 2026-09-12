@@ -2,6 +2,13 @@ import 'package:intl/intl.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
 
+num? _parseNum(dynamic val) {
+  if (val == null) return null;
+  if (val is num) return val;
+  if (val is String) return num.tryParse(val);
+  return null;
+}
+
 class ReportModel {
   final String? id;
   final String? sId;
@@ -47,17 +54,17 @@ class ReportModel {
     return ReportModel(
       id: json['id']?.toString() ?? json['_id']?.toString(),
       sId: json['_id']?.toString(),
-      aiSummary: json['aiSummary'] != null && json['aiSummary'] is Map<String, dynamic>
-          ? AiSummaryModel.fromJson(json['aiSummary'] as Map<String, dynamic>)
+      aiSummary: json['aiSummary'] != null && json['aiSummary'] is Map
+          ? AiSummaryModel.fromJson(Map<String, dynamic>.from(json['aiSummary']))
           : null,
-      consultation: json['consultation'] != null && json['consultation'] is Map<String, dynamic>
-          ? ReportConsultationInfo.fromJson(json['consultation'] as Map<String, dynamic>)
+      consultation: json['consultation'] != null && json['consultation'] is Map
+          ? ReportConsultationInfo.fromJson(Map<String, dynamic>.from(json['consultation']))
           : null,
-      user: json['user'] != null && json['user'] is Map<String, dynamic>
-          ? UserData.fromJson(json['user'] as Map<String, dynamic>)
+      user: json['user'] != null && json['user'] is Map
+          ? UserData.fromJson(Map<String, dynamic>.from(json['user']))
           : null,
-      consultant: json['consultant'] != null && json['consultant'] is Map<String, dynamic>
-          ? UserData.fromJson(json['consultant'] as Map<String, dynamic>)
+      consultant: json['consultant'] != null && json['consultant'] is Map
+          ? UserData.fromJson(Map<String, dynamic>.from(json['consultant']))
           : null,
       summary: json['summary']?.toString(),
       keyPoints: json['keyPoints'] != null && json['keyPoints'] is List
@@ -70,20 +77,16 @@ class ReportModel {
               json['recommendedProducts'] is List
           ? List<RecommendedProductModel>.from(
               (json['recommendedProducts'] as List)
-                  .where((x) => x is Map<String, dynamic>)
+                  .where((x) => x != null && x is Map)
                   .map(
                     (x) => RecommendedProductModel.fromJson(
-                      x as Map<String, dynamic>,
+                      Map<String, dynamic>.from(x),
                     ),
                   ),
             )
           : [],
       conversation: json['conversation']?.toString(),
-      duration: json['duration'] is num
-          ? json['duration'] as num
-          : (json['duration'] != null
-              ? num.tryParse(json['duration'].toString())
-              : null),
+      duration: _parseNum(json['duration']),
       notes: json['notes']?.toString(),
       images: json['images'] != null && json['images'] is List
           ? List<String>.from((json['images'] as List).map((x) => x.toString()))
@@ -171,11 +174,7 @@ class ReportConsultationInfo {
     return ReportConsultationInfo(
       id: json['id']?.toString() ?? json['_id']?.toString(),
       bookingType: json['bookingType']?.toString(),
-      perMinuteRate: json['perMinuteRate'] is num
-          ? json['perMinuteRate'] as num
-          : (json['perMinuteRate'] != null
-              ? num.tryParse(json['perMinuteRate'].toString())
-              : null),
+      perMinuteRate: _parseNum(json['perMinuteRate']),
       status: json['status']?.toString(),
     );
   }

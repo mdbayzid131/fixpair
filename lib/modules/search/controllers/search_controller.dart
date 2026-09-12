@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/user_repository.dart';
+import '../../../core/services/socket_service.dart';
 
 class SearchController extends GetxController {
   final UserRepository _userRepository = Get.find();
@@ -28,6 +29,7 @@ class SearchController extends GetxController {
     super.onInit();
     fetchCategories();
     fetchConsultants();
+    _listenToConsultantStatusChanges();
 
     searchController.addListener(_onSearchChanged);
   }
@@ -174,6 +176,28 @@ class SearchController extends GetxController {
     if (selectedCategory.value == category) return;
     selectedCategory.value = category;
     fetchConsultants();
+  }
+
+  void _listenToConsultantStatusChanges() {
+    if (Get.isRegistered<SocketService>()) {
+      final socketService = Get.find<SocketService>();
+      ever(socketService.consultantStatusUpdate, (statusData) {
+        if (statusData != null) {
+          final String? consultantId = statusData['consultantId']?.toString();
+          final bool? isOnline = statusData['isOnline'] as bool?;
+          if (consultantId != null && isOnline != null) {
+            final index = consultants.indexWhere((c) => c.id == consultantId);
+            if (index != -1) {
+              consultants[index] =
+                  consultants[index].copyWith(activeStatus: isOnline);
+              consultants.refresh();
+              debugPrint(
+                  'Real-time updated consultant $consultantId activeStatus: $isOnline on Search');
+            }
+          }
+        }
+      });
+    }
   }
 
   @override

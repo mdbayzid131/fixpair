@@ -37,14 +37,14 @@ class LoginController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        Helpers.showSuccess('Login successful');
+        Helpers.showSuccess('Login successful'.tr);
         await _authService.handleAuthResponse(response);
         Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
       } else if (response.statusCode == 403 &&
           response.data['message'] == 'Verify account first') {
         try {
           await _authService.resendOtp(emailController.text.trim());
-          Helpers.showSuccess('Verification needed. OTP sent to your email.');
+          Helpers.showSuccess('Verification needed. OTP sent to your email.'.tr);
           Get.toNamed(
             AppRoutes.OTP_FORM_REGISTER,
             arguments: emailController.text.trim(),
@@ -54,7 +54,7 @@ class LoginController extends GetxController {
         }
       } else {
         // ApiChecker.checkWriteApi(response);
-        Helpers.showError(response.data['message'] ?? 'Login failed');
+        Helpers.showError(response.data['message'] ?? 'Login failed'.tr);
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());
@@ -69,10 +69,10 @@ class LoginController extends GetxController {
       isLoading.value = true;
       final response = await _authService.loginWithGoogle();
       if (response.statusCode == 200) {
-        Helpers.showSuccess('Login successful');
+        Helpers.showSuccess('Login successful'.tr);
         Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
       } else {
-        Helpers.showError(response.data['message'] ?? 'Google Login failed');
+        Helpers.showError(response.data['message'] ?? 'Google Login failed'.tr);
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());
@@ -87,10 +87,10 @@ class LoginController extends GetxController {
       isLoading.value = true;
       final response = await _authService.loginWithApple();
       if (response.statusCode == 200) {
-        Helpers.showSuccess('Login successful');
+        Helpers.showSuccess('Login successful'.tr);
         Get.offAllNamed(AppRoutes.BOTTOM_NAV_BAR);
       } else {
-        Helpers.showError(response.data['message'] ?? 'Apple Login failed');
+        Helpers.showError(response.data['message'] ?? 'Apple Login failed'.tr);
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());

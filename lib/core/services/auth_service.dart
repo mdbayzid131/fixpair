@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/modules/video_call/controllers/video_call_controller.dart';
@@ -14,13 +13,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:fixpair/core/utils/logger.dart';
+import 'package:fixpair/core/utils/helpers.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/auth_repository.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
 
 class AuthService extends GetxService {
@@ -177,9 +176,27 @@ class AuthService extends GetxService {
   /// ===================== LOGOUT =====================
   Future<void> logout() async {
     try {
-      await _authRepo.logout();
-      await _clearLocalAuth();
+      // 1. Get current device FCM token
+      String deviceToken =
+          await StorageService.getString(StorageConstants.deviceToken);
+      if (deviceToken.isEmpty) {
+        final fcmToken = await FirebaseNotificationService.getToken();
+        if (fcmToken != null && fcmToken.isNotEmpty) {
+          deviceToken = fcmToken;
+        }
+      }
+
+      AppLogger.info(
+        '🚪 [LOGOUT] Calling logout API with deviceToken: $deviceToken',
+      );
+      // 2. Call backend logout with deviceToken in body: { "deviceToken": "..." }
+      await _authRepo.logout(deviceToken: deviceToken);
     } catch (e) {
+      AppLogger.warning('Error calling backend logout: $e');
+    } finally {
+      if (Get.isRegistered<SocketService>()) {
+        Get.find<SocketService>().disconnect();
+      }
       await _clearLocalAuth();
     }
   }
@@ -282,6 +299,7 @@ class AuthService extends GetxService {
     await StorageService.remove(StorageConstants.bearerToken);
     await StorageService.remove(StorageConstants.refreshToken);
     await StorageService.remove(StorageConstants.userData);
+    await StorageService.remove(StorageConstants.deviceToken);
 
     isLoggedIn.value = false;
     user.value = null;
@@ -297,7 +315,8 @@ class AuthService extends GetxService {
       // 1. Initialize FCM and obtain device token
       final String? token = await FirebaseNotificationService.initialize();
       print('🔥 [AUTH SERVICE] FCM TOKEN LOADED: $token');
-      if (token != null) {
+      if (token != null && token.isNotEmpty) {
+        await StorageService.setString(StorageConstants.deviceToken, token);
         // 2. Upload the token to the backend
         print('🔥 [AUTH SERVICE] UPLOADING FCM TOKEN TO BACKEND...');
         await _userRepository.saveDeviceToken(token);
@@ -306,6 +325,12 @@ class AuthService extends GetxService {
 
       // 3. Listen for token refreshes dynamically
       FirebaseNotificationService.onTokenRefresh = (newToken) async {
+        if (newToken.isNotEmpty) {
+          await StorageService.setString(
+            StorageConstants.deviceToken,
+            newToken,
+          );
+        }
         if (isLoggedIn.value) {
           await _userRepository.saveDeviceToken(newToken);
         }
@@ -346,43 +371,31 @@ class AuthService extends GetxService {
   }
 
   void _handleIncomingCall(RemoteMessage message, {bool isFromTap = false}) async {
-    Map<String, dynamic> rawData = Map<String, dynamic>.from(message.data);
-    if (rawData['data'] != null) {
-      final subData = rawData['data'];
-      if (subData is Map) {
-        rawData.addAll(Map<String, dynamic>.from(subData));
-      } else if (subData is String && subData.trim().startsWith('{')) {
-        try {
-          final dec = jsonDecode(subData);
-          if (dec is Map) rawData.addAll(Map<String, dynamic>.from(dec));
-        } catch (_) {}
-      }
-    }
+    final payload = IncomingCallPayload.fromMessage(message);
+    final String? reason = (message.data['body'] ?? message.notification?.body)?.toString();
+    handleIncomingCallPayload(payload, isFromTap: isFromTap, rawReason: reason);
+  }
 
-    final type = (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'])
-        ?.toString()
-        .toUpperCase();
-    final status = rawData['status']?.toString().toLowerCase();
+  void handleIncomingCallPayload(
+    IncomingCallPayload payload, {
+    bool isFromTap = false,
+    String? rawReason,
+  }) async {
+    AppLogger.info('📞 [CALL EVENT] Type: ${payload.type} | Status: ${payload.status}');
 
-    AppLogger.info('📞 [FCM CALL EVENT] Type: ${type ?? 'N/A'} | Status: ${status ?? 'N/A'}');
-
-    if (type == 'CALL_REJECTED' ||
-        type == 'CALL_CANCELLED' ||
-        type == 'CANCEL_CALL' ||
-        type == 'REJECT_CALL' ||
-        status == 'rejected' ||
-        status == 'cancelled') {
-      AppLogger.info('🚫 [FCM CALL REJECTED/CANCELLED] Closing Call & CallKit UI | Data: $rawData');
+    // ── 1. Call cancellation / rejection from remote peer ──
+    if (payload.isCancelOrReject) {
+      AppLogger.info('🚫 [CALL REJECTED/CANCELLED] Closing Call & CallKit UI');
       try {
-        if (Get.isDialogOpen == true) {
+        while (Get.isDialogOpen == true) {
           Get.back();
         }
-        FlutterCallkitIncoming.endAllCalls();
+        await FlutterCallkitIncoming.endAllCalls();
         if (Get.isRegistered<VideoCallController>()) {
           final controller = Get.find<VideoCallController>();
           if (!controller.hasConsultantJoined) {
             controller.handleCallRejected(
-              reason: rawData['body'] ?? 'Call rejected by consultant'.tr,
+              reason: rawReason ?? 'Call rejected by consultant'.tr,
             );
           } else {
             await controller.endCall();
@@ -395,239 +408,44 @@ class AuthService extends GetxService {
           }
         }
       } catch (e) {
-        AppLogger.warning('Error handling CALL_REJECTED FCM notification: $e');
+        AppLogger.warning('Error handling CALL_REJECTED notification: $e');
       }
       return;
     }
 
-    if (type != 'INCOMING_CALL' &&
-        type != 'CALL' &&
-        type != 'VIDEO_CALL' &&
-        type != 'CALL_INCOMING') {
+    // ── 2. Validate incoming call data ──
+    if (!payload.isIncomingCall || payload.sessionId.isEmpty || payload.token.isEmpty) {
       return;
     }
 
-    final sessionId = rawData['sessionId']?.toString() ??
-        rawData['session_id']?.toString() ??
-        rawData['callId']?.toString() ??
-        rawData['call_id']?.toString() ??
-        rawData['id']?.toString();
-
-    final token = rawData['token']?.toString() ??
-        rawData['agoraToken']?.toString() ??
-        rawData['agora_token']?.toString() ??
-        rawData['rtcToken']?.toString() ??
-        rawData['rtc_token']?.toString();
-
-    // Robust parsing of booking ID
-    final idKeys = [
-      'bookingId',
-      'booking_id',
-      'booking',
-      'consultationId',
-      'consultation_id',
-      'consultation'
-    ];
-    String bookingId = '';
-    for (var key in idKeys) {
-      final val = rawData[key]?.toString();
-      if (val != null && val.isNotEmpty) {
-        bookingId = val;
-        break;
-      }
+    // Don't show incoming call if already in an active video call
+    if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
+      AppLogger.info('⚠️ Already in video call, skipping show incoming call.');
+      return;
     }
-
-    bool isValidName(String? n) {
-      if (n == null) return false;
-      final clean = n.trim().toLowerCase();
-      return clean.isNotEmpty &&
-          clean != 'a user' &&
-          clean != 'user' &&
-          clean != 'notification' &&
-          clean != 'fixpair' &&
-          clean != 'fixpair notification' &&
-          clean != 'incoming call' &&
-          clean != 'video call' &&
-          clean != 'call' &&
-          clean != 'consultant' &&
-          clean != 'null' &&
-          clean != 'undefined';
-    }
-
-    String callerName = '';
-    String callerAvatar = '';
-
-    // 1. Check direct keys
-    final nameKeys = [
-      'consultantName',
-      'consultant_name',
-      'senderName',
-      'sender_name',
-      'expertName',
-      'expert_name',
-      'callerName',
-      'caller_name',
-      'name',
-      'displayName',
-      'display_name',
-      'userName',
-      'user_name',
-    ];
-    for (var key in nameKeys) {
-      final val = rawData[key]?.toString().trim();
-      if (isValidName(val)) {
-        callerName = val!;
-        break;
-      }
-    }
-
-    // 2. Check first name + last name
-    if (callerName.isEmpty) {
-      final fn = rawData['consultantFirstName'] ??
-          rawData['consultant_first_name'] ??
-          rawData['senderFirstName'] ??
-          rawData['sender_first_name'] ??
-          rawData['firstName'] ??
-          rawData['first_name'];
-      final ln = rawData['consultantLastName'] ??
-          rawData['consultant_last_name'] ??
-          rawData['senderLastName'] ??
-          rawData['sender_last_name'] ??
-          rawData['lastName'] ??
-          rawData['last_name'];
-      if (isValidName(fn?.toString())) {
-        callerName = '$fn ${ln ?? ''}'.trim();
-      }
-    }
-
-    // 3. Check nested JSON objects
-    if (callerName.isEmpty) {
-      for (var objKey in ['consultant', 'sender', 'caller', 'user', 'expert', 'booking']) {
-        final raw = rawData[objKey];
-        if (raw != null) {
-          Map<String, dynamic>? map;
-          if (raw is Map) {
-            map = Map<String, dynamic>.from(raw);
-          } else if (raw is String && raw.trim().startsWith('{')) {
-            try {
-              final dec = jsonDecode(raw);
-              if (dec is Map) map = Map<String, dynamic>.from(dec);
-            } catch (_) {}
-          }
-          if (map != null) {
-            final n = map['name'] ??
-                map['displayName'] ??
-                map['consultantName'] ??
-                map['senderName'] ??
-                map['fullName'] ??
-                map['full_name'];
-            if (isValidName(n?.toString())) {
-              callerName = n.toString().trim();
-            } else {
-              final f = map['firstName'] ?? map['first_name'];
-              final l = map['lastName'] ?? map['last_name'];
-              if (isValidName(f?.toString())) {
-                callerName = '$f ${l ?? ''}'.trim();
-              }
-            }
-            if (callerAvatar.isEmpty) {
-              final av = map['avatar'] ??
-                  map['image'] ??
-                  map['photo'] ??
-                  map['profilePic'] ??
-                  map['avatarUrl'] ??
-                  map['avatar_url'];
-              if (av != null && av.toString().isNotEmpty && av.toString() != 'null') {
-                callerAvatar = ApiConstants.getImageUrl(av.toString());
-              }
-            }
-            if (callerName.isNotEmpty) break;
-          }
-        }
-      }
-    }
-
-    // 4. Check notification body for caller name
-    if (callerName.isEmpty) {
-      final body = message.notification?.body?.trim();
-      if (body != null && body.isNotEmpty) {
-        final match = RegExp(
-          r'^(.+?)\s+(is calling|calling|sent you a call)',
-          caseSensitive: false,
-        ).firstMatch(body);
-        if (match != null) {
-          final extracted = match.group(1)?.trim();
-          if (isValidName(extracted)) {
-            callerName = extracted!;
-          }
-        }
-      }
-    }
-
-    // 5. Default fallback
-    if (callerName.isEmpty) {
-      callerName = 'Fixpair Consultant';
-    }
-
-    // Extract Avatar URL
-    if (callerAvatar.isEmpty) {
-      final avatarKeys = [
-        'consultantAvatar',
-        'consultant_avatar',
-        'consultantImage',
-        'consultant_image',
-        'senderAvatar',
-        'sender_avatar',
-        'senderImage',
-        'sender_image',
-        'callerAvatar',
-        'caller_avatar',
-        'avatar',
-        'image',
-        'photo',
-        'profilePic',
-        'avatarUrl',
-        'avatar_url',
-      ];
-      for (var key in avatarKeys) {
-        final val = rawData[key]?.toString();
-        if (val != null && val.isNotEmpty && val != 'null') {
-          callerAvatar = ApiConstants.getImageUrl(val);
-          break;
-        }
-      }
-    }
-
-    AppLogger.info('📞 [FCM CALL INCOMING] Session: $sessionId | Booking: $bookingId | Caller: $callerName');
-
-    if (sessionId == null || token == null) return;
-
-    final channelName = rawData['channelName']?.toString() ??
-        rawData['channel_name']?.toString() ??
-        rawData['channel']?.toString() ??
-        sessionId;
 
     final bookingRx = BookingModel(
-      id: bookingId,
-      consultant: UserData(name: callerName, avatar: callerAvatar),
+      id: payload.bookingId,
+      consultant: UserData(name: payload.callerName, avatar: payload.callerAvatar),
     ).obs;
 
-    // Even if bookingId is empty, try to fetch real booking details (falls back to active callback/booking lookup)
-    _userRepository.getBookingById(bookingId).then((realBooking) {
-      if (realBooking != null) {
-        AppLogger.info('✅ [FCM BOOKING RESOLVED] Consultant: ${realBooking.consultant?.name} | ID: ${realBooking.id}');
-        bookingRx.value = realBooking;
-      }
-    }).catchError((err) {
-      AppLogger.debug('Error fetching booking details for FCM call: $err');
-    });
+    if (payload.bookingId.isNotEmpty) {
+      _userRepository.getBookingById(payload.bookingId).then((realBooking) {
+        if (realBooking != null) {
+          AppLogger.info('✅ [BOOKING RESOLVED] Consultant: ${realBooking.consultant?.name} | ID: ${realBooking.id}');
+          bookingRx.value = realBooking;
+        }
+      }).catchError((err) {
+        AppLogger.debug('Error fetching booking details for call: $err');
+      });
+    }
 
     if (isFromTap) {
-      // Tapped from background -> go directly to video call screen
-      _joinVideoCall(bookingRx.value, sessionId, token, channelName);
+      // Direct enter if tapped from OS system notification tray
+      joinVideoCall(bookingRx.value, payload.sessionId, payload.token, payload.channelName);
     } else {
-      // Received in foreground -> show premium interactive ringing dialog
-      _showIncomingCallDialog(bookingRx, sessionId, token, channelName);
+      // Unified Full-Screen CallKit Incoming UI with Accept & Decline buttons
+      await FlutterCallkitIncoming.showCallkitIncoming(payload.toCallKitParams());
     }
   }
 
@@ -754,386 +572,219 @@ class AuthService extends GetxService {
     );
   }
 
-  Future<void> _joinVideoCall(
+  bool _isJoiningCall = false;
+  DateTime? _lastCallAcceptHandledTime;
+  String? _lastAcceptedCallId;
+
+  /// Joins video session with backend handshake, token resolution, and proper navigation
+  Future<bool> joinVideoCall(
     BookingModel booking,
     String sessionId,
     String token,
     String channelName,
   ) async {
-    // Show a loading indicator dialog
-    Get.dialog(
-      const Center(child: CircularProgressIndicator(color: Color(0xFF22C55E))),
-      barrierDismissible: false,
-    );
+    final realSessionId = IncomingCallPayload.resolveSessionId(sessionId);
+    if (realSessionId.isEmpty) return false;
+
+    if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
+      AppLogger.info('⚠️ Already on video call screen, skipping duplicate joinVideoCall.');
+      return true;
+    }
+    if (_isJoiningCall) {
+      AppLogger.info('⚠️ Already joining a video call session, skipping duplicate call.');
+      return false;
+    }
+    _isJoiningCall = true;
+
+    // Show a loading indicator dialog if not already visible
+    if (Get.isDialogOpen != true) {
+      Get.dialog(
+        const Center(child: CircularProgressIndicator(color: Color(0xFF22C55E))),
+        barrierDismissible: false,
+      );
+    }
 
     try {
-      final response = await _userRepository.joinVideoSession(sessionId);
+      final response = await _userRepository.joinVideoSession(realSessionId);
 
-      // Close the loading dialog
-      if (Get.isDialogOpen == true) {
+      // Close all open loading dialogs
+      while (Get.isDialogOpen == true) {
         Get.back();
       }
 
       if (response.statusCode == 200) {
         final joinData = response.data['data'];
-        final freshToken = joinData['token'] ?? token;
-        final freshChannel = joinData['channelName'] ?? channelName;
+        final freshToken = (joinData is Map ? joinData['token'] : null) ?? token;
+        final freshChannel = (joinData is Map ? joinData['channelName'] : null) ?? channelName;
 
-        Get.toNamed(
-          AppRoutes.VIDEO_CALL,
-          arguments: {
-            'booking': booking,
-            'sessionId': sessionId,
-            'token': freshToken,
-            'channelName': freshChannel,
-          },
-        );
+        if (Get.currentRoute == AppRoutes.SPLASH) {
+          Get.offAllNamed(
+            AppRoutes.VIDEO_CALL,
+            arguments: {
+              'booking': booking,
+              'sessionId': realSessionId,
+              'token': freshToken,
+              'channelName': freshChannel,
+            },
+          );
+        } else {
+          Get.toNamed(
+            AppRoutes.VIDEO_CALL,
+            arguments: {
+              'booking': booking,
+              'sessionId': realSessionId,
+              'token': freshToken,
+              'channelName': freshChannel,
+            },
+          );
+        }
+        return true;
       } else if (response.statusCode == 402) {
+        try {
+          await FlutterCallkitIncoming.endAllCalls();
+        } catch (_) {}
         showPaymentRequiredDialog();
+        return false;
       } else {
-        Get.snackbar(
-          'Error'.tr,
+        try {
+          await FlutterCallkitIncoming.endAllCalls();
+        } catch (_) {}
+        Helpers.showError(
           response.statusMessage ?? 'Failed to join video session'.tr,
-          backgroundColor: const Color(0xFF0F172A).withOpacity(0.9),
-          colorText: Colors.white,
         );
+        return false;
       }
     } catch (e) {
-      if (Get.isDialogOpen == true) {
+      while (Get.isDialogOpen == true) {
         Get.back();
       }
       AppLogger.warning('Error joining video session: $e');
-      // Fallback: join anyway using notification token
-      Get.toNamed(
-        AppRoutes.VIDEO_CALL,
-        arguments: {
-          'booking': booking,
-          'sessionId': sessionId,
-          'token': token,
-          'channelName': channelName,
-        },
-      );
+      try {
+        await FlutterCallkitIncoming.endAllCalls();
+      } catch (_) {}
+      return false;
+    } finally {
+      Future.delayed(const Duration(seconds: 3), () {
+        _isJoiningCall = false;
+      });
     }
   }
 
-  void _showIncomingCallDialog(
-    Rx<BookingModel> bookingRx,
-    String sessionId,
-    String token,
-    String channelName,
-  ) {
-    Get.dialog(
-      barrierDismissible: false,
-      Dialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: Obx(() {
-          final booking = bookingRx.value;
-          return Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: const Color(
-              0xFF0F172A,
-            ).withOpacity(0.95), // Premium Slate 900
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: const Color(0xFF334155).withOpacity(0.5), // Slate 700
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF22C55E).withOpacity(0.15), // Green glow
-                blurRadius: 40,
-                spreadRadius: 5,
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Glowing Ring Indicator with Caller Avatar
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFF22C55E).withOpacity(0.8),
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 96,
-                    height: 96,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF1E293B),
-                      shape: BoxShape.circle,
-                    ),
-                    child: ClipOval(
-                      child: booking.consultant?.avatar != null &&
-                              booking.consultant!.avatar!.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: ApiConstants.getImageUrl(
-                                booking.consultant!.avatar,
-                              ),
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              ),
-                              errorWidget: (context, url, error) => Center(
-                                child: Text(
-                                  booking.consultant?.name
-                                          ?.substring(0, 1)
-                                          .toUpperCase() ??
-                                      'C',
-                                  style: const TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF22C55E),
-                                  ),
-                                ),
-                              ),
-                            )
-                          : Center(
-                              child: Text(
-                                booking.consultant?.name
-                                        ?.substring(0, 1)
-                                        .toUpperCase() ??
-                                    'C',
-                                style: const TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF22C55E),
-                                ),
-                              ),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              // Caller Name
-              Text(
-                booking.consultant?.name ?? 'Consultant',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              // Call Subtitle
-              Text(
-                'Incoming Video Consultation...'.tr,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF94A3B8), // Slate 400
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 36),
-              // Action Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // Decline Button
-                  GestureDetector(
-                    onTap: () async {
-                      Get.back(); // Close Dialog
-                      try {
-                        await _userRepository.actionVideoSession(
-                          sessionId,
-                          'REJECT',
-                        );
-                        if (Get.isRegistered<SocketService>()) {
-                          Get.find<SocketService>().emitRejectCall(sessionId);
-                        }
-                      } catch (e) {
-                        AppLogger.warning(
-                          'Error notifying backend of rejected call: $e',
-                        );
-                      }
-                      try {
-                        await FlutterCallkitIncoming.endCall(sessionId);
-                        await FlutterCallkitIncoming.endAllCalls();
-                      } catch (e) {
-                        AppLogger.debug(
-                          'Error ending call on foreground decline: $e',
-                        );
-                      }
-                    },
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFEF4444), // Red 500
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color(0xFFEF4444),
-                                blurRadius: 15,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.call_end,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Decline'.tr,
-                          style: const TextStyle(
-                            color: Color(0xFFEF4444),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Accept Button
-                  GestureDetector(
-                    onTap: () async {
-                      Get.back(); // Close Dialog
-
-                      // Dismiss any pending background CallKit notification
-                      try {
-                        await FlutterCallkitIncoming.endAllCalls();
-                      } catch (e) {
-                        AppLogger.debug(
-                          'Error clearing CallKit on foreground accept: $e',
-                        );
-                      }
-
-                      _joinVideoCall(booking, sessionId, token, channelName);
-                    },
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF22C55E), // Green 500
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color(0xFF22C55E),
-                                blurRadius: 15,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.videocam,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Accept'.tr,
-                          style: const TextStyle(
-                            color: Color(0xFF22C55E),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-        }),
-      ),
-    );
-  }
-
+  /// ===================== CALLKIT LIFECYCLE LISTENER =====================
+  /// Listens to native CallKit actions (Accept, Decline, Timeout, Ended)
+  /// and synchronizes state with Agora Video Call & Backend APIs across all app states.
   void _initCallKit() {
     FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
       if (event == null) return;
+      AppLogger.info('📞 [CallKit Event] ${event.eventName}');
 
       switch (event) {
-        case CallEventActionCallAccept():
-          // Mark call as connected in CallKit (updates notification to ongoing)
-          try {
-            await FlutterCallkitIncoming.setCallConnected(event.id);
-          } catch (e) {
-            AppLogger.debug('Error setting CallKit connected: $e');
+        // ── 1. USER ACCEPTS THE CALL ──
+        case CallEventActionCallAccept(:final id):
+          final now = DateTime.now();
+          if (_lastCallAcceptHandledTime != null &&
+              (_lastAcceptedCallId == id || now.difference(_lastCallAcceptHandledTime!) < const Duration(seconds: 4))) {
+            AppLogger.info('⚠️ Skipping duplicate CallKit accept event within cooldown');
+            break;
           }
+          if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
+            AppLogger.info('⚠️ Already on video call screen, skipping CallKit accept event');
+            break;
+          }
+          _lastCallAcceptHandledTime = now;
+          _lastAcceptedCallId = id;
+
+          if (id.isNotEmpty) {
+            try {
+              await FlutterCallkitIncoming.setCallConnected(id);
+            } catch (e) {
+              AppLogger.debug('Error setting CallKit connected: $e');
+            }
+          }
+
+          Map<String, dynamic>? extra;
           final activeCalls = await FlutterCallkitIncoming.activeCalls();
           if (activeCalls.isNotEmpty) {
             CallKitParams? targetCall;
             for (var c in activeCalls) {
-              if (c.id == event.id) {
+              if (c.id == id) {
                 targetCall = c;
                 break;
               }
             }
             targetCall ??= activeCalls.first;
-            final extra = targetCall.extra;
-            if (extra != null) {
-              final booking = BookingModel(
-                id: extra['bookingId'] ?? '',
-                consultant: UserData(
-                  name: extra['callerName'] ?? 'Consultant',
-                  avatar: extra['callerAvatar'] ?? '',
-                ),
-              );
-              _joinVideoCall(
-                booking,
-                extra['sessionId'] ?? '',
-                extra['token'] ?? '',
-                extra['channelName'] ?? '',
-              );
+            final rawExtra = targetCall.extra;
+            if (rawExtra != null) {
+              extra = Map<String, dynamic>.from(rawExtra);
             }
           }
+
+          if (extra != null) {
+            final booking = BookingModel(
+              id: extra['bookingId'] ?? '',
+              consultant: UserData(
+                name: extra['callerName'] ?? 'Consultant',
+                avatar: extra['callerAvatar'] ?? '',
+              ),
+            );
+            await joinVideoCall(
+              booking,
+              extra['sessionId'] ?? id,
+              extra['token'] ?? '',
+              extra['channelName'] ?? '',
+            );
+          }
           break;
-        case CallEventActionCallDecline():
-        case CallEventActionCallTimeout():
-          final callId = event is CallEventActionCallDecline
-              ? event.id
-              : (event as CallEventActionCallTimeout).id;
-          if (Get.isDialogOpen == true) {
+
+        // ── 2. USER DECLINES ──
+        case CallEventActionCallDecline(:final id):
+        // ── 3. CALL TIMEOUT ──
+        case CallEventActionCallTimeout(:final id):
+          while (Get.isDialogOpen == true) {
             Get.back();
           }
+
           if (Get.isRegistered<VideoCallController>()) {
             Get.find<VideoCallController>().endCall();
           } else {
             try {
-              await _userRepository.actionVideoSession(callId, 'REJECT');
+              if (id.isNotEmpty) {
+                final realSessionId = IncomingCallPayload.resolveSessionId(id);
+                await _userRepository.actionVideoSession(realSessionId, 'REJECT');
+                if (Get.isRegistered<SocketService>()) {
+                  Get.find<SocketService>().emitRejectCall(realSessionId);
+                }
+              }
             } catch (e) {
               AppLogger.warning(
                 'Error rejecting video session on CallKit event: $e',
               );
             }
           }
+
+          try {
+            await FlutterCallkitIncoming.endAllCalls();
+          } catch (_) {}
           break;
+
+        // ── 4. CALL ENDED ──
         case CallEventActionCallEnded():
-          if (Get.isDialogOpen == true) {
+          while (Get.isDialogOpen == true) {
             Get.back();
           }
           if (Get.isRegistered<VideoCallController>()) {
             Get.find<VideoCallController>().endCall();
           }
+          try {
+            await FlutterCallkitIncoming.endAllCalls();
+          } catch (_) {}
           break;
+
         default:
           break;
       }
+    }, onError: (err) {
+      AppLogger.debug('CallKit event stream exception caught safely: $err');
     });
   }
 }

@@ -196,6 +196,14 @@ class UserRepository {
     });
   }
 
+  // Delete/Detach a payment method
+  Future<Response> deletePaymentMethod(String paymentMethodId) async {
+    return await _apiClient.deleteData(
+      ApiConstants.deletePaymentMethod(paymentMethodId),
+      body: {'paymentMethodId': paymentMethodId},
+    );
+  }
+
   // Get invoice details
   Future<Response> getInvoice(String consultationId) async {
     return await _apiClient.getData(ApiConstants.getInvoice(consultationId));

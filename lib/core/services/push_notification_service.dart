@@ -1,92 +1,128 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fixpair/config/constants/api_constants.dart';
+import 'package:fixpair/config/constants/storage_constants.dart';
+import 'package:fixpair/core/services/storage_service.dart';
 import 'package:fixpair/core/utils/logger.dart';
-import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+import 'package:fixpair/firebase_options.dart';
 import 'package:flutter_callkit_incoming/entities/entities.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// ===================== FIREBASE NOTIFICATION SERVICE =====================
-/// Handles Firebase Cloud Messaging (FCM) push notifications.
-/// Requires: firebase_core, firebase_messaging
-/// Also needs google-services.json (Android) and GoogleService-Info.plist (iOS).
+/// ===================== INCOMING CALL PAYLOAD =====================
+/// Centralized, robust parser for incoming call push payloads.
+/// Extracts caller identity, Agora credentials, and routing parameters uniformly.
+class IncomingCallPayload {
+  final String sessionId;
+  final String token;
+  final String channelName;
+  final String bookingId;
+  final String callerName;
+  final String callerAvatar;
+  final String type;
+  final String status;
+  final bool isCancelOrReject;
+  final bool isIncomingCall;
 
-import 'package:fixpair/firebase_options.dart';
+  const IncomingCallPayload({
+    required this.sessionId,
+    required this.token,
+    required this.channelName,
+    required this.bookingId,
+    required this.callerName,
+    required this.callerAvatar,
+    required this.type,
+    required this.status,
+    required this.isCancelOrReject,
+    required this.isIncomingCall,
+  });
 
-/// 🔥 Background handler — must be a top-level function
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // Load dotenv so ApiConstants (BASE_URL, SERVER_URL) works correctly
-  // in this isolated background isolate where main() is not called.
-  try {
-    await dotenv.load(fileName: '.env');
-  } catch (_) {
-    // Ignore if already loaded or file missing — ApiConstants has fallback values
+  factory IncomingCallPayload.fromMessage(RemoteMessage message) {
+    return IncomingCallPayload.fromMap(
+      message.data,
+      notificationBody: message.notification?.body,
+    );
   }
 
-  // ── Debug: print full raw payload so we can verify backend is sending name/avatar ──
-  print('🔔 [BG CALL] =========================================');
-  print('🔔 [BG CALL] messageId: ${message.messageId}');
-  print('🔔 [BG CALL] notification title: ${message.notification?.title}');
-  print('🔔 [BG CALL] notification body:  ${message.notification?.body}');
-  print('🔔 [BG CALL] data keys: ${message.data.keys.toList()}');
-  print('🔔 [BG CALL] full data: ${message.data}');
-  print('🔔 [BG CALL] =========================================');
-
-  AppLogger.debug('Background Message: ${message.messageId}');
-  AppLogger.debug('Background Data: ${message.data}');
-
-  // Handle incoming call notifications in background/terminated state
-  Map<String, dynamic> rawData = Map<String, dynamic>.from(message.data);
-  if (rawData['data'] != null) {
-    final subData = rawData['data'];
-    if (subData is Map) {
-      rawData.addAll(Map<String, dynamic>.from(subData));
-    } else if (subData is String && subData.trim().startsWith('{')) {
-      try {
-        final dec = jsonDecode(subData);
-        if (dec is Map) rawData.addAll(Map<String, dynamic>.from(dec));
-      } catch (_) {}
+  factory IncomingCallPayload.fromMap(
+    Map<dynamic, dynamic> rawInputData, {
+    String? notificationBody,
+    String? defaultType,
+  }) {
+    final Map<String, dynamic> rawData = Map<String, dynamic>.from(rawInputData);
+    if (rawData['data'] != null) {
+      final subData = rawData['data'];
+      if (subData is Map) {
+        rawData.addAll(Map<String, dynamic>.from(subData));
+      } else if (subData is String && subData.trim().startsWith('{')) {
+        try {
+          final dec = jsonDecode(subData);
+          if (dec is Map) rawData.addAll(Map<String, dynamic>.from(dec));
+        } catch (_) {}
+      }
     }
-  }
 
-  final type = (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'])
-      ?.toString()
-      .toUpperCase();
+    final type =
+        (rawData['type'] ?? rawData['callType'] ?? rawData['notificationType'] ?? defaultType)
+            ?.toString()
+            .toUpperCase() ??
+        '';
+    final status = rawData['status']?.toString().toLowerCase() ?? '';
 
-  if (type == 'INCOMING_CALL' ||
-      type == 'CALL' ||
-      type == 'VIDEO_CALL' ||
-      type == 'CALL_INCOMING') {
-    final sessionId = rawData['sessionId']?.toString() ??
-        rawData['session_id']?.toString() ??
-        rawData['callId']?.toString() ??
-        rawData['call_id']?.toString() ??
-        rawData['id']?.toString();
+    final bool isCancelOrReject =
+        type == 'CALL_REJECTED' ||
+        type == 'CALL_CANCELLED' ||
+        type == 'CANCEL_CALL' ||
+        type == 'REJECT_CALL' ||
+        type == 'SESSION_ENDED' ||
+        type == 'CALL_ENDED' ||
+        status == 'rejected' ||
+        status == 'cancelled' ||
+        status == 'ended';
 
-    final token = rawData['token']?.toString() ??
-        rawData['agoraToken']?.toString() ??
-        rawData['agora_token']?.toString() ??
-        rawData['rtcToken']?.toString() ??
-        rawData['rtc_token']?.toString();
+    final sessionId =
+        (rawData['sessionId'] ??
+                rawData['session_id'] ??
+                rawData['callId'] ??
+                rawData['call_id'] ??
+                rawData['id'])
+            ?.toString() ??
+        '';
 
-    final channelName = rawData['channelName']?.toString() ??
-        rawData['channel_name']?.toString() ??
-        rawData['channel']?.toString() ??
-        sessionId;
+    final token =
+        (rawData['token'] ??
+                rawData['agoraToken'] ??
+                rawData['agora_token'] ??
+                rawData['rtcToken'] ??
+                rawData['rtc_token'])
+            ?.toString() ??
+        '';
 
-    // Robust parsing of booking ID
+    final bool isIncomingCall =
+        type == 'INCOMING_CALL' ||
+        type == 'CALL' ||
+        type == 'VIDEO_CALL' ||
+        type == 'CALL_INCOMING' ||
+        (sessionId.isNotEmpty && token.isNotEmpty && !isCancelOrReject);
+
+    final channelName =
+        (rawData['channelName'] ??
+                rawData['channel_name'] ??
+                rawData['channel'] ??
+                sessionId)
+            .toString();
+
+    // ── 1. Booking ID extraction ──
     final idKeys = [
       'bookingId',
       'booking_id',
       'booking',
       'consultationId',
       'consultation_id',
-      'consultation'
+      'consultation',
     ];
     String bookingId = '';
     for (var key in idKeys) {
@@ -117,14 +153,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     String callerName = '';
     String callerAvatar = '';
 
-    // 1. Check direct keys
+    // ── 2. Direct caller name keys ──
     final nameKeys = [
       'consultantName',
       'consultant_name',
       'senderName',
       'sender_name',
-      'expertName',
-      'expert_name',
       'callerName',
       'caller_name',
       'name',
@@ -141,15 +175,17 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       }
     }
 
-    // 2. Check first name + last name
+    // ── 3. First name + Last name ──
     if (callerName.isEmpty) {
-      final fn = rawData['consultantFirstName'] ??
+      final fn =
+          rawData['consultantFirstName'] ??
           rawData['consultant_first_name'] ??
           rawData['senderFirstName'] ??
           rawData['sender_first_name'] ??
           rawData['firstName'] ??
           rawData['first_name'];
-      final ln = rawData['consultantLastName'] ??
+      final ln =
+          rawData['consultantLastName'] ??
           rawData['consultant_last_name'] ??
           rawData['senderLastName'] ??
           rawData['sender_last_name'] ??
@@ -160,76 +196,30 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       }
     }
 
-    // 3. Check nested JSON objects (consultant, sender, caller, booking, user, data)
+    // ── 4. Nested consultant / sender objects ──
     if (callerName.isEmpty) {
-      for (var objKey in ['consultant', 'sender', 'caller', 'user', 'expert', 'booking']) {
+      for (var objKey in [
+        'consultant',
+        'sender',
+        'caller',
+        'user',
+        'expert',
+        'booking',
+      ]) {
         final raw = rawData[objKey];
         if (raw != null) {
-          Map<String, dynamic>? map;
           if (raw is Map) {
-            map = Map<String, dynamic>.from(raw);
-          } else if (raw is String && raw.trim().startsWith('{')) {
-            try {
-              final dec = jsonDecode(raw);
-              if (dec is Map) map = Map<String, dynamic>.from(dec);
-            } catch (_) {}
-          }
-          if (map != null) {
-            final n = map['name'] ??
-                map['displayName'] ??
-                map['consultantName'] ??
-                map['senderName'] ??
-                map['fullName'] ??
-                map['full_name'];
+            final n = raw['name'] ?? raw['displayName'] ?? raw['userName'];
             if (isValidName(n?.toString())) {
               callerName = n.toString().trim();
-            } else {
-              final f = map['firstName'] ?? map['first_name'];
-              final l = map['lastName'] ?? map['last_name'];
-              if (isValidName(f?.toString())) {
-                callerName = '$f ${l ?? ''}'.trim();
-              }
+              break;
             }
-            if (callerAvatar.isEmpty) {
-              final av = map['avatar'] ??
-                  map['image'] ??
-                  map['photo'] ??
-                  map['profilePic'] ??
-                  map['avatarUrl'] ??
-                  map['avatar_url'];
-              if (av != null && av.toString().isNotEmpty && av.toString() != 'null') {
-                callerAvatar = ApiConstants.getImageUrl(av.toString());
-              }
-            }
-            if (callerName.isNotEmpty) break;
           }
         }
       }
     }
 
-    // 4. Check notification body for caller name (e.g. "Dr. Alex is calling you")
-    if (callerName.isEmpty) {
-      final body = message.notification?.body?.trim();
-      if (body != null && body.isNotEmpty) {
-        final match = RegExp(
-          r'^(.+?)\s+(is calling|calling|sent you a call)',
-          caseSensitive: false,
-        ).firstMatch(body);
-        if (match != null) {
-          final extracted = match.group(1)?.trim();
-          if (isValidName(extracted)) {
-            callerName = extracted!;
-          }
-        }
-      }
-    }
-
-    // 5. Default fallback
-    if (callerName.isEmpty) {
-      callerName = 'Fixpair Consultant';
-    }
-
-    // Extract Avatar URL
+    // ── 5. Caller Avatar Extraction ──
     if (callerAvatar.isEmpty) {
       final avatarKeys = [
         'consultantAvatar',
@@ -240,8 +230,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         'sender_avatar',
         'senderImage',
         'sender_image',
-        'callerAvatar',
-        'caller_avatar',
         'avatar',
         'image',
         'photo',
@@ -258,45 +246,194 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       }
     }
 
-    print('🔔 [BG CALL] Parsed → sessionId=$sessionId | callerName=$callerName | callerAvatar=$callerAvatar');
-
-    if (sessionId != null && token != null) {
-      final CallKitParams callKitParams = CallKitParams(
-        id: sessionId,
-        nameCaller: callerName,
-        appName: 'Fixpair',
-        avatar: callerAvatar.isNotEmpty ? callerAvatar : null,
-        handle: 'Video Consultation',
-        type: 1, // 0: audio, 1: video
-        duration: 35000,
-        extra: <String, dynamic>{
-          'sessionId': sessionId,
-          'token': token,
-          'channelName': channelName,
-          'callerName': callerName,
-          'callerAvatar': callerAvatar,
-          'bookingId': bookingId,
-        },
-        missedCallNotification: const NotificationParams(
-          showNotification: false,
-          isShowCallback: false,
-        ),
-        android: AndroidParams(
-          isCustomNotification: true,
-          backgroundColor: '#0F172A',
-          incomingCallNotificationChannelName: "Incoming Call",
-          isShowLogo: true,
-          isShowFullLockedScreen: true,
-          isImportant: true,
-          ringtonePath: 'system_ringtone_default',
-          textAccept: 'Accept',
-          textDecline: 'Decline',
-        ),
-        ios: const IOSParams(handleType: 'generic', supportsVideo: true),
-      );
-
-      await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
+    // ── 6. Check notification body ──
+    if (callerName.isEmpty && notificationBody != null && notificationBody.trim().isNotEmpty) {
+      final body = notificationBody.trim();
+      final match = RegExp(
+        r'^(.+?)\s+(is calling|calling|sent you a call)',
+        caseSensitive: false,
+      ).firstMatch(body);
+      if (match != null) {
+        final extracted = match.group(1)?.trim();
+        if (isValidName(extracted)) {
+          callerName = extracted!;
+        }
+      }
     }
+
+    if (callerName.isEmpty) {
+      callerName = 'Fixpair Consultant';
+    }
+
+    return IncomingCallPayload(
+      sessionId: sessionId,
+      token: token,
+      channelName: channelName,
+      bookingId: bookingId,
+      callerName: callerName,
+      callerAvatar: callerAvatar,
+      type: type,
+      status: status,
+      isCancelOrReject: isCancelOrReject,
+      isIncomingCall: isIncomingCall,
+    );
+  }
+
+  static String formatToUuid(String id) {
+    if (id.isEmpty) return '00000000-0000-0000-0000-000000000000';
+    final uuidRegex = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+    if (uuidRegex.hasMatch(id)) return id;
+
+    final clean = id.replaceAll(RegExp(r'[^0-9a-fA-F]'), '');
+    final padded = '${clean}00000000000000000000000000000000'.substring(0, 32);
+    return '${padded.substring(0, 8)}-${padded.substring(8, 12)}-${padded.substring(12, 16)}-${padded.substring(16, 20)}-${padded.substring(20, 32)}';
+  }
+
+  static String resolveSessionId(String id, [Map<String, dynamic>? extra]) {
+    if (extra != null && extra['sessionId'] != null && extra['sessionId'].toString().isNotEmpty) {
+      return extra['sessionId'].toString();
+    }
+    final clean = id.replaceAll('-', '');
+    if (clean.length == 32 && clean.endsWith('00000000')) {
+      return clean.substring(0, 24);
+    }
+    return id;
+  }
+
+  String get callKitUuid => formatToUuid(sessionId);
+
+  /// Creates standard FlutterCallkitIncoming parameters with full-screen intent
+  CallKitParams toCallKitParams() {
+    return CallKitParams(
+      id: callKitUuid,
+      nameCaller: callerName.isNotEmpty ? callerName : 'Consultant',
+      appName: 'Fixpair',
+      avatar: callerAvatar.isNotEmpty ? callerAvatar : null,
+      handle: 'Video Consultation',
+      type: 1, // 0: audio, 1: video
+      duration: 35000,
+      extra: <String, dynamic>{
+        'sessionId': sessionId,
+        'token': token,
+        'channelName': channelName,
+        'callerName': callerName,
+        'callerAvatar': callerAvatar,
+        'bookingId': bookingId,
+      },
+      missedCallNotification: const NotificationParams(
+        showNotification: false,
+        isShowCallback: false,
+      ),
+      android: const AndroidParams(
+        isCustomNotification: false,
+        isShowLogo: false,
+        isShowFullLockedScreen: true,
+        isImportant: true,
+        ringtonePath: 'system_ringtone_default',
+        incomingCallNotificationChannelName: 'Incoming Call',
+        backgroundColor: '#0F172A',
+        textAccept: 'Accept',
+        textDecline: 'Decline',
+      ),
+      ios: const IOSParams(
+        handleType: 'generic',
+        supportsVideo: true,
+        maximumCallGroups: 2,
+        maximumCallsPerCallGroup: 1,
+        audioSessionMode: 'videoChat',
+        audioSessionActive: true,
+        audioSessionPreferredSampleRate: 44100.0,
+        audioSessionPreferredIOBufferDuration: 0.005,
+        supportsDTMF: true,
+        supportsHolding: true,
+        supportsGrouping: false,
+        supportsUngrouping: false,
+        ringtonePath: '',
+      ),
+    );
+  }
+}
+
+/// ===================== FIREBASE NOTIFICATION SERVICE =====================
+/// Handles Firebase Cloud Messaging (FCM) push notifications.
+/// Coordinates background call presentation and token lifecycle.
+
+/// 🔥 Background handler — must be a top-level function
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // Fallback to ApiConstants defaults
+  }
+
+  AppLogger.debug('Background Message: ${message.messageId}');
+  AppLogger.debug('Background Data: ${message.data}');
+
+  final payload = IncomingCallPayload.fromMessage(message);
+
+  // ── [1. CALL CANCELLATION / REJECTION IN BACKGROUND / TERMINATED STATE] ──
+  if (payload.isCancelOrReject) {
+    try {
+      if (payload.sessionId.isNotEmpty) {
+        await FlutterCallkitIncoming.endCall(payload.sessionId);
+      }
+    } catch (_) {}
+    try {
+      await FlutterCallkitIncoming.endAllCalls();
+    } catch (_) {}
+    return;
+  }
+
+  // ── [2. INCOMING CALL IN BACKGROUND / TERMINATED STATE] ──
+  if (payload.isIncomingCall &&
+      payload.sessionId.isNotEmpty &&
+      payload.token.isNotEmpty) {
+    await FlutterCallkitIncoming.showCallkitIncoming(payload.toCallKitParams());
+
+    // Listen for CallKit actions in background isolate (Decline / Timeout)
+    FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
+      if (event == null) return;
+      switch (event) {
+        case CallEventActionCallDecline(:final id):
+        case CallEventActionCallTimeout(:final id):
+          if (id.isNotEmpty) {
+            try {
+              final realSessionId = IncomingCallPayload.resolveSessionId(id);
+              final token = await StorageService.getString(
+                StorageConstants.bearerToken,
+              );
+              final dio = Dio(
+                BaseOptions(
+                  baseUrl: ApiConstants.baseUrl,
+                  headers: {
+                    'Content-Type': 'application/json',
+                    if (token.isNotEmpty) 'Authorization': 'Bearer $token',
+                  },
+                ),
+              );
+              await dio.post(
+                ApiConstants.actionVideoSession,
+                data: {'sessionId': realSessionId, 'action': 'REJECT'},
+              );
+              AppLogger.info(
+                '🔔 [BG CALL] Successfully notified backend of rejected call $realSessionId',
+              );
+            } catch (e) {
+              AppLogger.warning(
+                '🔔 [BG CALL] Error notifying backend of rejection in BG: $e',
+              );
+            }
+          }
+          break;
+        default:
+          break;
+      }
+    }, onError: (err) {
+      AppLogger.debug('BG CallKit event stream exception handled: $err');
+    });
   }
 }
 
@@ -324,7 +461,7 @@ class FirebaseNotificationService {
     );
     AppLogger.debug('FCM Permission: ${settings.authorizationStatus}');
 
-    // Get APNS token for iOS reliability
+    // Get APNS token and VoIP token for iOS reliability
     try {
       if (Platform.isIOS) {
         String? apnsToken = await _messaging.getAPNSToken();
@@ -335,6 +472,13 @@ class FirebaseNotificationService {
           retryCount++;
           AppLogger.debug('⏳ Waiting for APNS Token... (Retry: $retryCount)');
         }
+
+        try {
+          final voipToken = await FlutterCallkitIncoming.getDevicePushTokenVoIP();
+          AppLogger.info('📱 [iOS VoIP Token]: $voipToken');
+        } catch (e) {
+          AppLogger.debug('Error fetching iOS VoIP token: $e');
+        }
       }
     } catch (e) {
       AppLogger.debug('Error fetching APNS Token: $e');
@@ -342,10 +486,7 @@ class FirebaseNotificationService {
 
     // Get FCM token
     final token = await _messaging.getToken();
-    print('🔥 [FCM SERVICE] ---------------------------------------------');
-    print('🔥 FCM TOKEN: $token');
-    print('🔥 -----------------------------------------------------------');
-    AppLogger.debug('FCM Token: $token');
+    AppLogger.info('🔥 FCM Token Loaded: $token');
 
     // Listen for token refresh
     _messaging.onTokenRefresh.listen((newToken) {
@@ -355,24 +496,41 @@ class FirebaseNotificationService {
 
     // Foreground message listener
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      final title = message.notification?.title ?? message.data['title'] ?? message.data['type'] ?? 'Push Notification';
-      final type = message.data['type'] ?? message.data['status'] ?? 'NOTIFICATION';
-      AppLogger.info('🔔 [FCM PUSH RECEIVED] Title: $title | Type: $type | Data: ${message.data}');
+      final title =
+          message.notification?.title ??
+          message.data['title'] ??
+          message.data['type'] ??
+          'Push Notification';
+      final type =
+          message.data['type'] ?? message.data['status'] ?? 'NOTIFICATION';
+      AppLogger.info(
+        '🔔 [FCM PUSH RECEIVED] Title: $title | Type: $type | Data: ${message.data}',
+      );
       onForegroundMessage?.call(message);
     });
 
     // Notification tap (app in background)
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      final title = message.notification?.title ?? message.data['title'] ?? 'Notification';
-      AppLogger.info('👆 [FCM PUSH CLICKED] Title: $title | Data: ${message.data}');
+      final title =
+          message.notification?.title ??
+          message.data['title'] ??
+          'Notification';
+      AppLogger.info(
+        '👆 [FCM PUSH CLICKED] Title: $title | Data: ${message.data}',
+      );
       onNotificationTap?.call(message);
     });
 
     // App opened from terminated state
     final initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
-      final title = initialMessage.notification?.title ?? initialMessage.data['title'] ?? 'Notification';
-      AppLogger.info('🚀 [FCM TERMINATED OPEN] Title: $title | Data: ${initialMessage.data}');
+      final title =
+          initialMessage.notification?.title ??
+          initialMessage.data['title'] ??
+          'Notification';
+      AppLogger.info(
+        '🚀 [FCM TERMINATED OPEN] Title: $title | Data: ${initialMessage.data}',
+      );
       onNotificationTap?.call(initialMessage);
     }
 
@@ -380,6 +538,16 @@ class FirebaseNotificationService {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     return token;
+  }
+
+  /// Get current FCM Token
+  static Future<String?> getToken() async {
+    try {
+      return await _messaging.getToken();
+    } catch (e) {
+      AppLogger.debug('Error fetching FCM token: $e');
+      return null;
+    }
   }
 
   /// Subscribe to a topic
