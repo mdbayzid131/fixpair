@@ -1,6 +1,11 @@
 # Environment Variables
 .env
 
+# Archive & Sensitive Keys / Guides
+/archive/
+*.p8
+BACKEND_VOIP_PUSH_GUIDE.md
+
 # Miscellaneous
 *.class
 *.log
