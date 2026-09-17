@@ -4,7 +4,9 @@ import 'package:fixpair/core/utils/helpers.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:fixpair/data/repositories/user_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class RequestCallbackController extends GetxController {
   final UserRepository _userRepository = Get.find();
@@ -96,11 +98,14 @@ class RequestCallbackController extends GetxController {
       Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        insetPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
         child: Container(
-          padding: const EdgeInsets.all(24),
+          width: double.infinity,
+          constraints: BoxConstraints(maxWidth: 380.w),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.95),
-            borderRadius: BorderRadius.circular(28),
+            color: const Color(0xFF0F172A).withValues(alpha: 0.96),
+            borderRadius: BorderRadius.circular(24.r),
             border: Border.all(
               color: const Color(0xFF0066FF).withValues(alpha: 0.4),
               width: 1.5,
@@ -117,81 +122,96 @@ class RequestCallbackController extends GetxController {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 70,
-                height: 70,
+                width: 64.w,
+                height: 64.w,
                 decoration: BoxDecoration(
                   color: const Color(0xFF0066FF).withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.credit_card_rounded,
-                  color: Color(0xFF0066FF),
-                  size: 36,
+                  color: const Color(0xFF0066FF),
+                  size: 32.sp,
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 18.h),
               Text(
                 'Payment Method Required'.tr,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                style: GoogleFonts.manrope(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
                   color: Colors.white,
-                  letterSpacing: 0.5,
+                  letterSpacing: 0.3,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 10.h),
               Text(
                 'Please add a credit or debit card before requesting a callback consultation.'.tr,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF94A3B8),
-                  height: 1.5,
+                style: GoogleFonts.manrope(
+                  fontSize: 13.5.sp,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF94A3B8),
+                  height: 1.45,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 24.h),
               Row(
                 children: [
                   Expanded(
-                    child: TextButton(
-                      onPressed: () => Get.back(),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      height: 46.h,
+                      child: OutlinedButton(
+                        onPressed: () => Get.back(),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF334155)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 8.w),
                         ),
-                      ),
-                      child: Text(
-                        'Cancel'.tr,
-                        style: const TextStyle(
-                          color: Color(0xFF94A3B8),
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'Cancel'.tr,
+                            style: GoogleFonts.manrope(
+                              color: const Color(0xFF94A3B8),
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 12.w),
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                        Get.toNamed(AppRoutes.PAYMENT_METHODS);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0066FF),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      height: 46.h,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                          Get.toNamed(AppRoutes.PAYMENT_METHODS);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0066FF),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 8.w),
                         ),
-                      ),
-                      child: Text(
-                        'Add Card'.tr,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'Add Card'.tr,
+                            style: GoogleFonts.manrope(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
                       ),
                     ),

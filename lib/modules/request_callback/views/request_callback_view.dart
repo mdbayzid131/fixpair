@@ -16,53 +16,63 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
         title: 'Request Callback'.tr,
         showBackButton: true,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSectionLabel('When should they call?'.tr),
-            SizedBox(height: 16.h),
-            _buildTimeOptions(),
-            // SizedBox(height: 32.h),
-            // _buildSectionLabel('Contact Number'),
-            // SizedBox(height: 12.h),
-            // _buildInputField(
-            //   controller: controller.phoneController,
-            //   icon: Icons.phone_outlined,
-            //   hint: 'Phone Number',
-            // ),
-            SizedBox(height: 32.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildSectionLabel('Reason for consultation'.tr),
-                Text(
-                  'OPTIONAL'.tr,
-                  style: GoogleFonts.manrope(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF94A3B8),
-                  ),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 32.h,
                 ),
-              ],
-            ),
-            SizedBox(height: 12.h),
-            _buildMultilineField(),
-            SizedBox(height: 16.h),
-            Text(
-              'This helps the consultant prepare and ensures they are the right fit for your needs.'.tr,
-              style: GoogleFonts.manrope(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF64748B),
-                height: 1.5,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionLabel('When should they call?'.tr),
+                        SizedBox(height: 14.h),
+                        _buildTimeOptions(),
+                        SizedBox(height: 24.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildSectionLabel('Reason for consultation'.tr),
+                            Text(
+                              'OPTIONAL'.tr,
+                              style: GoogleFonts.manrope(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF94A3B8),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        _buildMultilineField(),
+                        SizedBox(height: 12.h),
+                        Text(
+                          'This helps the consultant prepare and ensures they are the right fit for your needs.'.tr,
+                          style: GoogleFonts.manrope(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF64748B),
+                            height: 1.45,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 32.h, bottom: 12.h),
+                      child: _buildSubmitButton(),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 48.h),
-            _buildSubmitButton(),
-            SizedBox(height: 24.h),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -91,7 +101,7 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
               width: double.infinity,
               duration: const Duration(milliseconds: 200),
               margin: EdgeInsets.only(bottom: 12.h),
-              padding: EdgeInsets.all(20.w),
+              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
               decoration: BoxDecoration(
                 color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
                 borderRadius: BorderRadius.circular(16.r),
@@ -108,7 +118,7 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
                   Text(
                     option['title']!.tr,
                     style: GoogleFonts.manrope(
-                      fontSize: 16.sp,
+                      fontSize: 15.sp,
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF1D293D),
                     ),
@@ -117,7 +127,7 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
                   Text(
                     option['subtitle']!.tr,
                     style: GoogleFonts.manrope(
-                      fontSize: 14.sp,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF64748B),
                     ),
@@ -173,15 +183,19 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
         controller: controller.reasonController,
         maxLines: 4,
         style: GoogleFonts.manrope(
-          fontSize: 15.sp,
+          fontSize: 14.sp,
           fontWeight: FontWeight.w600,
           color: const Color(0xFF1D293D),
         ),
         decoration: InputDecoration(
           hintText: 'Briefly describe what you need help with..'.tr,
-          hintStyle: GoogleFonts.manrope(color: const Color(0xFF94A3B8)),
+          hintStyle: GoogleFonts.manrope(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF94A3B8),
+          ),
           prefixIcon: Padding(
-            padding: EdgeInsets.only(bottom: 50.h),
+            padding: EdgeInsets.only(top: 14.h, left: 14.w, right: 10.w, bottom: 48.h),
             child: Icon(
               Icons.description_outlined,
               color: const Color(0xFF64748B),
@@ -198,7 +212,7 @@ class RequestCallbackView extends GetView<RequestCallbackController> {
   Widget _buildSubmitButton() {
     return Container(
       width: double.infinity,
-      height: 56.h,
+      height: 54.h,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFFF6B00), Color(0xFFFF8A00)],
