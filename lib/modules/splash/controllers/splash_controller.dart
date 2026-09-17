@@ -10,6 +10,8 @@ import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'package:fixpair/core/utils/helpers.dart';
+
 /// ===================== SPLASH CONTROLLER =====================
 /// Entry-point controller that orchestrates cold-start app navigation,
 /// onboarding verification, and CallKit terminated call acceptance.
@@ -21,6 +23,7 @@ class SplashController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    Helpers.clearAppBadge();
     _requestInitialPermissions();
     navigate();
   }

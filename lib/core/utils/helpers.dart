@@ -5,12 +5,21 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:flutter/services.dart';
+
 enum SnackBarType { success, error, info, warning, secondary }
 
 /// ===================== HELPERS =====================
 /// Common utility functions used across the app.
 class Helpers {
   Helpers._();
+
+  static Future<void> clearAppBadge() async {
+    try {
+      const MethodChannel channel = MethodChannel('com.fixpair.app/badge');
+      await channel.invokeMethod('clearBadge');
+    } catch (_) {}
+  }
 
   // ──────────────────── SNACKBAR (BOOKING SUCCESS) ────────────────────
 

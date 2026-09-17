@@ -20,6 +20,7 @@ class NotificationsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    Helpers.clearAppBadge();
     fetchNotifications();
   }
 
