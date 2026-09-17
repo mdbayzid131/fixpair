@@ -8,6 +8,7 @@ import 'package:fixpair/data/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// ===================== SPLASH CONTROLLER =====================
 /// Entry-point controller that orchestrates cold-start app navigation,
@@ -20,7 +21,18 @@ class SplashController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _requestInitialPermissions();
     navigate();
+  }
+
+  Future<void> _requestInitialPermissions() async {
+    try {
+      await [
+        Permission.microphone,
+        Permission.camera,
+        Permission.notification,
+      ].request();
+    } catch (_) {}
   }
 
   Future<void> navigate() async {

@@ -1,66 +1,272 @@
-Searched for "emitToUser"
-Searched for "emitToRoom"
-Viewed socketHelper.ts:50-115
+I/flutter ( 5170): ℹ️┌ 📡 SOCKET EVENT RECEIVED ══════════════════════════════════════
+I/flutter ( 5170): ℹ️│ Event: incoming-call
+I/flutter ( 5170): ℹ️│ Data: {sessionId: 6aab67e086151deb8a4b3a94, callerName: A user, callerAvatar: , appId: 0ad305926d534e6f817fd6b0d49db2b6, token: 007eJxTYHhQvL52utfierZr7+TebYzYZfVvxlp164NpE149/7LpkvMdBQaDxBRjA1NLI7MUU2OTVLM0C0PztBSzJIMUE8uUJKMkswfpq7M+lK7Okl1kw8TIwMjAwsDIAOIzgUlmMMkCJlUZkvPziktzShJLMvPz4s0SE5PMzFOMLcwMTQ1TUpMsEk2SjBONUlgYDA0MDAFJejk7, channelName: consultation_6aab67d386151deb8a4b3a2d, bookingId: 6aab67d386151deb8a4b3a2d, consultantName: Non ut minim volupta, consultantAvatar: https://i.ibb.co/z5YHLV9/profile.png, uid: 1001}
+I/flutter ( 5170): ℹ️└ 📡 SOCKET EVENT RECEIVED ══════════════════════════════════════
+I/flutter ( 5170): ℹ️ℹ️ℹ️ℹ INFO: Incoming call event received via socket: {sessionId: 6aab67e086151deb8a4b3a94, callerName: A user, callerAvatar: , appId: 0ad305926d534e6f817fd6b0d49db2b6, token: 007eJxTYHhQvL52utfierZr7+TebYzYZfVvxlp164NpE149/7LpkvMdBQaDxBRjA1NLI7MUU2OTVLM0C0PztBSzJIMUE8uUJKMkswfpq7M+lK7Okl1kw8TIwMjAwsDIAOIzgUlmMMkCJlUZkvPziktzShJLMvPz4s0SE5PMzFOMLcwMTQ1TUpMsEk2SjBONUlgYDA0MDAFJejk7, channelName: consultation_6aab67d386151deb8a4b3a2d, bookingId: 6aab67d386151deb8a4b3a2d, consultantName: Non ut minim volupta, consultantAvatar: https://i.ibb.co/z5YHLV9/profile.png, uid: 1001}
+I/flutter ( 5170): ℹ️ℹ️ℹ️ℹ INFO: 📞 [CALL EVENT] Type: INCOMING_CALL | Status:
+I/flutter ( 5170):
+I/flutter ( 5170): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+I/flutter ( 5170): │ GET https://nayem5000.binarybards.online/api/v1/consultation/my-bookings?status=pending&status=accepted&status=confirmed&status=ongoing&limit=20
+I/flutter ( 5170): │ Headers: {Content-Type: application/json, Authorization: ***}
+I/flutter ( 5170): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+I/flutter ( 5170):
+D/CallkitIncomingReceiver( 5170): com.fixpair.app.com.hiennv.flutter_callkit_incoming.ACTION_CALL_INCOMING
+D/CallkitIncomingReceiver( 5170): Telecom addNewIncomingCall id=6aab67e0-8615-1deb-8a4b-3a9400000000
+D/onStart ( 5170): -
+D/AudioSystem( 5170): onNewServiceWithAdapter: media.audio_flinger service obtained 0xb400007cef551b40
+D/AudioSystem( 5170): getService: checking for service media.audio_flinger: 0xb400007dcf484fb0
+D/Ringtone( 5170): Successfully created local player
+D/AudioSystem( 5170): onNewService: media.audio_policy service obtained 0xb400007dcf483700
+D/AudioSystem( 5170): getService: checking for service media.audio_policy: 0xb400007dcf483700
+V/MediaPlayer( 5170): resetDrmState:  mDrmInfo=null mDrmProvisioningThread=null mPrepareDrmInProgress=false mActiveDrmScheme=false
+V/MediaPlayer( 5170): cleanDrmObj: mDrmObj=null mDrmSessionId=null
+V/MediaPlayer( 5170): resetDrmState:  mDrmInfo=null mDrmProvisioningThread=null mPrepareDrmInProgress=false mActiveDrmScheme=false
+V/MediaPlayer( 5170): cleanDrmObj: mDrmObj=null mDrmSessionId=null
+D/Ringtone( 5170): Successfully created local player
+D/FlutterCallkitIncomingPlugin( 5170): Sending UI event: com.hiennv.flutter_callkit_incoming.ACTION_CALL_INCOMING
+W/CheckTime( 5170): App running slow: Executing com.hiennv.flutter_callkit_incoming.CallkitIncomingBroadcastReceiver onReceive took 415ms
+W/CheckTime( 5170): App running slow: Executing com.hiennv.flutter_callkit_incoming.CallkitIncomingBroadcastReceiver scheduleReceive took 417ms
+I/flutter ( 5170): ℹ️ℹ️ℹ️ℹ INFO: 📞 [CallKit Event] com.hiennv.flutter_callkit_incoming.ACTION_CALL_INCOMING
+D/FLTFireMsgReceiver( 5170): broadcast received for message
+I/flutter ( 5170): ℹ️ℹ️ℹ️ℹ INFO: 🔔 [FCM PUSH RECEIVED] Title: Incoming Video Call | Type: INCOMING_CALL | Data: {uid: 1001, consultantName: Non ut minim volupta, consultantAvatar: https://i.ibb.co/z5YHLV9/profile.png, appId: 0ad305926d534e6f817fd6b0d49db2b6, channelName: consultation_6aab67d386151deb8a4b3a2d, sessionId: 6aab67e086151deb8a4b3a94, type: INCOMING_CALL, click_action: FLUTTER_NOTIFICATION_CLICK, callerAvatar: , bookingId: 6aab67d386151deb8a4b3a2d, token: 007eJxTYHhQvL52utfierZr7+TebYzYZfVvxlp164NpE149/7LpkvMdBQaDxBRjA1NLI7MUU2OTVLM0C0PztBSzJIMUE8uUJKMkswfpq7M+lK7Okl1kw8TIwMjAwsDIAOIzgUlmMMkCJlUZkvPziktzShJLMvPz4s0SE5PMzFOMLcwMTQ1TUpMsEk2SjBONUlgYDA0MDAFJejk7, callerName: A user}
+I/flutter ( 5170): ℹ️ℹ️ℹ️ℹ INFO: 📞 [CALL EVENT] Type: INCOMING_CALL | Status:
+I/TelecomFramework( 5170): CallkitConnectionService: createConnection, callManagerAccount: ComponentInfo{com.fixpair.app/com.hiennv.flutter_callkit_incoming.CallkitConnectionService}, ***, UserHandle{0}, callId: TC@2_1, request: ConnectionRequest  Bundle[android.telecom.extra.INCOMING_VIDEO_STATE=0, android.telecom.extra.ADD_SELF_MANAGED_CALLS_TO_INCALLSERVICE=true, com.hiennv.flutter_callkit_incoming.CALL_BUNDLE=Bundle[mParcelledData.dataSize=4140], android.telecom.extra.CALL_TELECOM_ROUTING_START_TIME_MILLIS=186140003, ] isAdhocConf: N, isIncoming: true, isUnknown: false, isLegacyHandover: false, isHandover: false,  addSelfManaged: true: (SBC.oSC)->CS.crCo->H.CS.crCo->H.CS.crCo.pICR(cfa/cast)@E-DMg
+D/CallkitConnectionSvc( 5170): onCreateIncomingConnection id=6aab67e0-8615-1deb-8a4b-3a9400000000 caller=Non ut minim volupta
+D/CallkitConnection( 5170): Connection created id=6aab67e0-8615-1deb-8a4b-3a9400000000 active=1
+I/flutter ( 5170):
+I/flutter ( 5170): ┌ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+I/flutter ( 5170): │ GET https://nayem5000.binarybards.online/api/v1/consultation/my-bookings?status=pending&status=accepted&status=confirmed&status=ongoing&limit=20
+I/flutter ( 5170): │ Headers: {Content-Type: application/json, Authorization: ***}
+I/flutter ( 5170): └ ➡️➡️➡️➡️ REQUEST ══════════════════════════════════════ ➡️➡️➡️➡️
+I/flutter ( 5170):
+I/com.fixpair.app( 5170): hiddenapi: Accessing hidden method Landroid/os/WorkSource;->add(I)Z (runtime_flags=0, domain=platform, api=unsupported,test-api) from Lcom/google/android/gms/common/util/WorkSourceUtil; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/com.fixpair.app( 5170): hiddenapi: Accessing hidden method Landroid/os/WorkSource;->add(ILjava/lang/String;)Z (runtime_flags=0, domain=platform, api=unsupported,test-api) from Lcom/google/android/gms/common/util/WorkSourceUtil; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/com.fixpair.app( 5170): hiddenapi: Accessing hidden method Landroid/os/WorkSource;->get(I)I (runtime_flags=0, domain=platform, api=unsupported) from Lcom/google/android/gms/common/util/WorkSourceUtil; (domain=app, TargetSdkVersion=36) using reflection: allowed
+I/com.fixpair.app( 5170): hiddenapi: Accessing hidden method Landroid/os/WorkSource;->getName(I)Ljava/lang/String; (runtime_flags=0, domain=platform, api=unsupported) from Lcom/google/android/gms/common/util/WorkSourceUtil; (domain=app, TargetSdkVersion=36) using reflection: allowed
+W/AidlConversionCppNdk( 5170): aidl2legacy_AudioChannelLayout_audio_channel_mask_t: no legacy output audio_channel_mask_t found for AudioChannelLayout{layoutMask: 16}
+W/AidlConversionCppNdk( 5170): aidl2legacy_AudioChannelLayout_audio_channel_mask_t: no legacy output audio_channel_mask_t found for AudioChannelLayout{layoutMask: 16}
+W/FirebaseMessaging( 5170): Unable to log event: analytics library is missing
+I/TelecomFramework( 5170): CallkitConnectionService: notifyCreateConnectionComplete TC@2_1: (...->CSW.hCCC)->CS.crCoC->H.CS.crCoC(cfa/cast)@E-E-E-DMg
+W/FirebaseMessaging( 5170): Unable to log event: analytics library is missing
+D/CallkitIncomingReceiver( 5170): com.fixpair.app.com.hiennv.flutter_callkit_incoming.ACTION_CALL_INCOMING
+D/CallkitIncomingReceiver( 5170): Telecom call already registered id=6aab67e0-8615-1deb-8a4b-3a9400000000 — skip
+D/onStart ( 5170): -
+V/MediaPlayer( 5170): resetDrmState:  mDrmInfo=null mDrmProvisioningThread=null mPrepareDrmInProgress=false mActiveDrmScheme=false
+V/MediaPlayer( 5170): cleanDrmObj: mDrmObj=null mDrmSessionId=null
+V/MediaPlayer( 5170): resetDrmState:  mDrmInfo=null mDrmProvisioningThread=null mPrepareDrmInProgress=false mActiveDrmScheme=false
+V/MediaPlayer( 5170): cleanDrmObj: mDrmObj=null mDrmSessionId=null
+W/HWUI    ( 5170): Image decoding logging dropped!
+W/HWUI    ( 5170): Image decoding logging dropped!
+D/Ringtone( 5170): Successfully created local player
+V/MediaPlayer( 5170): resetDrmState:  mDrmInfo=null mDrmProvisioningThread=null mPrepareDrmInProgress=false mActiveDrmScheme=false
+V/MediaPlayer( 5170): cleanDrmObj: mDrmObj=null mDrmSessionId=null
+V/MediaPlayer( 5170): resetDrmState:  mDrmInfo=null mDrmProvisioningThread=null mPrepareDrmInProgress=false mActiveDrmScheme=false
+V/MediaPlayer( 5170): cleanDrmObj: mDrmObj=null mDrmSessionId=null
+D/Ringtone( 5170): Successfully created local player
+D/FlutterCallkitIncomingPlugin( 5170): Sending UI event: com.hiennv.flutter_callkit_incoming.ACTION_CALL_INCOMING
+W/CheckTime( 5170): App running slow: Executing com.hiennv.flutter_callkit_incoming.CallkitIncomingBroadcastReceiver onReceive took 955ms
+W/CheckTime( 5170): App running slow: Executing com.hiennv.flutter_callkit_incoming.CallkitIncomingBroadcastReceiver scheduleReceive took 956ms
+I/TelecomFramework( 5170): CallkitConnectionService: onAvailableCallEndpointsChanged TC@2_1: (...->CSW.hCCC->CARSM.pM_UPDATE_SYSTEM_AUDIO_ROUTE)->CS.oACEC->H.CS.cASC(cfa/cast/cast)@E-E-E-DMg
+I/TelecomFramework( 5170): CallkitConnectionService: onCallEndpointChanged TC@2_1 [CallEndpoint Name: Earpiece, Type: EARPIECE, Identifier: 102ddfad-9324-41c0-86f5-95cb2f6737ee]: (...->CSW.hCCC->CARSM.pM_UPDATE_SYSTEM_AUDIO_ROUTE)->CS.oCEC->H.CS.cASC(cfa/cast/cast)@E-E-E-DMg
+I/TelecomFramework( 5170): CallkitConnectionService: onMuteStateChanged TC@2_1 false: (...->CSW.hCCC->CARSM.pM_UPDATE_SYSTEM_AUDIO_ROUTE)->CS.oMSC->H.CS.cASC(cfa/cast/cast)@E-E-E-DMg
+I/TelecomFramework( 5170): CallkitConnectionService: onAudioStateChanged TC@2_1 [AudioState isMuted: false, route: EARPIECE, supportedRouteMask: EARPIECE, SPEAKER, activeBluetoothDevice: [null], supportedBluetoothDevices: []]: (...->CSW.hCCC->CARSM.pM_UPDATE_SYSTEM_AUDIO_ROUTE)->CS.cASC->H.CS.cASC(cfa/cast/cast)@E-E-E-DMg
+I/TelecomFramework( 5170): CallkitConnectionService: onTrackedByNonUiService TC@2_1 true: (ICSBC.oSC)->CS.tBNUS->H.CS.tBNUS(a/cast)@E-DNM
+I/flutter ( 5170):
+I/flutter ( 5170): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
+I/flutter ( 5170): │ [200] https://nayem5000.binarybards.online/api/v1/consultation/my-bookings?status=pending&status=accepted&status=confirmed&status=ongoing&limit=20
+I/flutter ( 5170): │ Data: {
+I/flutter ( 5170): │   "success": true,
+I/flutter ( 5170): │   "message": "Bookings retrieved successfully",
+I/flutter ( 5170): │   "data": [
+I/flutter ( 5170): │     {
+I/flutter ( 5170): │       "remindersSent": {
+I/flutter ( 5170): │         "twentyFourHour": false,
+I/flutter ( 5170): │         "oneHour": false
+I/flutter ( 5170): │       },
+I/flutter ( 5170): │       "aiSummary": {
+I/flutter ( 5170): │         "overview": null,
+I/flutter ( 5170): │         "keyPoints": [],
+I/flutter ( 5170): │         "actionItems": [],
+I/flutter ( 5170): │         "recommendations": []
+I/flutter ( 5170): │       },
+I/flutter ( 5170): │       "_id": "6aab67d386151deb8a4b3a2d",
+I/flutter ( 5170): │       "user": {
+I/flutter ( 5170): │         "_id": "6aab668286151deb8a4b3874",
+I/flutter ( 5170): │         "name": "SAIFUL ISLAM (Fahim)",
+I/flutter ( 5170): │         "email": "siffahim25@gmail.com",
+I/flutter ( 5170): │         "image": "https://i.ibb.co/z5YHLV9/profile.png"
+I/flutter ( 5170): │       },
+I/flutter ( 5170): │       "consultant": {
+I/flutter ( 5170): │         "_id": "6a9baf46958765e3d3bb6102",
+I/flutter ( 5170): │         "name": "Non ut minim volupta",
+I/flutter ( 5170): │         "email": "qujype@mailinator.com",
+I/flutter ( 5170): │         "image": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter ( 5170): │         "consultancyType": {
+I/flutter ( 5170): │           "_id": "6a8f3cd64f3189b6783ec608",
+I/flutter ( 5170): │           "name": "testberater",
+I/flutter ( 5170): │           "status": "active",
+I/flutter ( 5170): │           "createdAt": "2026-08-26T19:21:58.463Z",
+I/flutter ( 5170): │           "updatedAt": "2026-08-26T19:21:58.463Z",
+I/flutter ( 5170): │           "__v": 0
+I/flutter ( 5170): │         }
+I/flutter ( 5170): │       },
+I/flutter ( 5170): │       "bookingType": "callback",
+I/flutter ( 5170): │       "preferredWindow": "asap",
+I/flutter ( 5170): │       "notes": null,
+I/flutter ( 5170): │       "perMinuteRate": 44,
+I/flutter ( 5170): │       "platformFee": 5,
+I/flutter ( 5170): │       "finalSettledAmount": 0,
+I/flutter ( 5170): │       "preAuthIntentId": null,
+I/flutter ( 5170): │       "authorizedAmount": 0,
+I/flutter ( 5170): │       "consumedAmount": 0,
+I/flutter ( 5170): │       "remainingMinutes": 0,
+I/flutter ( 5170): │       "billingStatus": "pending",
+I/flutter ( 5170): │       "terminationReason": null,
+I/flutter ( 5170): │       "status": "confirmed",
+I/flutter ( 5170): │       "paymentStatus": "pending",
+I/flutter ( 5170): │       "cancelledAt": null,
+I/flutter ( 5170): │       "cancelReason": null,
+I/flutter ( 5170): │       "cancelledBy": null,
+I/flutter ( 5170): │       "createdAt": "2026-09-17T04:08:51.217Z",
+I/flutter ( 5170): │       "updatedAt": "2026-09-17T04:09:04.837Z",
+I/flutter ( 5170): │       "report": null,
+I/flutter ( 5170): │       "id": "6aab67d386151deb8a4b3a2d",
+I/flutter ( 5170): │       "isReviewed": false
+I/flutter ( 5170): │     }
+I/flutter ( 5170): │   ],
+I/flutter ( 5170): │   "pagination": {
+I/flutter ( 5170): │     "total": 1,
+I/flutter ( 5170): │     "limit": 20,
+I/flutter ( 5170): │     "page": 1,
+I/flutter ( 5170): │     "totalPage": 1
+I/flutter ( 5170): │   }
+I/flutter ( 5170): │ }
+I/flutter ( 5170): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
+I/flutter ( 5170):
+I/flutter ( 5170): ℹ️ℹ️ℹ️ℹ INFO: ✅ [BOOKING RESOLVED] Consultant: Non ut minim volupta | ID: 6aab67d386151deb8a4b3a2d
+I/flutter ( 5170):
+I/flutter ( 5170): ┌ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
+I/flutter ( 5170): │ [200] https://nayem5000.binarybards.online/api/v1/consultation/my-bookings?status=pending&status=accepted&status=confirmed&status=ongoing&limit=20
+I/flutter ( 5170): │ Data: {
+I/flutter ( 5170): │   "success": true,
+I/flutter ( 5170): │   "message": "Bookings retrieved successfully",
+I/flutter ( 5170): │   "data": [
+I/flutter ( 5170): │     {
+I/flutter ( 5170): │       "remindersSent": {
+I/flutter ( 5170): │         "twentyFourHour": false,
+I/flutter ( 5170): │         "oneHour": false
+I/flutter ( 5170): │       },
+I/flutter ( 5170): │       "aiSummary": {
+I/flutter ( 5170): │         "overview": null,
+I/flutter ( 5170): │         "keyPoints": [],
+I/flutter ( 5170): │         "actionItems": [],
+I/flutter ( 5170): │         "recommendations": []
+I/flutter ( 5170): │       },
+I/flutter ( 5170): │       "_id": "6aab67d386151deb8a4b3a2d",
+I/flutter ( 5170): │       "user": {
+I/flutter ( 5170): │         "_id": "6aab668286151deb8a4b3874",
+I/flutter ( 5170): │         "name": "SAIFUL ISLAM (Fahim)",
+I/flutter ( 5170): │         "email": "siffahim25@gmail.com",
+I/flutter ( 5170): │         "image": "https://i.ibb.co/z5YHLV9/profile.png"
+I/flutter ( 5170): │       },
+I/flutter ( 5170): │       "consultant": {
+I/flutter ( 5170): │         "_id": "6a9baf46958765e3d3bb6102",
+I/flutter ( 5170): │         "name": "Non ut minim volupta",
+I/flutter ( 5170): │         "email": "qujype@mailinator.com",
+I/flutter ( 5170): │         "image": "https://i.ibb.co/z5YHLV9/profile.png",
+I/flutter ( 5170): │         "consultancyType": {
+I/flutter ( 5170): │           "_id": "6a8f3cd64f3189b6783ec608",
+I/flutter ( 5170): │           "name": "testberater",
+I/flutter ( 5170): │           "status": "active",
+I/flutter ( 5170): │           "createdAt": "2026-08-26T19:21:58.463Z",
+I/flutter ( 5170): │           "updatedAt": "2026-08-26T19:21:58.463Z",
+I/flutter ( 5170): │           "__v": 0
+I/flutter ( 5170): │         }
+I/flutter ( 5170): │       },
+I/flutter ( 5170): │       "bookingType": "callback",
+I/flutter ( 5170): │       "preferredWindow": "asap",
+I/flutter ( 5170): │       "notes": null,
+I/flutter ( 5170): │       "perMinuteRate": 44,
+I/flutter ( 5170): │       "platformFee": 5,
+I/flutter ( 5170): │       "finalSettledAmount": 0,
+I/flutter ( 5170): │       "preAuthIntentId": null,
+I/flutter ( 5170): │       "authorizedAmount": 0,
+I/flutter ( 5170): │       "consumedAmount": 0,
+I/flutter ( 5170): │       "remainingMinutes": 0,
+I/flutter ( 5170): │       "billingStatus": "pending",
+I/flutter ( 5170): │       "terminationReason": null,
+I/flutter ( 5170): │       "status": "confirmed",
+I/flutter ( 5170): │       "paymentStatus": "pending",
+I/flutter ( 5170): │       "cancelledAt": null,
+I/flutter ( 5170): │       "cancelReason": null,
+I/flutter ( 5170): │       "cancelledBy": null,
+I/flutter ( 5170): │       "createdAt": "2026-09-17T04:08:51.217Z",
+I/flutter ( 5170): │       "updatedAt": "2026-09-17T04:09:04.837Z",
+I/flutter ( 5170): │       "report": null,
+I/flutter ( 5170): │       "id": "6aab67d386151deb8a4b3a2d",
+I/flutter ( 5170): │       "isReviewed": false
+I/flutter ( 5170): │     }
+I/flutter ( 5170): │   ],
+I/flutter ( 5170): │   "pagination": {
+I/flutter ( 5170): │     "total": 1,
+I/flutter ( 5170): │     "limit": 20,
+I/flutter ( 5170): │     "page": 1,
+I/flutter ( 5170): │     "totalPage": 1
+I/flutter ( 5170): │   }
+I/flutter ( 5170): │ }
+I/flutter ( 5170): └ ✅✅✅✅ RESPONSE ══════════════════════════════════════ ✅✅✅✅
+I/flutter ( 5170):
+I/flutter ( 5170): ℹ️ℹ️ℹ️ℹ INFO: ✅ [BOOKING RESOLVED] Consultant: Non ut minim volupta | ID: 6aab67d386151deb8a4b3a2d
+I/TelecomFramework( 5170): CallkitConnectionService: onAvailableCallEndpointsChanged TC@2_1: (...->CSW.hCCC->CAM.oCER->CAMSM.pM_2002->CARSM.pM_SWITCH_FOCUS)->CS.oACEC->H.CS.cASC(cfa/cast/cast)@E-E-E-DMg
+I/TelecomFramework( 5170): CallkitConnectionService: onCallEndpointChanged TC@2_1 [CallEndpoint Name: Earpiece, Type: EARPIECE, Identifier: 102ddfad-9324-41c0-86f5-95cb2f6737ee]: (...->CSW.hCCC->CAM.oCER->CAMSM.pM_2002->CARSM.pM_SWITCH_FOCUS)->CS.oCEC->H.CS.cASC(cfa/cast/cast)@E-E-E-DMg
+I/TelecomFramework( 5170): CallkitConnectionService: onMuteStateChanged TC@2_1 false: (...->CSW.hCCC->CAM.oCER->CAMSM.pM_2002->CARSM.pM_SWITCH_FOCUS)->CS.oMSC->H.CS.cASC(cfa/cast/cast)@E-E-E-DMg
+I/TelecomFramework( 5170): CallkitConnectionService: onAudioStateChanged TC@2_1 [AudioState isMuted: false, route: EARPIECE, supportedRouteMask: EARPIECE, SPEAKER, activeBluetoothDevice: [null], supportedBluetoothDevices: []]: (...->CSW.hCCC->CAM.oCER->CAMSM.pM_2002->CARSM.pM_SWITCH_FOCUS)->CS.cASC->H.CS.cASC(cfa/cast/cast)@E-E-E-DMg
+D/onSuccess( 5170): -
+D/onSuccess( 5170): -
+I/flutter ( 5170): ℹ️ℹ️ℹ️ℹ INFO: 📞 [CallKit Event] com.hiennv.flutter_callkit_incoming.ACTION_CALL_INCOMING
+V/MediaPlayer( 5170): resetDrmState:  mDrmInfo=null mDrmProvisioningThread=null mPrepareDrmInProgress=false mActiveDrmScheme=false
+V/MediaPlayer( 5170): cleanDrmObj: mDrmObj=null mDrmSessionId=null
+V/MediaPlayer( 5170): resetDrmState:  mDrmInfo=null mDrmProvisioningThread=null mPrepareDrmInProgress=false mActiveDrmScheme=false
+V/MediaPlayer( 5170): cleanDrmObj: mDrmObj=null mDrmSessionId=null
+D/CallkitIncomingReceiver( 5170): com.fixpair.app.com.hiennv.flutter_callkit_incoming.ACTION_CALL_ACCEPT
+D/CallkitConnection( 5170): markAccepted id=6aab67e0-8615-1deb-8a4b-3a9400000000
+D/FlutterCallkitIncomingPlugin( 5170): Sending UI event: com.hiennv.flutter_callkit_incoming.ACTION_CALL_ACCEPT
+D/onStart ( 5170): -
+D/onSuccess( 5170): -
+D/AndroidRuntime( 5170): Shutting down VM
+E/AndroidRuntime( 5170): FATAL EXCEPTION: main
+E/AndroidRuntime( 5170): Process: com.fixpair.app, PID: 5170
+E/AndroidRuntime( 5170): java.lang.RuntimeException: Unable to start service com.hiennv.flutter_callkit_incoming.CallkitNotificationService@1e0bdf with Intent { act=com.hiennv.flutter_callkit_incoming.ACTION_CALL_ACCEPT xflg=0x4 cmp=com.fixpair.app/com.hiennv.flutter_callkit_incoming.CallkitNotificationService (has extras) }: java.lang.SecurityException: Starting FGS with type microphone callerApp=ProcessRecord{bdae02c 5170:com.fixpair.app/u0a271} targetSDK=36 requires permissions: all of the permissions allOf=true [android.permission.FOREGROUND_SERVICE_MICROPHONE] any of the permissions allOf=false [android.permission.CAPTURE_AUDIO_HOTWORD, android.permission.CAPTURE_AUDIO_OUTPUT, android.permission.CAPTURE_MEDIA_OUTPUT, android.permission.CAPTURE_TUNER_AUDIO_INPUT, android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT, android.permission.RECORD_AUDIO]  and the app must be in the eligible state/exemptions to access the foreground only permission
+E/AndroidRuntime( 5170): 	at android.app.ActivityThread.handleServiceArgs(ActivityThread.java:5627)
+E/AndroidRuntime( 5170): 	at android.app.ActivityThread.-$$Nest$mhandleServiceArgs(ActivityThread.java:0)
+E/AndroidRuntime( 5170): 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2734)
+E/AndroidRuntime( 5170): 	at android.os.Handler.dispatchMessage(Handler.java:110)
+E/AndroidRuntime( 5170): 	at android.os.Looper.loopOnce(Looper.java:248)
+E/AndroidRuntime( 5170): 	at android.os.Looper.loop(Looper.java:338)
+E/AndroidRuntime( 5170): 	at android.app.ActivityThread.main(ActivityThread.java:9318)
+E/AndroidRuntime( 5170): 	at java.lang.reflect.Method.invoke(Native Method)
+E/AndroidRuntime( 5170): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:652)
+E/AndroidRuntime( 5170): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:967)
+E/AndroidRuntime( 5170): Caused by: java.lang.SecurityException: Starting FGS with type microphone callerApp=ProcessRecord{bdae02c 5170:com.fixpair.app/u0a271} targetSDK=36 requires permissions: all of the permissions allOf=true [android.permission.FOREGROUND_SERVICE_MICROPHONE] any of the permissions allOf=false [android.permission.CAPTURE_AUDIO_HOTWORD, android.permission.CAPTURE_AUDIO_OUTPUT, android.permission.CAPTURE_MEDIA_OUTPUT, android.permission.CAPTURE_TUNER_AUDIO_INPUT, android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT, android.permission.RECORD_AUDIO]  and the app must be in the eligible state/exemptions to access the foreground only permission
+E/AndroidRuntime( 5170): 	at android.os.Parcel.createExceptionOrNull(Parcel.java:3339)
+E/AndroidRuntime( 5170): 	at android.os.Parcel.createException(Parcel.java:3323)
+E/AndroidRuntime( 5170): 	at android.os.Parcel.readException(Parcel.java:3306)
+E/AndroidRuntime( 5170): 	at android.os.Parcel.readException(Parcel.java:3248)
+E/AndroidRuntime( 5170): 	at android.app.IActivityManager$Stub$Proxy.setServiceForeground(IActivityManager.java:7399)
+E/AndroidRuntime( 5170): 	at android.app.Service.startForeground(Service.java:863)
+E/AndroidRuntime( 5170): 	at com.hiennv.flutter_callkit_incoming.CallkitNotificationService.startForeground(CallkitNotificationService.kt:109)
+E/AndroidRuntime( 5170): 	at com.hiennv.flutter_callkit_incoming.CallkitNotificationService.showOngoingCallNotification(CallkitNotificationService.kt:92)
+E/AndroidRuntime( 5170): 	at com.hiennv.flutter_callkit_incoming.CallkitNotificationService.onStartCommand(CallkitNotificationService.kt:76)
+E/AndroidRuntime( 5170): 	at android.app.ActivityThread.handleServiceArgs(ActivityThread.java:5609)
+E/AndroidRuntime( 5170): 	... 9 more
+E/AndroidRuntime( 5170): Caused by: android.os.RemoteException: Remote stack trace:
+E/AndroidRuntime( 5170): 	at com.android.server.am.ActiveServices.validateForegroundServiceType(ActiveServices.java:3054)
+E/AndroidRuntime( 5170): 	at com.android.server.am.ActiveServices.setServiceForegroundInnerLocked(ActiveServices.java:2730)
+E/AndroidRuntime( 5170): 	at com.android.server.am.ActiveServices.setServiceForegroundLocked(ActiveServices.java:1962)
+E/AndroidRuntime( 5170): 	at com.android.server.am.ActivityManagerService.setServiceForeground(ActivityManagerService.java:14533)
+E/AndroidRuntime( 5170): 	at android.app.IActivityManager$Stub.onTransact(IActivityManager.java:3633)
+E/AndroidRuntime( 5170):
+I/Process ( 5170): Sending signal. PID: 5170 SIG: 9
+Lost connection to device.
 
-আমাদের প্রজেক্টে ব্যবহৃত সকল **Socket.io Events**-এর পূর্ণাঙ্গ তালিকা, এদের ক্যাটাগরি এবং কোনটি কেন ব্যবহার হচ্ছে তা নিচে বিস্তারিত দেওয়া হলো:
-
----
-
-## 📡 ১. Client ➔ Server Events (ক্লায়েন্ট বা অ্যাপ সার্ভারকে পাঠায়)
-
-| Event Name | Payload / Parameter | কেন ব্যবহার হয়? |
-| :--- | :--- | :--- |
-| **`connection`** | `{ auth: { token: "Bearer ..." } }` | ইউজার/কনসালট্যান্ট সোকেটে কানেক্ট হওয়ার সময় JWT ভ্যালিডেট করে তাকে অনলাইনে রেজিস্টার করে। |
-| **`join-consultation`** | `consultationId` (string) | কল স্ক্রিনে প্রবেশের সাথে সাথে ইউজার এবং কনসালট্যান্টকে `consultation:${consultationId}` রুমে জয়েন করায় (যাতে লাইভ ট্রান্সক্রিপ্ট ও কল এন্ড ইভেন্ট সবার কাছে পৌঁছায়)। |
-| **`send-speech`** | `{ sessionId, text }` | ডিভাইসের নিজস্ব ভয়েস-টু-টেক্সট ডাটা অপর প্রান্তের মানুষের কাছে লাইভ রিলে করতে। |
-| **`disconnect`** | — | ইউজার অফলাইন হলে ১ মিনিটের গ্রেস পিরিয়ড দেয়; রিকানেক্ট না করলে কলটি অটো-ক্যান্সেল করে দেয়। |
-
----
-
-## 📲 ২. Server ➔ Client Events (সার্ভার থেকে অ্যাপে রিয়েল-টাইমে আসে)
-
-### 🎥 A. কলিং ও সিগন্যালিং (Video Calling & Signaling)
-| Event Name | কার কাছে যায়? | কেন ব্যবহার হয়? |
-| :--- | :--- | :--- |
-| **`incoming-call`** | কনসালট্যান্টের কাছে | ইউজার কল দিলে কনসালট্যান্টের স্ক্রিনে ইনকামিং কল ও রিংটোন বাজাতে (Agora Token, Channel Name সহ)। |
-| **`call-rejected`** | কলারের কাছে ও রুমে | কনসালট্যান্ট কল রিজেক্ট করলে ইউজারের কলিং স্ক্রিন বন্ধ করতে। |
-| **`call-cancelled`** | রিসিভারের কাছে ও রুমে | ইউজার রিং হওয়া অবস্থায় কল ক্যান্সেল করলে কনসালট্যান্টের রিংটোন বন্ধ করতে। |
-| **`call-ended`** | উভয় পক্ষ ও রুমে | কল চলাকালীন যে কোনো এক পক্ষ কল এন্ড করলে অপর পক্ষের স্ক্রিন সাথে সাথে কেটে ইনভয়েস/রিভিউ স্ক্রিন দেখাতে। |
-
----
-
-### 🎙️ B. লাইভ ট্রান্সক্রিপশন ও AI সাবটাইটেল (Speech-to-Text)
-| Event Name | কার কাছে যায়? | কেন ব্যবহার হয়? |
-| :--- | :--- | :--- |
-| **`transcript:new`** | কনসালটেশন রুমে | Agora STT এজেন্ট যখন উভয় পক্ষের কথা টেক্সটে রূপান্তর করে, তা লাইভ সাবটাইটেল/ক্যাপশন হিসেবে স্ক্রিনে দেখাতে। |
-| **`receive-speech`** | অপর পার্টিসিপেন্টের কাছে | ক্লায়েন্ট থেকে পাঠানো স্পিচ টেক্সট অপর প্রান্তে দেখাতে। |
-| **`transcription-failed`**| ইউজারের কাছে | ট্রান্সক্রিপশন সার্ভিস শুরু হতে ব্যর্থ হলে সতর্কতা পাঠাতে। |
-
----
-
-### 💳 C. রিয়েল-টাইম বিলিং ও পেমেন্ট ইঞ্জিন (Per-Minute Billing)
-| Event Name | কার কাছে যায়? | কেন ব্যবহার হয়? |
-| :--- | :--- | :--- |
-| **`billing-updated`** | ইউজারের কাছে | প্রতি মিনিট অন্তর কনসালটেশনের কত টাকা খরচ হলো (`consumedAmount`), তা স্ক্রিনে লাইভ কাউন্টার হিসেবে আপডেট করতে। |
-| **`billing-warning`** | ইউজারের কাছে | প্রি-অথোরাইজড ব্যালেন্স শেষ হওয়ার **১ মিনিট পূর্বে** ইউজারকে সতর্ক করতে (`remainingMinutes: 1`)। |
-| **`billing-critical`** | ইউজারের কাছে | ব্যালেন্স শেষ বা পেমেন্ট মেথড ফেইল করলে তাৎক্ষণিক সতর্ক করতে। |
-| **`consultation-auto-ended`**| উভয় পক্ষ ও রুমে | ব্যালেন্স সম্পূর্ণ শেষ হলে বা ইন্টারনেট দীর্ঘক্ষণ অফলাইন থাকলে সার্ভার অটোমেটিক কল কেটে দেওয়ার পর স্ক্রিন ক্লোজ করতে। |
-| **`live-billing-update`** | অ্যাডমিন রুমে (`admin_room`) | অ্যাডমিন ড্যাশবোর্ডে প্ল্যাটফর্মের সব চলমান লাইভ কলের ইনকাম ও ডিউরেশন লাইভ মনিটর করতে। |
-
----
-
-### 🔔 D. নোটিফিকেশন ও রিপোর্ট (General Notifications)
-| Event Name | কার কাছে যায়? | কেন ব্যবহার হয়? |
-| :--- | :--- | :--- |
-| **`notification`** | নির্দিষ্ট ইউজারের কাছে | নতুন বুকিং রিকোয়েস্ট, রিশিডিউল বা যে কোনো পুশ নোটিফিকেশন লাইভ দেখাতে। |
-| **`report-generated`** | ক্লায়েন্ট ও কনসালট্যান্টের কাছে | কল শেষ হওয়ার পর Gemini AI সামারি ও PDF প্রেসক্রিপশন/রিপোর্ট রেডি হলে ডাউনলোড লিঙ্ক পাঠাতে। |
-
----
-
-### 💡 ফ্রন্টএন্ড ডেভেলপারদের জন্য টিপস:
-কল স্ক্রিন ওপেন হওয়ার সাথে সাথে ফ্রন্টএন্ড থেকে:
-1. `socket.emit('join-consultation', consultationId)` কল করতে হবে।
-2. নিচের গুরুত্বপূর্ণ ইভেন্টগুলো অবশ্যই লিসেন করতে হবে:
-   * `socket.on('call-ended', ...)` ➔ স্ক্রিন বন্ধ ও ফিডব্যাক মডালে যাওয়ার জন্য।
-   * `socket.on('transcript:new', ...)` ➔ লাইভ ক্যাপশন দেখানোর জন্য।
-   * `socket.on('billing-updated', ...)` ➔ প্রতি মিনিটের খরচ আপডেট দেখানোর জন্য।
+Exited.
