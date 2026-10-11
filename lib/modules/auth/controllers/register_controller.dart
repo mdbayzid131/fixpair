@@ -156,12 +156,17 @@ class RegisterController extends GetxController {
           arguments: emailController.text.trim(),
         );
       } else {
-        // ApiChecker.checkWriteApi(response);
-        Helpers.showError(response.data['message'] ?? 'Registration failed'.tr);
+        String errorMessage = 'Registration failed'.tr;
+        if (response.data is Map && response.data['message'] != null) {
+          errorMessage = response.data['message'].toString();
+        } else if (response.statusMessage != null && response.statusMessage!.isNotEmpty) {
+          errorMessage = response.statusMessage!;
+        }
+        Helpers.showError(errorMessage);
       }
     } catch (e) {
       Helpers.showDebugLog(e.toString());
-      Helpers.showError(e.toString());
+      Helpers.showError('Something went wrong, please try again'.tr);
     } finally {
       isLoading.value = false;
     }

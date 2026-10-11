@@ -27,7 +27,6 @@ class _LockViewState extends State<LockView> {
   Future<void> _triggerBiometric() async {
     final success = await AppLockService.to.unlockWithBiometric();
     if (success && mounted) {
-      AppLockService.to.isLockScreenOpen = false;
       Get.back();
     }
   }
@@ -130,8 +129,7 @@ class _LockViewState extends State<LockView> {
 
                 // Logout Fallback Button
                 TextButton(
-                  onPressed: () async {
-                    await AppLockService.to.markUnlocked();
+                  onPressed: () {
                     Get.offAllNamed(AppRoutes.LOGIN);
                   },
                   child: Text(

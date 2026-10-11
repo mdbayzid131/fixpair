@@ -160,14 +160,60 @@ class LoginView extends GetView<LoginController> {
                     ),
                     SizedBox(height: 24.h),
 
-                    // 6. Log In Button
-                    Obx(
-                      () => CustomElevatedButton(
-                        label: 'Log In'.tr,
-                        onPressed: controller.login,
-                        isLoading: controller.isLoading.value,
-                      ),
-                    ),
+                    // 6. Log In Button & Biometric Quick Login
+                    Obx(() {
+                      if (!controller.isBiometricAvailable.value) {
+                        return CustomElevatedButton(
+                          label: 'Log In'.tr,
+                          onPressed: controller.login,
+                          isLoading: controller.isLoading.value,
+                        );
+                      }
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: CustomElevatedButton(
+                              label: 'Log In'.tr,
+                              onPressed: controller.login,
+                              isLoading: controller.isLoading.value,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          InkWell(
+                            onTap: controller.loginWithBiometrics,
+                            borderRadius: BorderRadius.circular(12.r),
+                            child: Container(
+                              height: 50.h,
+                              width: 52.w,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEFF6FF),
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(
+                                  color: const Color(0xFF3B82F6).withOpacity(0.4),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Center(
+                                child: controller.isBiometricLoading.value
+                                    ? SizedBox(
+                                        width: 22.w,
+                                        height: 22.w,
+                                        child: const CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Color(0xFF0066FF),
+                                        ),
+                                      )
+                                    : Icon(
+                                        controller.biometricIcon.value,
+                                        color: const Color(0xFF0066FF),
+                                        size: 26.sp,
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
                     SizedBox(height: 32.h),
 
                     // 7. Divider
