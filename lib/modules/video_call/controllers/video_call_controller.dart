@@ -283,10 +283,14 @@ class VideoCallController extends GetxController with WidgetsBindingObserver {
     // Prevent starting timer multiple times
     if (_timer != null) return;
 
-    final double rate = booking.perMinuteRate?.toDouble() ?? 4.0;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       callDuration.value++;
-      currentCost.value = (rate / 60) * callDuration.value;
+      final double rate =
+          (bookingRx.value?.perMinuteRate ?? booking.perMinuteRate)?.toDouble() ??
+              4.0;
+      final int billedMinutes =
+          callDuration.value > 0 ? (callDuration.value / 60).ceil() : 0;
+      currentCost.value = billedMinutes * rate;
     });
   }
 
