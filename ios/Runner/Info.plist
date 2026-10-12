@@ -2,17 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.827439833710-01cu8oed84nphjju12tcbgq0l7ml4frl</string>
-			</array>
-		</dict>
-	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -33,10 +22,34 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.827439833710-01cu8oed84nphjju12tcbgq0l7ml4frl</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>mailto</string>
+		<string>tel</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires access to your camera to take photos for updating your profile picture and uploading verification documents.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>This app requires Face ID permission to authenticate and unlock the app securely.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires access to your microphone to enable audio calls and voice communication.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to your photo library to select photos for updating your profile picture and uploading verification documents.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -60,6 +73,12 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>voip</string>
+		<string>remote-notification</string>
+		<string>audio</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -77,24 +96,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>voip</string>
-		<string>remote-notification</string>
-		<string>audio</string>
-	</array>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>mailto</string>
-		<string>tel</string>
-	</array>
-	<key>NSCameraUsageDescription</key>
-	<string>This app requires access to your camera to take photos for updating your profile picture and uploading verification documents.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app requires access to your photo library to select photos for updating your profile picture and uploading verification documents.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app requires access to your microphone to enable audio calls and voice communication.</string>
-	<key>NSFaceIDUsageDescription</key>
-	<string>This app requires Face ID permission to authenticate and unlock the app securely.</string>
 </dict>
 </plist>
