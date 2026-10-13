@@ -392,6 +392,22 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (payload.isIncomingCall &&
       payload.sessionId.isNotEmpty &&
       payload.token.isNotEmpty) {
+    try {
+      await StorageService.setString(
+        StorageConstants.latestCallPayload,
+        jsonEncode({
+          'sessionId': payload.sessionId,
+          'token': payload.token,
+          'channelName': payload.channelName,
+          'callerName': payload.callerName,
+          'callerAvatar': payload.callerAvatar,
+          'bookingId': payload.bookingId,
+          'callKitUuid': payload.callKitUuid,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        }),
+      );
+    } catch (_) {}
+
     await FlutterCallkitIncoming.showCallkitIncoming(payload.toCallKitParams());
 
     // Listen for CallKit actions in background isolate (Decline / Timeout)

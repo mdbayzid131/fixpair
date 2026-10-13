@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:fixpair/config/routes/app_pages.dart';
 import 'package:fixpair/modules/video_call/controllers/video_call_controller.dart';
@@ -764,6 +765,8 @@ class AuthService extends GetxService {
           }
 
           Map<String, dynamic>? extra;
+
+          // 1. Check activeCalls
           final activeCalls = await FlutterCallkitIncoming.activeCalls();
           if (activeCalls.isNotEmpty) {
             CallKitParams? targetCall;
@@ -780,7 +783,22 @@ class AuthService extends GetxService {
             }
           }
 
-          // Fallback to cached payload if activeCalls did not contain extra
+          // 2. Check persistent StorageService (saved by background handler across isolates)
+          if (extra == null || (extra['sessionId']?.toString().isEmpty ?? true)) {
+            final storedCallStr =
+                await StorageService.getString(StorageConstants.latestCallPayload);
+            if (storedCallStr.isNotEmpty) {
+              try {
+                final Map<String, dynamic> storedMap = jsonDecode(storedCallStr);
+                final ts = storedMap['timestamp'] as int? ?? 0;
+                if (DateTime.now().millisecondsSinceEpoch - ts < 180000) {
+                  extra = storedMap;
+                }
+              } catch (_) {}
+            }
+          }
+
+          // 4. Fallback to cached payload
           if (extra == null && _latestIncomingCallPayload != null) {
             extra = {
               'sessionId': _latestIncomingCallPayload!.sessionId,
@@ -794,6 +812,8 @@ class AuthService extends GetxService {
 
           final String callSessionId = extra?['sessionId']?.toString() ??
               IncomingCallPayload.resolveSessionId(id);
+
+          AppLogger.info('📞 [CallKit Accept Resolved] SessionId: $callSessionId | Extra: $extra');
 
           if (callSessionId.isNotEmpty) {
             final booking = BookingModel(
