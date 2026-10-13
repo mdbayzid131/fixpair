@@ -48,11 +48,21 @@ class AuthRepo {
   Future<Response> socialLogin({
     required String idToken,
     required String provider,
+    String? email,
+    String? name,
   }) async {
-    return await apiClient.postData(ApiConstants.socialLogin, {
+    final Map<String, dynamic> data = {
       "idToken": idToken,
       "provider": provider,
-    });
+    };
+    if (email != null && email.trim().isNotEmpty) {
+      data["email"] = email.trim();
+    }
+    if (name != null && name.trim().isNotEmpty) {
+      data["name"] = name.trim();
+    }
+
+    return await apiClient.postData(ApiConstants.socialLogin, data);
   }
 
   /// ===================== FORGOT PASSWORD =====================

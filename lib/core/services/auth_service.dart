@@ -140,6 +140,8 @@ class AuthService extends GetxService {
       final Response response = await _authRepo.socialLogin(
         idToken: idToken,
         provider: 'google',
+        email: userCredential.user?.email ?? googleUser.email,
+        name: userCredential.user?.displayName ?? googleUser.displayName,
       );
 
       await handleAuthResponse(response);
@@ -164,6 +166,8 @@ class AuthService extends GetxService {
       final Response response = await _authRepo.socialLogin(
         idToken: idToken,
         provider: 'apple',
+        email: userCredential.user?.email,
+        name: userCredential.user?.displayName,
       );
 
       await handleAuthResponse(response);
