@@ -300,6 +300,7 @@ class AuthService extends GetxService {
     await StorageService.remove(StorageConstants.refreshToken);
     await StorageService.remove(StorageConstants.userData);
     await StorageService.remove(StorageConstants.deviceToken);
+    await StorageService.remove(StorageConstants.voipToken);
 
     isLoggedIn.value = false;
     user.value = null;
@@ -315,15 +316,35 @@ class AuthService extends GetxService {
       // 1. Initialize FCM and obtain device token
       final String? token = await FirebaseNotificationService.initialize();
       print('🔥 [AUTH SERVICE] FCM TOKEN LOADED: $token');
-      if (token != null && token.isNotEmpty) {
-        await StorageService.setString(StorageConstants.deviceToken, token);
-        // 2. Upload the token to the backend
-        print('🔥 [AUTH SERVICE] UPLOADING FCM TOKEN TO BACKEND...');
-        await _userRepository.saveDeviceToken(token);
-        print('🔥 [AUTH SERVICE] FCM TOKEN UPLOAD COMPLETED SUCCESSFULLY!');
+
+      // 2. On iOS: Get VoIP token for APNs PushKit (required for closed-app call notification)
+      String? voipToken;
+      if (Platform.isIOS) {
+        try {
+          final rawVoipToken = await FlutterCallkitIncoming.getDevicePushTokenVoIP();
+          if (rawVoipToken != null && rawVoipToken.toString().isNotEmpty) {
+            voipToken = rawVoipToken.toString();
+            await StorageService.setString(StorageConstants.voipToken, voipToken);
+            AppLogger.info('📱 [iOS VoIP Token Captured]: $voipToken');
+          }
+        } catch (e) {
+          AppLogger.debug('Error fetching iOS VoIP token in setupPushNotifications: $e');
+        }
       }
 
-      // 3. Listen for token refreshes dynamically
+      if (token != null && token.isNotEmpty) {
+        await StorageService.setString(StorageConstants.deviceToken, token);
+        // 3. Upload FCM token + VoIP token to backend in one call
+        print('🔥 [AUTH SERVICE] UPLOADING DEVICE TOKENS TO BACKEND...');
+        await _userRepository.saveDeviceToken(token, voipToken: voipToken);
+        print('🔥 [AUTH SERVICE] TOKEN UPLOAD COMPLETED SUCCESSFULLY!');
+      } else if (voipToken != null && Platform.isIOS) {
+        // No FCM token but we have VoIP token — register VoIP token alone
+        AppLogger.info('📱 [AUTH SERVICE] Registering VoIP token without FCM token...');
+        await _userRepository.saveVoipToken(voipToken);
+      }
+
+      // 4. Listen for token refreshes dynamically
       FirebaseNotificationService.onTokenRefresh = (newToken) async {
         if (newToken.isNotEmpty) {
           await StorageService.setString(
@@ -332,11 +353,15 @@ class AuthService extends GetxService {
           );
         }
         if (isLoggedIn.value) {
-          await _userRepository.saveDeviceToken(newToken);
+          final savedVoip = await StorageService.getString(StorageConstants.voipToken);
+          await _userRepository.saveDeviceToken(
+            newToken,
+            voipToken: savedVoip.isNotEmpty ? savedVoip : null,
+          );
         }
       };
 
-      // 4. Register foreground and background/tap notification listeners
+      // 5. Register foreground and background/tap notification listeners
       FirebaseNotificationService.onForegroundMessage = (message) {
         _handleIncomingCall(message, isFromTap: false);
       };
@@ -345,7 +370,7 @@ class AuthService extends GetxService {
         _handleIncomingCall(message, isFromTap: true);
       };
 
-      // 5. Request Android permissions for CallKit notifications & full-screen intents
+      // 6. Request Android permissions for CallKit notifications & full-screen intents
       if (Platform.isAndroid) {
         try {
           await FlutterCallkitIncoming.requestNotificationPermission({
@@ -417,6 +442,8 @@ class AuthService extends GetxService {
     if (!payload.isIncomingCall || payload.sessionId.isEmpty || payload.token.isEmpty) {
       return;
     }
+
+    _latestIncomingCallPayload = payload;
 
     // Don't show incoming call if already in an active video call
     if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
@@ -575,6 +602,7 @@ class AuthService extends GetxService {
   bool _isJoiningCall = false;
   DateTime? _lastCallAcceptHandledTime;
   String? _lastAcceptedCallId;
+  IncomingCallPayload? _latestIncomingCallPayload;
 
   /// Joins video session with backend handshake, token resolution, and proper navigation
   Future<bool> joinVideoCall(
@@ -719,19 +747,34 @@ class AuthService extends GetxService {
             }
           }
 
-          if (extra != null) {
+          // Fallback to cached payload if activeCalls did not contain extra
+          if (extra == null && _latestIncomingCallPayload != null) {
+            extra = {
+              'sessionId': _latestIncomingCallPayload!.sessionId,
+              'token': _latestIncomingCallPayload!.token,
+              'channelName': _latestIncomingCallPayload!.channelName,
+              'callerName': _latestIncomingCallPayload!.callerName,
+              'callerAvatar': _latestIncomingCallPayload!.callerAvatar,
+              'bookingId': _latestIncomingCallPayload!.bookingId,
+            };
+          }
+
+          final String callSessionId = extra?['sessionId']?.toString() ??
+              IncomingCallPayload.resolveSessionId(id);
+
+          if (callSessionId.isNotEmpty) {
             final booking = BookingModel(
-              id: extra['bookingId'] ?? '',
+              id: extra?['bookingId']?.toString() ?? '',
               consultant: UserData(
-                name: extra['callerName'] ?? 'Consultant',
-                avatar: extra['callerAvatar'] ?? '',
+                name: extra?['callerName']?.toString() ?? 'Consultant',
+                avatar: extra?['callerAvatar']?.toString() ?? '',
               ),
             );
             await joinVideoCall(
               booking,
-              extra['sessionId'] ?? id,
-              extra['token'] ?? '',
-              extra['channelName'] ?? '',
+              callSessionId,
+              extra?['token']?.toString() ?? '',
+              extra?['channelName']?.toString() ?? '',
             );
           }
           break;
@@ -785,6 +828,40 @@ class AuthService extends GetxService {
       }
     }, onError: (err) {
       AppLogger.debug('CallKit event stream exception caught safely: $err');
+    });
+
+    // Check on cold launch if user already accepted call from native lock screen
+    FlutterCallkitIncoming.activeCalls().then((calls) {
+      if (calls.isNotEmpty) {
+        for (final c in calls) {
+          if (c.isAccepted == true) {
+            AppLogger.info('📞 Found active accepted CallKit call on launch: ${c.id}');
+            final rawExtra = c.extra;
+            final extra =
+                rawExtra != null ? Map<String, dynamic>.from(rawExtra) : null;
+            final callSessionId = extra?['sessionId']?.toString() ??
+                IncomingCallPayload.resolveSessionId(c.id ?? '');
+            if (callSessionId.isNotEmpty) {
+              final booking = BookingModel(
+                id: extra?['bookingId']?.toString() ?? '',
+                consultant: UserData(
+                  name: extra?['callerName']?.toString() ?? 'Consultant',
+                  avatar: extra?['callerAvatar']?.toString() ?? '',
+                ),
+              );
+              joinVideoCall(
+                booking,
+                callSessionId,
+                extra?['token']?.toString() ?? '',
+                extra?['channelName']?.toString() ?? '',
+              );
+              break;
+            }
+          }
+        }
+      }
+    }).catchError((err) {
+      AppLogger.debug('Error checking active calls on launch: $err');
     });
   }
 }

@@ -9,5 +9,6 @@ class StorageConstants {
   static const String theme = 'theme';
   static const String onboardingSeen = 'onboarding_seen';
   static const String deviceToken = 'device_token';
+  static const String voipToken = 'voip_token';
   static const String quickSetupCompleted = 'quick_setup_completed';
 }

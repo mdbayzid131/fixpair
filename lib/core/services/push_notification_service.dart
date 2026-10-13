@@ -378,6 +378,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (payload.isCancelOrReject) {
     try {
       if (payload.sessionId.isNotEmpty) {
+        await FlutterCallkitIncoming.endCall(payload.callKitUuid);
         await FlutterCallkitIncoming.endCall(payload.sessionId);
       }
     } catch (_) {}

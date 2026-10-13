@@ -79,5 +79,5 @@ class ApiConstants {
 
   // Agora Config
   static String get agoraAppId =>
-      dotenv.env['AGORA_APP_ID'] ?? 'af25d4c8759847daace4a7fe5462f361';
+      dotenv.env['AGORA_APP_ID'] ?? '0ad305926d534e6f817fd6b0d49db2b6';
 }

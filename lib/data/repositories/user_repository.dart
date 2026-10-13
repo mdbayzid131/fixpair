@@ -254,11 +254,25 @@ class UserRepository {
   }
 
   // Save FCM device token for push notifications
-  Future<Response> saveDeviceToken(String deviceToken) async {
-    return await _apiClient.postData('/user/device-token', {
+  Future<Response> saveDeviceToken(String deviceToken, {String? voipToken}) async {
+    final Map<String, dynamic> body = {
       'deviceToken': deviceToken,
       'deviceType': GetPlatform.isIOS ? 'ios' : 'android',
-      "action": "add",
+      'action': 'add',
+    };
+    // Include voipToken if provided (iOS only) — required for APNs VoIP PushKit
+    if (voipToken != null && voipToken.isNotEmpty) {
+      body['voipToken'] = voipToken;
+    }
+    return await _apiClient.postData('/user/device-token', body);
+  }
+
+  // Save iOS VoIP token only (for re-registration on token refresh)
+  Future<Response> saveVoipToken(String voipToken) async {
+    return await _apiClient.postData('/user/device-token', {
+      'voipToken': voipToken,
+      'deviceType': 'ios',
+      'action': 'add',
     });
   }
 
