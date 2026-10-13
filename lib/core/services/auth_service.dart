@@ -669,8 +669,8 @@ class AuthService extends GetxService {
     try {
       final response = await _userRepository.joinVideoSession(realSessionId);
 
-      // Close all open loading dialogs
-      while (Get.isDialogOpen == true) {
+      // Close loading dialog if open
+      if (Get.isDialogOpen == true) {
         Get.back();
       }
 
@@ -717,7 +717,7 @@ class AuthService extends GetxService {
         return false;
       }
     } catch (e) {
-      while (Get.isDialogOpen == true) {
+      if (Get.isDialogOpen == true) {
         Get.back();
       }
       AppLogger.warning('Error joining video session: $e');
@@ -726,9 +726,7 @@ class AuthService extends GetxService {
       } catch (_) {}
       return false;
     } finally {
-      Future.delayed(const Duration(seconds: 3), () {
-        _isJoiningCall = false;
-      });
+      _isJoiningCall = false;
     }
   }
 
