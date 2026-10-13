@@ -154,20 +154,49 @@ class AuthService extends GetxService {
   /// ===================== APPLE LOGIN =====================
   Future<Response> loginWithApple() async {
     try {
+      final appleProvider = AppleAuthProvider();
+      appleProvider.addScope('email');
+      appleProvider.addScope('name');
+
       // Native Apple Sign-In on iOS, Firebase Web Auth flow on Android
-      final UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithProvider(AppleAuthProvider());
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithProvider(appleProvider);
 
       final String? idToken = await userCredential.user?.getIdToken();
       if (idToken == null) {
         throw Exception('Failed to retrieve Firebase ID Token.');
       }
 
+      String? email = userCredential.user?.email;
+      String? name = userCredential.user?.displayName;
+
+      // Apple only returns name and email on the very first sign-in authorization
+      final profile = userCredential.additionalUserInfo?.profile;
+      if (profile != null) {
+        if (email == null || email.trim().isEmpty) {
+          if (profile['email'] is String && (profile['email'] as String).isNotEmpty) {
+            email = profile['email'] as String;
+          }
+        }
+        if (name == null || name.trim().isEmpty) {
+          if (profile['name'] is Map) {
+            final nameMap = profile['name'] as Map;
+            final first = (nameMap['firstName'] ?? '').toString().trim();
+            final last = (nameMap['lastName'] ?? '').toString().trim();
+            final fullName = '$first $last'.trim();
+            if (fullName.isNotEmpty) name = fullName;
+          } else if (profile['given_name'] != null || profile['family_name'] != null) {
+            final fullName = '${profile['given_name'] ?? ''} ${profile['family_name'] ?? ''}'.trim();
+            if (fullName.isNotEmpty) name = fullName;
+          }
+        }
+      }
+
       final Response response = await _authRepo.socialLogin(
         idToken: idToken,
         provider: 'apple',
-        email: userCredential.user?.email,
-        name: userCredential.user?.displayName,
+        email: email,
+        name: name,
       );
 
       await handleAuthResponse(response);
