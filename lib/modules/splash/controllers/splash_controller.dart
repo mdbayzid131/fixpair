@@ -7,6 +7,7 @@ import 'package:fixpair/core/services/push_notification_service.dart';
 import 'package:fixpair/core/services/storage_service.dart';
 import 'package:fixpair/data/models/user_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_callkit_incoming/entities/entities.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -46,17 +47,24 @@ class SplashController extends GetxController {
       final isPendingAccept =
           await StorageService.getBool(StorageConstants.callAcceptedPending) ?? false;
 
-      if (activeCalls.isNotEmpty || isPendingAccept) {
+      CallKitParams? explicitlyAcceptedCall;
+      for (final call in activeCalls) {
+        if (call.isAccepted == true) {
+          explicitlyAcceptedCall = call;
+          break;
+        }
+      }
+
+      final bool hasExplicitlyAccepted =
+          isPendingAccept || (explicitlyAcceptedCall != null);
+
+      if (hasExplicitlyAccepted) {
         await StorageService.setBool(StorageConstants.callAcceptedPending, false);
         Map<String, dynamic>? extra;
-        String? targetId;
+        String? targetId = explicitlyAcceptedCall?.id;
 
-        if (activeCalls.isNotEmpty) {
-          final call = activeCalls.first;
-          targetId = call.id;
-          if (call.extra != null && call.extra!.isNotEmpty) {
-            extra = Map<String, dynamic>.from(call.extra!);
-          }
+        if (explicitlyAcceptedCall?.extra != null && explicitlyAcceptedCall!.extra!.isNotEmpty) {
+          extra = Map<String, dynamic>.from(explicitlyAcceptedCall.extra!);
         }
 
         if (extra == null || (extra['sessionId']?.toString().isEmpty ?? true)) {
@@ -102,11 +110,6 @@ class SplashController extends GetxController {
     } catch (_) {
       // Proceed to normal navigation on any error
     }
-
-    // Clean up any old / stale active calls from native memory
-    try {
-      await FlutterCallkitIncoming.endAllCalls();
-    } catch (_) {}
 
     // ── 2. Standard splash transition delay ──
     await Future.delayed(const Duration(seconds: 2));

@@ -908,7 +908,9 @@ class AuthService extends GetxService with WidgetsBindingObserver {
     }
   }
 
-  /// Checks for pending accepted calls from background isolate or active CallKit calls
+  /// Checks for pending accepted calls from background isolate or active CallKit calls.
+  /// Strictly verifies that the call was explicitly accepted by the user,
+  /// preventing premature auto-acceptance and incorrect billing while the phone is still ringing.
   Future<void> checkPendingAcceptedCall() async {
     if (Get.currentRoute == AppRoutes.VIDEO_CALL || _isJoiningCall) {
       return;
@@ -924,18 +926,27 @@ class AuthService extends GetxService with WidgetsBindingObserver {
       activeCalls = await FlutterCallkitIncoming.activeCalls();
     } catch (_) {}
 
+    CallKitParams? explicitlyAcceptedCall;
+    for (final call in activeCalls) {
+      if (call.isAccepted == true) {
+        explicitlyAcceptedCall = call;
+        break;
+      }
+    }
+
+    final bool hasExplicitlyAccepted =
+        isPendingAccept || (explicitlyAcceptedCall != null);
+
     AppLogger.info(
-      '📞 [CHECK PENDING CALL] Pending: $isPendingAccept, ActiveCalls: ${activeCalls.length}',
+      '📞 [CHECK PENDING CALL] PendingAccept: $isPendingAccept, AcceptedCall: ${explicitlyAcceptedCall?.id}, TotalActiveCalls: ${activeCalls.length}',
     );
 
-    if (isPendingAccept || activeCalls.isNotEmpty) {
-      String? id = acceptedCallId.isNotEmpty ? acceptedCallId : null;
+    if (hasExplicitlyAccepted) {
+      await StorageService.setBool(StorageConstants.callAcceptedPending, false);
+      String? id = acceptedCallId.isNotEmpty ? acceptedCallId : explicitlyAcceptedCall?.id;
       Map<String, dynamic>? extra;
-      if (activeCalls.isNotEmpty) {
-        id ??= activeCalls.first.id;
-        if (activeCalls.first.extra != null && activeCalls.first.extra!.isNotEmpty) {
-          extra = Map<String, dynamic>.from(activeCalls.first.extra!);
-        }
+      if (explicitlyAcceptedCall?.extra != null && explicitlyAcceptedCall!.extra!.isNotEmpty) {
+        extra = Map<String, dynamic>.from(explicitlyAcceptedCall.extra!);
       }
       await handleCallAccept(id: id, extraData: extra);
     }
