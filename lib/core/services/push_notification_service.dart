@@ -414,8 +414,18 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     FlutterCallkitIncoming.onEvent.listen((CallEvent? event) async {
       if (event == null) return;
       switch (event) {
+        case CallEventActionCallAccept(:final id):
+          AppLogger.info('📞 [BG CALL] User accepted CallKit call: $id');
+          try {
+            await StorageService.setBool(StorageConstants.callAcceptedPending, true);
+            await StorageService.setString(StorageConstants.callAcceptedId, id);
+          } catch (_) {}
+          break;
         case CallEventActionCallDecline(:final id):
         case CallEventActionCallTimeout(:final id):
+          try {
+            await StorageService.setBool(StorageConstants.callAcceptedPending, false);
+          } catch (_) {}
           if (id.isNotEmpty) {
             try {
               final realSessionId = IncomingCallPayload.resolveSessionId(id);

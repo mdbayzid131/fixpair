@@ -12,4 +12,6 @@ class StorageConstants {
   static const String voipToken = 'voip_token';
   static const String quickSetupCompleted = 'quick_setup_completed';
   static const String latestCallPayload = 'latest_call_payload';
+  static const String callAcceptedPending = 'call_accepted_pending';
+  static const String callAcceptedId = 'call_accepted_id';
 }

@@ -3,8 +3,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService extends GetxService {
   //===========================> Get Data <========================
-  static Future<String> getString(String key) async {
+  static Future<String> getString(String key, {bool reload = false}) async {
     final preferences = await SharedPreferences.getInstance();
+    if (reload) {
+      await preferences.reload();
+    }
     return preferences.getString(key) ?? "";
   }
 

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:fixpair/config/constants/image_paths.dart';
 import 'package:fixpair/config/constants/storage_constants.dart';
 import 'package:fixpair/config/routes/app_pages.dart';
@@ -42,39 +43,60 @@ class SplashController extends GetxController {
     // ── 1. Check if app was launched via CallKit (accepted call in terminated state) ──
     try {
       final activeCalls = await FlutterCallkitIncoming.activeCalls();
-      if (activeCalls.isNotEmpty) {
-        final call = activeCalls.first;
-        // Only join if the user explicitly answered/accepted the call from lock screen
-        if (call.isAccepted == true) {
-          final extra = call.extra;
-          if (extra != null) {
-            final sessionId = IncomingCallPayload.resolveSessionId(
-              (extra['sessionId'] ?? call.id ?? '').toString(),
-              extra,
-            );
-            final token = (extra['token'] ?? '').toString();
-            final channelName = (extra['channelName'] ?? '').toString();
-            final bookingId = (extra['bookingId'] ?? '').toString();
-            final callerName = (extra['callerName'] ?? 'Consultant').toString();
-            final callerAvatar = (extra['callerAvatar'] ?? '').toString();
+      final isPendingAccept =
+          await StorageService.getBool(StorageConstants.callAcceptedPending) ?? false;
 
-            if (sessionId.isNotEmpty) {
-              final booking = BookingModel(
-                id: bookingId,
-                consultant: UserData(
-                  name: callerName,
-                  avatar: callerAvatar,
-                ),
-              );
-              final bool joined = await _authService.joinVideoCall(
-                booking,
-                sessionId,
-                token,
-                channelName,
-              );
-              if (joined) return;
-            }
+      if (activeCalls.isNotEmpty || isPendingAccept) {
+        await StorageService.setBool(StorageConstants.callAcceptedPending, false);
+        Map<String, dynamic>? extra;
+        String? targetId;
+
+        if (activeCalls.isNotEmpty) {
+          final call = activeCalls.first;
+          targetId = call.id;
+          if (call.extra != null && call.extra!.isNotEmpty) {
+            extra = Map<String, dynamic>.from(call.extra!);
           }
+        }
+
+        if (extra == null || (extra['sessionId']?.toString().isEmpty ?? true)) {
+          final storedCallStr =
+              await StorageService.getString(StorageConstants.latestCallPayload, reload: true);
+          if (storedCallStr.isNotEmpty) {
+            try {
+              final Map<String, dynamic> storedMap = jsonDecode(storedCallStr);
+              final ts = storedMap['timestamp'] as int? ?? 0;
+              if (DateTime.now().millisecondsSinceEpoch - ts < 180000) {
+                extra = storedMap;
+              }
+            } catch (_) {}
+          }
+        }
+
+        final sessionId = (extra?['sessionId']?.toString().isNotEmpty ?? false)
+            ? extra!['sessionId'].toString()
+            : (targetId != null ? IncomingCallPayload.resolveSessionId(targetId) : '');
+        final token = (extra?['token'] ?? '').toString();
+        final channelName = (extra?['channelName'] ?? '').toString();
+        final bookingId = (extra?['bookingId'] ?? '').toString();
+        final callerName = (extra?['callerName'] ?? 'Consultant').toString();
+        final callerAvatar = (extra?['callerAvatar'] ?? '').toString();
+
+        if (sessionId.isNotEmpty) {
+          final booking = BookingModel(
+            id: bookingId,
+            consultant: UserData(
+              name: callerName,
+              avatar: callerAvatar,
+            ),
+          );
+          final bool joined = await _authService.joinVideoCall(
+            booking,
+            sessionId,
+            token,
+            channelName,
+          );
+          if (joined) return;
         }
       }
     } catch (_) {

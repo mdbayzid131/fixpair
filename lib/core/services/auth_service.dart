@@ -23,7 +23,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:fixpair/config/constants/api_constants.dart';
 
-class AuthService extends GetxService {
+class AuthService extends GetxService with WidgetsBindingObserver {
   late AuthRepo _authRepo;
   late UserRepository _userRepository;
 
@@ -34,6 +34,7 @@ class AuthService extends GetxService {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     // Explicitly find ApiClient to ensure it's initialized before AuthRepo
     _authRepo = AuthRepo(apiClient: Get.put(ApiClient()));
     _userRepository = UserRepository();
@@ -43,6 +44,20 @@ class AuthService extends GetxService {
 
     // Initialize CallKit global event listener
     _initCallKit();
+  }
+
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      AppLogger.info('📱 [APP RESUMED] Checking for active or pending CallKit calls...');
+      checkPendingAcceptedCall();
+    }
   }
 
   Future<void> _checkLoginStatus() async {
@@ -479,6 +494,23 @@ class AuthService extends GetxService {
 
     _latestIncomingCallPayload = payload;
 
+    // Persist payload to storage across isolates and app lifecycle states
+    try {
+      await StorageService.setString(
+        StorageConstants.latestCallPayload,
+        jsonEncode({
+          'sessionId': payload.sessionId,
+          'token': payload.token,
+          'channelName': payload.channelName,
+          'callerName': payload.callerName,
+          'callerAvatar': payload.callerAvatar,
+          'bookingId': payload.bookingId,
+          'callKitUuid': payload.callKitUuid,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        }),
+      );
+    } catch (_) {}
+
     // Don't show incoming call if already in an active video call
     if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
       AppLogger.info('⚠️ Already in video call, skipping show incoming call.');
@@ -658,26 +690,61 @@ class AuthService extends GetxService {
     }
     _isJoiningCall = true;
 
-    // Show a loading indicator dialog if not already visible
-    if (Get.isDialogOpen != true) {
-      Get.dialog(
-        const Center(child: CircularProgressIndicator(color: Color(0xFF22C55E))),
-        barrierDismissible: false,
-      );
-    }
-
     try {
-      final response = await _userRepository.joinVideoSession(realSessionId);
+      // 1. If we already have a valid token and channelName from push/storage,
+      // navigate immediately to the video call screen without waiting for HTTP latency!
+      if (token.isNotEmpty && channelName.isNotEmpty) {
+        AppLogger.info('🚀 [JOIN VIDEO CALL] Navigating immediately to VIDEO_CALL page with session $realSessionId');
 
-      // Close loading dialog if open
-      if (Get.isDialogOpen == true) {
-        Get.back();
+        if (Get.currentRoute == AppRoutes.SPLASH) {
+          Get.offAllNamed(
+            AppRoutes.VIDEO_CALL,
+            arguments: {
+              'booking': booking,
+              'sessionId': realSessionId,
+              'token': token,
+              'channelName': channelName,
+            },
+          );
+        } else {
+          Get.toNamed(
+            AppRoutes.VIDEO_CALL,
+            arguments: {
+              'booking': booking,
+              'sessionId': realSessionId,
+              'token': token,
+              'channelName': channelName,
+            },
+          );
+        }
+
+        // Synchronize with backend in background to register joined participant & start billing
+        _userRepository.joinVideoSession(realSessionId).then((response) {
+          if (response.statusCode == 402) {
+            try {
+              FlutterCallkitIncoming.endAllCalls();
+            } catch (_) {}
+            if (Get.isRegistered<VideoCallController>()) {
+              Get.find<VideoCallController>().endCall();
+            }
+            showPaymentRequiredDialog();
+          }
+        }).catchError((e) {
+          AppLogger.warning('Background joinVideoSession sync warning: $e');
+        });
+
+        return true;
       }
+
+      // 2. Fallback: If token or channelName is missing, await joinVideoSession from backend
+      final response = await _userRepository.joinVideoSession(realSessionId);
 
       if (response.statusCode == 200) {
         final joinData = response.data['data'];
         final freshToken = (joinData is Map ? joinData['token'] : null) ?? token;
         final freshChannel = (joinData is Map ? joinData['channelName'] : null) ?? channelName;
+
+        AppLogger.info('🚀 [JOIN VIDEO CALL] Navigating to VIDEO_CALL page with session $realSessionId');
 
         if (Get.currentRoute == AppRoutes.SPLASH) {
           Get.offAllNamed(
@@ -717,9 +784,6 @@ class AuthService extends GetxService {
         return false;
       }
     } catch (e) {
-      if (Get.isDialogOpen == true) {
-        Get.back();
-      }
       AppLogger.warning('Error joining video session: $e');
       try {
         await FlutterCallkitIncoming.endAllCalls();
@@ -727,6 +791,141 @@ class AuthService extends GetxService {
       return false;
     } finally {
       _isJoiningCall = false;
+    }
+  }
+
+  /// Unified handler for CallKit Accept across foreground, background, and cold start
+  Future<void> handleCallAccept({String? id, Map<String, dynamic>? extraData}) async {
+    final now = DateTime.now();
+    if (_lastCallAcceptHandledTime != null &&
+        id != null &&
+        id.isNotEmpty &&
+        _lastAcceptedCallId == id &&
+        now.difference(_lastCallAcceptHandledTime!) < const Duration(seconds: 4)) {
+      AppLogger.info('⚠️ Skipping duplicate CallKit accept event within cooldown');
+      return;
+    }
+    if (Get.currentRoute == AppRoutes.VIDEO_CALL || _isJoiningCall) {
+      AppLogger.info('⚠️ Already on/joining video call screen, skipping CallKit accept event');
+      return;
+    }
+    _lastCallAcceptHandledTime = now;
+    if (id != null && id.isNotEmpty) {
+      _lastAcceptedCallId = id;
+      try {
+        await FlutterCallkitIncoming.setCallConnected(id);
+      } catch (e) {
+        AppLogger.debug('Error setting CallKit connected: $e');
+      }
+    }
+
+    try {
+      await StorageService.setBool(StorageConstants.callAcceptedPending, false);
+    } catch (_) {}
+
+    Map<String, dynamic>? extra = extraData;
+
+    // 1. Check persistent StorageService with reload across isolates (highest reliability on iOS)
+    if (extra == null || (extra['sessionId']?.toString().isEmpty ?? true)) {
+      final storedCallStr =
+          await StorageService.getString(StorageConstants.latestCallPayload, reload: true);
+      if (storedCallStr.isNotEmpty) {
+        try {
+          final Map<String, dynamic> storedMap = jsonDecode(storedCallStr);
+          final ts = storedMap['timestamp'] as int? ?? 0;
+          if (DateTime.now().millisecondsSinceEpoch - ts < 180000) {
+            extra = storedMap;
+          }
+        } catch (_) {}
+      }
+    }
+
+    // 2. Check activeCalls
+    if (extra == null || (extra['sessionId']?.toString().isEmpty ?? true)) {
+      final activeCalls = await FlutterCallkitIncoming.activeCalls();
+      if (activeCalls.isNotEmpty) {
+        CallKitParams? targetCall;
+        if (id != null && id.isNotEmpty) {
+          for (var c in activeCalls) {
+            if (c.id == id) {
+              targetCall = c;
+              break;
+            }
+          }
+        }
+        targetCall ??= activeCalls.first;
+        final rawExtra = targetCall.extra;
+        if (rawExtra != null) {
+          extra = Map<String, dynamic>.from(rawExtra);
+        }
+      }
+    }
+
+    // 3. Fallback to cached payload
+    if (extra == null && _latestIncomingCallPayload != null) {
+      extra = {
+        'sessionId': _latestIncomingCallPayload!.sessionId,
+        'token': _latestIncomingCallPayload!.token,
+        'channelName': _latestIncomingCallPayload!.channelName,
+        'callerName': _latestIncomingCallPayload!.callerName,
+        'callerAvatar': _latestIncomingCallPayload!.callerAvatar,
+        'bookingId': _latestIncomingCallPayload!.bookingId,
+      };
+    }
+
+    final String callSessionId = (extra?['sessionId']?.toString().isNotEmpty ?? false)
+        ? extra!['sessionId'].toString()
+        : (id != null ? IncomingCallPayload.resolveSessionId(id) : '');
+
+    AppLogger.info('📞 [CallKit Accept Resolved] SessionId: $callSessionId | Extra: $extra');
+
+    if (callSessionId.isNotEmpty) {
+      final booking = BookingModel(
+        id: extra?['bookingId']?.toString() ?? '',
+        consultant: UserData(
+          name: extra?['callerName']?.toString() ?? 'Consultant',
+          avatar: extra?['callerAvatar']?.toString() ?? '',
+        ),
+      );
+      await joinVideoCall(
+        booking,
+        callSessionId,
+        extra?['token']?.toString() ?? '',
+        extra?['channelName']?.toString() ?? '',
+      );
+    }
+  }
+
+  /// Checks for pending accepted calls from background isolate or active CallKit calls
+  Future<void> checkPendingAcceptedCall() async {
+    if (Get.currentRoute == AppRoutes.VIDEO_CALL || _isJoiningCall) {
+      return;
+    }
+
+    final isPendingAccept =
+        await StorageService.getBool(StorageConstants.callAcceptedPending) ?? false;
+    final acceptedCallId =
+        await StorageService.getString(StorageConstants.callAcceptedId);
+
+    List<CallKitParams> activeCalls = [];
+    try {
+      activeCalls = await FlutterCallkitIncoming.activeCalls();
+    } catch (_) {}
+
+    AppLogger.info(
+      '📞 [CHECK PENDING CALL] Pending: $isPendingAccept, ActiveCalls: ${activeCalls.length}',
+    );
+
+    if (isPendingAccept || activeCalls.isNotEmpty) {
+      String? id = acceptedCallId.isNotEmpty ? acceptedCallId : null;
+      Map<String, dynamic>? extra;
+      if (activeCalls.isNotEmpty) {
+        id ??= activeCalls.first.id;
+        if (activeCalls.first.extra != null && activeCalls.first.extra!.isNotEmpty) {
+          extra = Map<String, dynamic>.from(activeCalls.first.extra!);
+        }
+      }
+      await handleCallAccept(id: id, extraData: extra);
     }
   }
 
@@ -741,99 +940,16 @@ class AuthService extends GetxService {
       switch (event) {
         // ── 1. USER ACCEPTS THE CALL ──
         case CallEventActionCallAccept(:final id):
-          final now = DateTime.now();
-          if (_lastCallAcceptHandledTime != null &&
-              (_lastAcceptedCallId == id || now.difference(_lastCallAcceptHandledTime!) < const Duration(seconds: 4))) {
-            AppLogger.info('⚠️ Skipping duplicate CallKit accept event within cooldown');
-            break;
-          }
-          if (Get.currentRoute == AppRoutes.VIDEO_CALL) {
-            AppLogger.info('⚠️ Already on video call screen, skipping CallKit accept event');
-            break;
-          }
-          _lastCallAcceptHandledTime = now;
-          _lastAcceptedCallId = id;
-
-          if (id.isNotEmpty) {
-            try {
-              await FlutterCallkitIncoming.setCallConnected(id);
-            } catch (e) {
-              AppLogger.debug('Error setting CallKit connected: $e');
-            }
-          }
-
-          Map<String, dynamic>? extra;
-
-          // 1. Check activeCalls
-          final activeCalls = await FlutterCallkitIncoming.activeCalls();
-          if (activeCalls.isNotEmpty) {
-            CallKitParams? targetCall;
-            for (var c in activeCalls) {
-              if (c.id == id) {
-                targetCall = c;
-                break;
-              }
-            }
-            targetCall ??= activeCalls.first;
-            final rawExtra = targetCall.extra;
-            if (rawExtra != null) {
-              extra = Map<String, dynamic>.from(rawExtra);
-            }
-          }
-
-          // 2. Check persistent StorageService (saved by background handler across isolates)
-          if (extra == null || (extra['sessionId']?.toString().isEmpty ?? true)) {
-            final storedCallStr =
-                await StorageService.getString(StorageConstants.latestCallPayload);
-            if (storedCallStr.isNotEmpty) {
-              try {
-                final Map<String, dynamic> storedMap = jsonDecode(storedCallStr);
-                final ts = storedMap['timestamp'] as int? ?? 0;
-                if (DateTime.now().millisecondsSinceEpoch - ts < 180000) {
-                  extra = storedMap;
-                }
-              } catch (_) {}
-            }
-          }
-
-          // 4. Fallback to cached payload
-          if (extra == null && _latestIncomingCallPayload != null) {
-            extra = {
-              'sessionId': _latestIncomingCallPayload!.sessionId,
-              'token': _latestIncomingCallPayload!.token,
-              'channelName': _latestIncomingCallPayload!.channelName,
-              'callerName': _latestIncomingCallPayload!.callerName,
-              'callerAvatar': _latestIncomingCallPayload!.callerAvatar,
-              'bookingId': _latestIncomingCallPayload!.bookingId,
-            };
-          }
-
-          final String callSessionId = extra?['sessionId']?.toString() ??
-              IncomingCallPayload.resolveSessionId(id);
-
-          AppLogger.info('📞 [CallKit Accept Resolved] SessionId: $callSessionId | Extra: $extra');
-
-          if (callSessionId.isNotEmpty) {
-            final booking = BookingModel(
-              id: extra?['bookingId']?.toString() ?? '',
-              consultant: UserData(
-                name: extra?['callerName']?.toString() ?? 'Consultant',
-                avatar: extra?['callerAvatar']?.toString() ?? '',
-              ),
-            );
-            await joinVideoCall(
-              booking,
-              callSessionId,
-              extra?['token']?.toString() ?? '',
-              extra?['channelName']?.toString() ?? '',
-            );
-          }
+          await handleCallAccept(id: id);
           break;
 
         // ── 2. USER DECLINES ──
         case CallEventActionCallDecline(:final id):
         // ── 3. CALL TIMEOUT ──
         case CallEventActionCallTimeout(:final id):
+          try {
+            await StorageService.setBool(StorageConstants.callAcceptedPending, false);
+          } catch (_) {}
           while (Get.isDialogOpen == true) {
             Get.back();
           }
@@ -863,6 +979,9 @@ class AuthService extends GetxService {
 
         // ── 4. CALL ENDED ──
         case CallEventActionCallEnded():
+          try {
+            await StorageService.setBool(StorageConstants.callAcceptedPending, false);
+          } catch (_) {}
           while (Get.isDialogOpen == true) {
             Get.back();
           }
@@ -881,38 +1000,7 @@ class AuthService extends GetxService {
       AppLogger.debug('CallKit event stream exception caught safely: $err');
     });
 
-    // Check on cold launch if user already accepted call from native lock screen
-    FlutterCallkitIncoming.activeCalls().then((calls) {
-      if (calls.isNotEmpty) {
-        for (final c in calls) {
-          if (c.isAccepted == true) {
-            AppLogger.info('📞 Found active accepted CallKit call on launch: ${c.id}');
-            final rawExtra = c.extra;
-            final extra =
-                rawExtra != null ? Map<String, dynamic>.from(rawExtra) : null;
-            final callSessionId = extra?['sessionId']?.toString() ??
-                IncomingCallPayload.resolveSessionId(c.id ?? '');
-            if (callSessionId.isNotEmpty) {
-              final booking = BookingModel(
-                id: extra?['bookingId']?.toString() ?? '',
-                consultant: UserData(
-                  name: extra?['callerName']?.toString() ?? 'Consultant',
-                  avatar: extra?['callerAvatar']?.toString() ?? '',
-                ),
-              );
-              joinVideoCall(
-                booking,
-                callSessionId,
-                extra?['token']?.toString() ?? '',
-                extra?['channelName']?.toString() ?? '',
-              );
-              break;
-            }
-          }
-        }
-      }
-    }).catchError((err) {
-      AppLogger.debug('Error checking active calls on launch: $err');
-    });
+    // Check on startup if user already accepted call from native lock screen or background
+    checkPendingAcceptedCall();
   }
 }
