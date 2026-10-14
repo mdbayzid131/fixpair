@@ -21,11 +21,21 @@ import flutter_callkit_incoming
       name: UIApplication.protectedDataWillBecomeUnavailableNotification,
       object: nil
     )
-    
+
     // Clear badge count on app launch
     clearBadge()
 
-    // Setup VoIP PushKit
+    // ─────────────────────────────────────────────────────────────────────────
+    // CRITICAL: Register Flutter plugins HERE, in didFinishLaunchingWithOptions.
+    // When iOS wakes the app in the TERMINATED state for a VoIP PushKit push,
+    // the Flutter UI engine is NOT started, so didInitializeImplicitFlutterEngine
+    // is NEVER called. Without this registration SwiftFlutterCallkitIncomingPlugin
+    // .sharedInstance remains nil and showCallkitIncoming silently does nothing,
+    // causing iOS to terminate the wake-up without ever ringing.
+    // ─────────────────────────────────────────────────────────────────────────
+    GeneratedPluginRegistrant.register(with: self)
+
+    // Setup VoIP PushKit registry
     let mainQueue = DispatchQueue.main
     let voip = PKPushRegistry(queue: mainQueue)
     voip.delegate = self
@@ -35,13 +45,12 @@ import flutter_callkit_incoming
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self
     }
-    
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
   override func applicationDidBecomeActive(_ application: UIApplication) {
     super.applicationDidBecomeActive(application)
-    // Clear badge count whenever user opens/switches to the app
     clearBadge()
   }
 
@@ -56,10 +65,11 @@ import flutter_callkit_incoming
     wasScreenLocked = true
   }
 
-  // MARK: - Flutter Engine & Channels
+  // MARK: - Flutter Engine & Custom Method Channels
+  // NOTE: GeneratedPluginRegistrant is intentionally NOT called here again —
+  //       it was already registered above in didFinishLaunchingWithOptions.
+  //       This delegate is only used for setting up custom method channels.
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
-    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
-
     let lockChannel = FlutterMethodChannel(name: "com.fixpair.app/device_lock", binaryMessenger: engineBridge.applicationRegistrar.messenger())
     lockChannel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
       if call.method == "isDeviceLocked" {
@@ -108,7 +118,7 @@ import flutter_callkit_incoming
     completionHandler()
   }
 
-  // MARK: - Recent Call History Integration
+  // MARK: - Recent Call History Integration (CallKit from Recents)
   override func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
@@ -131,6 +141,7 @@ import flutter_callkit_incoming
   // MARK: - PKPushRegistryDelegate (VoIP Push Notifications)
   func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType) {
     let deviceToken = credentials.token.map { String(format: "%02x", $0) }.joined()
+    NSLog("[AppDelegate] VoIP token updated: \(deviceToken.prefix(10))...")
     SwiftFlutterCallkitIncomingPlugin.sharedInstance?.setDevicePushTokenVoIP(deviceToken)
     UserDefaults.standard.set(deviceToken, forKey: "flutter.voip_token")
   }
@@ -152,13 +163,24 @@ import flutter_callkit_incoming
     }
 
     let dict = payload.dictionaryPayload
+    NSLog("[AppDelegate] VoIP push received: \(dict)")
+
+    // ── Resolve Call UUID ──
     var callId = dict["id"] as? String ?? ""
     if UUID(uuidString: callId) == nil {
       callId = UUID().uuidString
     }
 
-    let typeStr = (dict["type"] as? String ?? "").uppercased()
-    if typeStr == "CALL_CANCELLED" || typeStr == "CALL_REJECTED" || typeStr == "CANCEL_CALL" {
+    // ── Detect cancellation / rejection ──
+    // IMPORTANT: Backend sends `type` as a String for cancel/reject payloads.
+    // We check both String and Int forms to be safe.
+    let typeFromString = (dict["type"] as? String ?? "").uppercased()
+    let isCancelType = typeFromString == "CALL_CANCELLED"
+      || typeFromString == "CALL_REJECTED"
+      || typeFromString == "CANCEL_CALL"
+
+    if isCancelType {
+      NSLog("[AppDelegate] VoIP push is a cancellation/rejection, ending call: \(callId)")
       let cancelData = flutter_callkit_incoming.Data(id: callId, nameCaller: "", handle: "", type: 0)
       SwiftFlutterCallkitIncomingPlugin.sharedInstance?.endCall(cancelData)
       UserDefaults.standard.removeObject(forKey: "flutter.latest_call_payload")
@@ -167,38 +189,39 @@ import flutter_callkit_incoming
       return
     }
 
-    let nameCaller = dict["nameCaller"] as? String ?? "Fixpair Consultant"
+    // ── Build call data ──
+    let nameCaller = dict["nameCaller"] as? String ?? "Consultant"
     let handle = dict["handle"] as? String ?? "Video Consultation"
-    let isVideo = (dict["isVideo"] as? Bool) ?? (dict["type"] as? Int == 1)
+    // `isVideo` can be Bool or Int(1) from the server
+    let isVideo: Bool
+    if let boolVal = dict["isVideo"] as? Bool {
+      isVideo = boolVal
+    } else if let intVal = dict["type"] as? Int {
+      isVideo = intVal == 1
+    } else {
+      isVideo = true // default to video
+    }
 
     let data = flutter_callkit_incoming.Data(id: callId, nameCaller: nameCaller, handle: handle, type: isVideo ? 1 : 0)
     data.appName = "Fixpair"
     data.duration = 35000
 
+    // ── Collect extra fields for Dart side ──
     var extraMap: [String: Any] = [:]
     if let extra = dict["extra"] as? [String: Any] {
       extraMap = extra
-    } else if let extra = dict["extra"] as? NSDictionary {
-      if let swiftDict = extra as? [String: Any] {
-        extraMap = swiftDict
-      }
+    } else if let extra = dict["extra"] as? NSDictionary, let swiftDict = extra as? [String: Any] {
+      extraMap = swiftDict
     }
 
-    if extraMap["sessionId"] == nil, let sessId = dict["sessionId"] as? String {
-      extraMap["sessionId"] = sessId
-    }
-    if extraMap["token"] == nil, let tok = dict["token"] as? String {
-      extraMap["token"] = tok
-    }
-    if extraMap["channelName"] == nil, let ch = dict["channelName"] as? String {
-      extraMap["channelName"] = ch
-    }
-    if extraMap["callerName"] == nil {
-      extraMap["callerName"] = nameCaller
-    }
+    if extraMap["sessionId"] == nil, let sessId = dict["sessionId"] as? String { extraMap["sessionId"] = sessId }
+    if extraMap["token"] == nil, let tok = dict["token"] as? String { extraMap["token"] = tok }
+    if extraMap["channelName"] == nil, let ch = dict["channelName"] as? String { extraMap["channelName"] = ch }
+    if extraMap["callerName"] == nil { extraMap["callerName"] = nameCaller }
 
     data.extra = NSDictionary(dictionary: extraMap)
 
+    // ── Persist to UserDefaults so Dart can read on cold-start ──
     extraMap["callKitUuid"] = callId
     extraMap["timestamp"] = Int(Date().timeIntervalSince1970 * 1000)
     if let jsonData = try? JSONSerialization.data(withJSONObject: extraMap, options: []),
@@ -206,19 +229,32 @@ import flutter_callkit_incoming
       UserDefaults.standard.set(jsonString, forKey: "flutter.latest_call_payload")
     }
 
-    SwiftFlutterCallkitIncomingPlugin.sharedInstance?.showCallkitIncoming(data, fromPushKit: true) {
+    // ── Show CallKit incoming call UI ──
+    // sharedInstance MUST be non-nil here because we called GeneratedPluginRegistrant
+    // in didFinishLaunchingWithOptions. The guard below is a belt-and-suspenders
+    // fallback; if it ever fails, we still call completion() to avoid iOS penalising
+    // the app for missing the 5-second PushKit deadline.
+    guard let plugin = SwiftFlutterCallkitIncomingPlugin.sharedInstance else {
+      NSLog("[AppDelegate] CRITICAL: SwiftFlutterCallkitIncomingPlugin.sharedInstance is nil — CallKit will not ring!")
+      completion()
+      return
+    }
+
+    plugin.showCallkitIncoming(data, fromPushKit: true) {
       completion()
     }
   }
 
   // MARK: - CallkitIncomingAppDelegate (User CallKit Interactions)
   func onAccept(_ call: Call, _ action: CXAnswerCallAction) {
+    NSLog("[AppDelegate] Call accepted: \(call.uuid.uuidString)")
     UserDefaults.standard.set(true, forKey: "flutter.call_accepted_pending")
     UserDefaults.standard.set(call.uuid.uuidString, forKey: "flutter.call_accepted_id")
     action.fulfill()
   }
 
   func onDecline(_ call: Call, _ action: CXEndCallAction) {
+    NSLog("[AppDelegate] Call declined: \(call.uuid.uuidString)")
     UserDefaults.standard.set(false, forKey: "flutter.call_accepted_pending")
     action.fulfill()
   }
@@ -229,6 +265,7 @@ import flutter_callkit_incoming
   }
 
   func onTimeOut(_ call: Call) {
+    NSLog("[AppDelegate] Call timed out: \(call.uuid.uuidString)")
     UserDefaults.standard.set(false, forKey: "flutter.call_accepted_pending")
   }
 
