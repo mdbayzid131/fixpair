@@ -7,9 +7,12 @@ import AVFAudio
 import flutter_callkit_incoming
 
 @main
-@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate, PKPushRegistryDelegate, CallkitIncomingAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate, PKPushRegistryDelegate, CallkitIncomingAppDelegate, CXProviderDelegate {
   private var wasScreenLocked = false
   private var voipRegistry: PKPushRegistry?
+  private var callKitProvider: CXProvider?
+  private var activeCallUuid: UUID?
+  private let callController = CXCallController()
 
   override func application(
     _ application: UIApplication,
@@ -25,17 +28,10 @@ import flutter_callkit_incoming
     // Clear badge count on app launch
     clearBadge()
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // CRITICAL: Register Flutter plugins HERE, in didFinishLaunchingWithOptions.
-    // When iOS wakes the app in the TERMINATED state for a VoIP PushKit push,
-    // the Flutter UI engine is NOT started, so didInitializeImplicitFlutterEngine
-    // is NEVER called. Without this registration SwiftFlutterCallkitIncomingPlugin
-    // .sharedInstance remains nil and showCallkitIncoming silently does nothing,
-    // causing iOS to terminate the wake-up without ever ringing.
-    // ─────────────────────────────────────────────────────────────────────────
+    // Register plugins with self if possible (for foreground/normal launch)
     GeneratedPluginRegistrant.register(with: self)
 
-    // Setup VoIP PushKit registry
+    // Setup VoIP PushKit registry (critical for waking the app on incoming call)
     let mainQueue = DispatchQueue.main
     let voip = PKPushRegistry(queue: mainQueue)
     voip.delegate = self
@@ -65,11 +61,30 @@ import flutter_callkit_incoming
     wasScreenLocked = true
   }
 
+  // MARK: - Native CallKit Provider
+  private func getCallKitProvider() -> CXProvider {
+    if let provider = self.callKitProvider {
+      return provider
+    }
+    let config = CXProviderConfiguration(localizedName: "Fixpair")
+    config.supportsVideo = true
+    config.maximumCallGroups = 1
+    config.maximumCallsPerCallGroup = 1
+    config.supportedHandleTypes = [.generic, .phoneNumber, .emailAddress]
+    if #available(iOS 11.0, *) {
+      config.includesCallsInRecents = false
+    }
+    let provider = CXProvider(configuration: config)
+    provider.setDelegate(self, queue: nil)
+    self.callKitProvider = provider
+    return provider
+  }
+
   // MARK: - Flutter Engine & Custom Method Channels
-  // NOTE: GeneratedPluginRegistrant is intentionally NOT called here again —
-  //       it was already registered above in didFinishLaunchingWithOptions.
-  //       This delegate is only used for setting up custom method channels.
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    // When the UI scene boots up the Flutter engine, register all plugins with the engine's registrar
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+
     let lockChannel = FlutterMethodChannel(name: "com.fixpair.app/device_lock", binaryMessenger: engineBridge.applicationRegistrar.messenger())
     lockChannel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
       if call.method == "isDeviceLocked" {
@@ -90,6 +105,30 @@ import flutter_callkit_incoming
         result(FlutterMethodNotImplemented)
       }
     }
+
+    let voipChannel = FlutterMethodChannel(name: "com.fixpair.app/native_voip", binaryMessenger: engineBridge.applicationRegistrar.messenger())
+    voipChannel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+      if call.method == "endNativeCall" {
+        self?.endActiveNativeCall()
+        result(true)
+      } else {
+        result(FlutterMethodNotImplemented)
+      }
+    }
+  }
+
+  private func endActiveNativeCall() {
+    guard let activeUuid = self.activeCallUuid else { return }
+    let endAction = CXEndCallAction(call: activeUuid)
+    let transaction = CXTransaction(action: endAction)
+    self.callController.request(transaction) { error in
+      if let error = error {
+        NSLog("[AppDelegate] Failed to end native CallKit call: \(error.localizedDescription)")
+      } else {
+        NSLog("[AppDelegate] Successfully ended native CallKit call")
+      }
+    }
+    self.activeCallUuid = nil
   }
 
   // MARK: - UNUserNotificationCenterDelegate (Missed Call Notifications)
@@ -144,11 +183,13 @@ import flutter_callkit_incoming
     NSLog("[AppDelegate] VoIP token updated: \(deviceToken.prefix(10))...")
     SwiftFlutterCallkitIncomingPlugin.sharedInstance?.setDevicePushTokenVoIP(deviceToken)
     UserDefaults.standard.set(deviceToken, forKey: "flutter.voip_token")
+    UserDefaults.standard.set(deviceToken, forKey: "DevicePushTokenVoIP")
   }
 
   func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
     SwiftFlutterCallkitIncomingPlugin.sharedInstance?.setDevicePushTokenVoIP("")
     UserDefaults.standard.removeObject(forKey: "flutter.voip_token")
+    UserDefaults.standard.removeObject(forKey: "DevicePushTokenVoIP")
   }
 
   func pushRegistry(
@@ -166,14 +207,15 @@ import flutter_callkit_incoming
     NSLog("[AppDelegate] VoIP push received: \(dict)")
 
     // ── Resolve Call UUID ──
-    var callId = dict["id"] as? String ?? ""
-    if UUID(uuidString: callId) == nil {
-      callId = UUID().uuidString
+    var callUuid: UUID
+    if let rawId = dict["id"] as? String, let parsed = UUID(uuidString: rawId) {
+      callUuid = parsed
+    } else {
+      callUuid = UUID()
     }
+    let callId = callUuid.uuidString
 
     // ── Detect cancellation / rejection ──
-    // IMPORTANT: Backend sends `type` as a String for cancel/reject payloads.
-    // We check both String and Int forms to be safe.
     let typeFromString = (dict["type"] as? String ?? "").uppercased()
     let isCancelType = typeFromString == "CALL_CANCELLED"
       || typeFromString == "CALL_REJECTED"
@@ -183,6 +225,8 @@ import flutter_callkit_incoming
       NSLog("[AppDelegate] VoIP push is a cancellation/rejection, ending call: \(callId)")
       let cancelData = flutter_callkit_incoming.Data(id: callId, nameCaller: "", handle: "", type: 0)
       SwiftFlutterCallkitIncomingPlugin.sharedInstance?.endCall(cancelData)
+      self.callKitProvider?.reportCall(with: callUuid, endedAt: Date(), reason: .remoteEnded)
+      self.activeCallUuid = nil
       UserDefaults.standard.removeObject(forKey: "flutter.latest_call_payload")
       UserDefaults.standard.set(false, forKey: "flutter.call_accepted_pending")
       completion()
@@ -192,14 +236,13 @@ import flutter_callkit_incoming
     // ── Build call data ──
     let nameCaller = dict["nameCaller"] as? String ?? "Consultant"
     let handle = dict["handle"] as? String ?? "Video Consultation"
-    // `isVideo` can be Bool or Int(1) from the server
     let isVideo: Bool
     if let boolVal = dict["isVideo"] as? Bool {
       isVideo = boolVal
     } else if let intVal = dict["type"] as? Int {
       isVideo = intVal == 1
     } else {
-      isVideo = true // default to video
+      isVideo = true
     }
 
     let data = flutter_callkit_incoming.Data(id: callId, nameCaller: nameCaller, handle: handle, type: isVideo ? 1 : 0)
@@ -229,49 +272,99 @@ import flutter_callkit_incoming
       UserDefaults.standard.set(jsonString, forKey: "flutter.latest_call_payload")
     }
 
-    // ── Show CallKit incoming call UI ──
-    // sharedInstance MUST be non-nil here because we called GeneratedPluginRegistrant
-    // in didFinishLaunchingWithOptions. The guard below is a belt-and-suspenders
-    // fallback; if it ever fails, we still call completion() to avoid iOS penalising
-    // the app for missing the 5-second PushKit deadline.
-    guard let plugin = SwiftFlutterCallkitIncomingPlugin.sharedInstance else {
-      NSLog("[AppDelegate] CRITICAL: SwiftFlutterCallkitIncomingPlugin.sharedInstance is nil — CallKit will not ring!")
-      completion()
-      return
-    }
+    self.activeCallUuid = callUuid
 
-    plugin.showCallkitIncoming(data, fromPushKit: true) {
-      completion()
+    // ── Show CallKit incoming call UI ──
+    if let plugin = SwiftFlutterCallkitIncomingPlugin.sharedInstance {
+      NSLog("[AppDelegate] Presenting incoming call via SwiftFlutterCallkitIncomingPlugin")
+      plugin.showCallkitIncoming(data, fromPushKit: true) {
+        completion()
+      }
+    } else {
+      // ─────────────────────────────────────────────────────────────────────────
+      // CRITICAL TERMINATED STATE FALLBACK:
+      // When the app is woken in the terminated state by PushKit, Flutter's UI engine
+      // has not booted, so SwiftFlutterCallkitIncomingPlugin.sharedInstance is nil.
+      // Instead of silently dropping the call, we report directly via native CXProvider.
+      // ─────────────────────────────────────────────────────────────────────────
+      NSLog("[AppDelegate] SwiftFlutterCallkitIncomingPlugin.sharedInstance is nil. Reporting directly via native CXProvider!")
+      let provider = self.getCallKitProvider()
+      let callUpdate = CXCallUpdate()
+      callUpdate.remoteHandle = CXHandle(type: .generic, value: handle)
+      callUpdate.localizedCallerName = nameCaller
+      callUpdate.hasVideo = isVideo
+      callUpdate.supportsDTMF = false
+      callUpdate.supportsHolding = false
+      callUpdate.supportsGrouping = false
+      callUpdate.supportsUngrouping = false
+
+      provider.reportNewIncomingCall(with: callUuid, update: callUpdate) { error in
+        if let error = error {
+          NSLog("[AppDelegate] Native CXProvider report error: \(error.localizedDescription)")
+        } else {
+          NSLog("[AppDelegate] Native CXProvider successfully reported incoming call: \(callId)")
+        }
+        completion()
+      }
     }
   }
 
-  // MARK: - CallkitIncomingAppDelegate (User CallKit Interactions)
+  // MARK: - CXProviderDelegate (Native CallKit Delegate)
+  func providerDidReset(_ provider: CXProvider) {
+    NSLog("[AppDelegate] Native CXProvider reset")
+    self.activeCallUuid = nil
+  }
+
+  func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
+    NSLog("[AppDelegate] Native CXProvider: onAccept for \(action.callUUID.uuidString)")
+    UserDefaults.standard.set(true, forKey: "flutter.call_accepted_pending")
+    UserDefaults.standard.set(action.callUUID.uuidString, forKey: "flutter.call_accepted_id")
+    action.fulfill()
+  }
+
+  func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
+    NSLog("[AppDelegate] Native CXProvider: onEnd/Decline for \(action.callUUID.uuidString)")
+    UserDefaults.standard.set(false, forKey: "flutter.call_accepted_pending")
+    UserDefaults.standard.removeObject(forKey: "flutter.latest_call_payload")
+    self.activeCallUuid = nil
+    action.fulfill()
+  }
+
+  func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
+    NSLog("[AppDelegate] Native CXProvider: Audio session activated")
+  }
+
+  func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
+    NSLog("[AppDelegate] Native CXProvider: Audio session deactivated")
+  }
+
+  // MARK: - CallkitIncomingAppDelegate (User CallKit Interactions via Plugin)
   func onAccept(_ call: Call, _ action: CXAnswerCallAction) {
-    NSLog("[AppDelegate] Call accepted: \(call.uuid.uuidString)")
+    NSLog("[AppDelegate] Plugin Call accepted: \(call.uuid.uuidString)")
     UserDefaults.standard.set(true, forKey: "flutter.call_accepted_pending")
     UserDefaults.standard.set(call.uuid.uuidString, forKey: "flutter.call_accepted_id")
     action.fulfill()
   }
 
   func onDecline(_ call: Call, _ action: CXEndCallAction) {
-    NSLog("[AppDelegate] Call declined: \(call.uuid.uuidString)")
+    NSLog("[AppDelegate] Plugin Call declined: \(call.uuid.uuidString)")
     UserDefaults.standard.set(false, forKey: "flutter.call_accepted_pending")
+    UserDefaults.standard.removeObject(forKey: "flutter.latest_call_payload")
+    self.activeCallUuid = nil
     action.fulfill()
   }
 
   func onEnd(_ call: Call, _ action: CXEndCallAction) {
+    NSLog("[AppDelegate] Plugin Call ended: \(call.uuid.uuidString)")
     UserDefaults.standard.set(false, forKey: "flutter.call_accepted_pending")
+    UserDefaults.standard.removeObject(forKey: "flutter.latest_call_payload")
+    self.activeCallUuid = nil
     action.fulfill()
   }
 
   func onTimeOut(_ call: Call) {
-    NSLog("[AppDelegate] Call timed out: \(call.uuid.uuidString)")
+    NSLog("[AppDelegate] Plugin Call timeout: \(call.uuid.uuidString)")
     UserDefaults.standard.set(false, forKey: "flutter.call_accepted_pending")
+    self.activeCallUuid = nil
   }
-
-  func didActivateAudioSession(_ audioSession: AVAudioSession) {}
-
-  func didDeactivateAudioSession(_ audioSession: AVAudioSession) {}
-
-  func providerDidReset() {}
 }
