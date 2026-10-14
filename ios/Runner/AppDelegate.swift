@@ -367,4 +367,18 @@ import flutter_callkit_incoming
     UserDefaults.standard.set(false, forKey: "flutter.call_accepted_pending")
     self.activeCallUuid = nil
   }
+
+  func didActivateAudioSession(_ audioSession: AVAudioSession) {
+    NSLog("[AppDelegate] Plugin audio session activated")
+  }
+
+  func didDeactivateAudioSession(_ audioSession: AVAudioSession) {
+    NSLog("[AppDelegate] Plugin audio session deactivated")
+  }
+
+  func providerDidReset() {
+    NSLog("[AppDelegate] Plugin provider did reset")
+    self.activeCallUuid = nil
+  }
 }
+
