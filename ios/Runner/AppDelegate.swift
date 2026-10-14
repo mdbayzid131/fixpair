@@ -82,8 +82,8 @@ import flutter_callkit_incoming
 
   // MARK: - Flutter Engine & Custom Method Channels
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
-    // When the UI scene boots up the Flutter engine, register all plugins with the engine's registrar
-    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    // Note: GeneratedPluginRegistrant was already registered in didFinishLaunchingWithOptions.
+    // Do NOT call GeneratedPluginRegistrant.register again here, otherwise Flutter throws 'Duplicate plugin key'.
 
     let lockChannel = FlutterMethodChannel(name: "com.fixpair.app/device_lock", binaryMessenger: engineBridge.applicationRegistrar.messenger())
     lockChannel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
