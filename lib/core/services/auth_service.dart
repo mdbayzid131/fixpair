@@ -370,11 +370,23 @@ class AuthService extends GetxService with WidgetsBindingObserver {
       String? voipToken;
       if (Platform.isIOS) {
         try {
-          final rawVoipToken = await FlutterCallkitIncoming.getDevicePushTokenVoIP();
+          var rawVoipToken = await FlutterCallkitIncoming.getDevicePushTokenVoIP();
+          int voipRetries = 0;
+          while ((rawVoipToken == null || rawVoipToken.toString().isEmpty) && voipRetries < 3) {
+            await Future.delayed(const Duration(seconds: 1));
+            rawVoipToken = await FlutterCallkitIncoming.getDevicePushTokenVoIP();
+            voipRetries++;
+          }
           if (rawVoipToken != null && rawVoipToken.toString().isNotEmpty) {
             voipToken = rawVoipToken.toString();
             await StorageService.setString(StorageConstants.voipToken, voipToken);
             AppLogger.info('📱 [iOS VoIP Token Captured]: $voipToken');
+          } else {
+            final cachedVoip = await StorageService.getString(StorageConstants.voipToken);
+            if (cachedVoip.isNotEmpty) {
+              voipToken = cachedVoip;
+              AppLogger.info('📱 [iOS Cached VoIP Token Used]: $voipToken');
+            }
           }
         } catch (e) {
           AppLogger.debug('Error fetching iOS VoIP token in setupPushNotifications: $e');
