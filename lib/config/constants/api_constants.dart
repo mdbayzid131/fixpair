@@ -3,9 +3,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class ApiConstants {
   // Base URLs
   static String get baseUrl =>
-      dotenv.env['BASE_URL'] ?? 'https://nayem5000.binarybards.online/api/v1';
+      dotenv.env['BASE_URL'] ?? 'https://yelp-landless-theater.ngrok-free.dev/api/v1';
   static String get serverUrl =>
-      dotenv.env['SERVER_URL'] ?? 'https://nayem5000.binarybards.online';
+      dotenv.env['SERVER_URL'] ?? 'https://yelp-landless-theater.ngrok-free.dev';
 
   static String getImageUrl(String? url) {
     const String placeholder = 'https://i.ibb.co/z5YHLV9/profile.png';
