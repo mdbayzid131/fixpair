@@ -9,8 +9,13 @@ import '../../search/views/search_view.dart';
 import '../../history/views/history_view.dart';
 import '../../profile/views/profile_view.dart';
 
-class BottomNavBarView extends GetView<BottomNavBarController> {
+class BottomNavBarView extends StatelessWidget {
   const BottomNavBarView({super.key});
+
+  BottomNavBarController get controller =>
+      Get.isRegistered<BottomNavBarController>()
+          ? Get.find<BottomNavBarController>()
+          : Get.put(BottomNavBarController(), permanent: true);
 
   @override
   Widget build(BuildContext context) {

@@ -51,8 +51,27 @@ class ConsultationSummaryController extends GetxController {
         booking = args;
       }
 
+      if (args is Map) {
+        final d = args['duration'];
+        if (d != null) {
+          final int durSec = (d is num) ? d.toInt() : (int.tryParse(d.toString()) ?? 0);
+          final int mins = (durSec > 0) ? (durSec / 60).ceil() : 1;
+          duration.value = '$mins min';
+        }
+        final c = args['cost'];
+        if (c != null) {
+          final num costVal = (c is num) ? c : (num.tryParse(c.toString()) ?? 0);
+          if (costVal > 0) {
+            totalCharged.value = '€${costVal.toStringAsFixed(2)}';
+          }
+        }
+      }
+
       if (booking != null) {
         consultantName.value = booking?.consultant?.name ?? 'Consultant';
+        if (booking?.perMinuteRate != null && booking!.perMinuteRate! > 0) {
+          rate.value = '€${booking!.perMinuteRate!.toStringAsFixed(2)} / min';
+        }
         if (booking?.id != null) {
           loadData(booking!.id!);
         }
@@ -87,9 +106,10 @@ class ConsultationSummaryController extends GetxController {
                 )
               : DateFormat('dd.MM.yyyy').format(DateTime.now());
 
-          duration.value = invoice.billableMinutes != null
-              ? '${invoice.billableMinutes} min'
-              : '0 min';
+          final int parsedMins = int.tryParse(invoice.billableMinutes?.toString() ?? '') ??
+              int.tryParse(invoice.duration?.toString() ?? '') ??
+              0;
+          duration.value = parsedMins > 0 ? '$parsedMins min' : '1 min';
 
           rate.value = '€${invoice.perMinuteRate.toStringAsFixed(2)} / min';
           subtotal.value = '€${invoice.subtotal.toStringAsFixed(2)}';
@@ -97,7 +117,7 @@ class ConsultationSummaryController extends GetxController {
 
           final num calculatedVat =
               invoice.totalAmount - (invoice.subtotal + invoice.platformFee);
-          vat.value = '€${calculatedVat.toStringAsFixed(2)}';
+          vat.value = '€${(calculatedVat < 0 ? 0 : calculatedVat).toStringAsFixed(2)}';
           totalCharged.value = '€${invoice.totalAmount.toStringAsFixed(2)}';
         }
       }
